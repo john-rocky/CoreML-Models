@@ -10,7 +10,7 @@ Converted CoreML Models
 
 | Google Drive Link | Size | Original Project |
 | ------------- | ------------- | ------------- |
-| [UGATIT_selfie2anime](https://drive.google.com/file/d/1-2IJyaJJFnCm9UUt_2P4wHUJsr1qmRCk/view?usp=sharing) | 1.12GB | [taki0112/UGATIT](https://github.com/taki0112/UGATIT)  |
+| [UGATIT_selfie2anime](https://drive.google.com/file/d/1cOB1comTnd5I22htZ4_OJ7tFQuQEI2ne/view?usp=sharing) | 1.12GB | [taki0112/UGATIT](https://github.com/taki0112/UGATIT)  |
 | [AnimeGANv2_Hayao](https://drive.google.com/file/d/1i_kwj41BxA1xZNu2B7yX2VVqNF66atMN/view?usp=sharing)　| 8.7MB | [TachibanaYoshino/AnimeGANv2](https://github.com/TachibanaYoshino/AnimeGANv2)|
 | [AnimeGANv2_Paprika](https://drive.google.com/file/d/1wuoaVoI8-HOOQ1kUiZkVJ9GWnPbtPnWF/view?usp=sharing)　| 8.7MB | [TachibanaYoshino/AnimeGANv2](https://github.com/TachibanaYoshino/AnimeGANv2)|
 | [WarpGAN Caricature](https://drive.google.com/file/d/1QjfA6DSOu7Za1zY-b9ajX6tsIWe9-C16/view?usp=sharing)　| 35.5MB | [seasonSH/WarpGAN](https://github.com/seasonSH/WarpGAN)|
