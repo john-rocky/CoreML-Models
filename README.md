@@ -1,6 +1,10 @@
 # CoreML-Models
 Converted CoreML Models
 
+# How to get the model
+You can get the model converted to CoreML format from the link of Google drive.
+See the section below for how to use it in Xcode.
+
 **Image Classifier**
 | Google Drive Link | Size | Original Project |
 | ------------- | ------------- | ------------- |
