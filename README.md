@@ -26,6 +26,13 @@ Converted CoreML Models
 #### [AnimeGANv2_Hayao](https://drive.google.com/file/d/1i_kwj41BxA1xZNu2B7yX2VVqNF66atMN/view?usp=sharing)
 <img width="256" src="https://user-images.githubusercontent.com/23278992/144670978-1447ce28-db49-4cf9-b484-3142ef703ade.jpg">→<img width="256" src="https://user-images.githubusercontent.com/23278992/144671089-cceb615f-82e0-4a2e-a199-01cb61a52ec5.png">
 
+#### [AnimeGANv2_Paprika](https://drive.google.com/file/d/1wuoaVoI8-HOOQ1kUiZkVJ9GWnPbtPnWF/view?usp=sharing)
+<img width="256" src="https://user-images.githubusercontent.com/23278992/144670978-1447ce28-db49-4cf9-b484-3142ef703ade.jpg">→<img width="256" src="https://user-images.githubusercontent.com/23278992/144671455-f7258cc9-1a3e-49df-8bbb-03285c619b17.png">
+
+#### [WarpGAN Caricature](https://drive.google.com/file/d/1QjfA6DSOu7Za1zY-b9ajX6tsIWe9-C16/view?usp=sharing)
+<img width="256" src="https://user-images.githubusercontent.com/23278992/144672418-2a16f40f-713c-4a07-bd40-6b436bae2717.png">→<img width="256" src="https://user-images.githubusercontent.com/23278992/144672310-3e34b96a-2610-428d-aa02-ad283b0c2c33.png">
+
+
 ## How to use in a xcode project.
 
 ### 1,Use [CoreGANContainer](https://github.com/john-rocky/CoreGANContainer). You can use models with dragging&dropping into the container project. 
