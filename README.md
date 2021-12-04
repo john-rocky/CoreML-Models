@@ -39,7 +39,7 @@ See the section below for how to use it in Xcode.
 <img width="256" src="https://user-images.githubusercontent.com/23278992/144672418-2a16f40f-713c-4a07-bd40-6b436bae2717.png">→<img width="256" src="https://user-images.githubusercontent.com/23278992/144672310-3e34b96a-2610-428d-aa02-ad283b0c2c33.png">
 
 #### [DCGAN](https://drive.google.com/file/d/132GrmmuETSLTml1zWyLUnIksclP-8vGw/view?usp=sharing)
-<img width="256" src="https://qiita-user-contents.imgix.net/https%3A%2F%2Fqiita-image-store.s3.ap-northeast-1.amazonaws.com%2F0%2F235259%2F4cfdc82e-3d41-6bb6-94ee-961f2b279476.png?ixlib=rb-4.0.0&auto=format&gif-q=60&q=75&w=1400&fit=max&s=debc364c9af2890047500cec02f72444">
+<img width="256" src="https://user-images.githubusercontent.com/23278992/144690829-3a4cebcf-ee73-4df0-b8db-1dfc2e616798.png">
 
 ## How to use in a xcode project.
 
