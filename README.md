@@ -22,6 +22,8 @@ See the section below for how to use it in Xcode.
 | [CartoonGAN_Hayao](https://drive.google.com/file/d/1-2dTGge4fza-TTBI9actkg_xp91zYT-F/view?usp=sharing)　| 44.6MB | [mnicnc404/CartoonGan-tensorflow](https://github.com/mnicnc404/CartoonGan-tensorflow)|
 | [CartoonGAN_Hosoda](https://drive.google.com/file/d/1-5VB1g7kRt0KMe6u37fi_t18l-Zn_wr1/view?usp=sharing)　| 44.6MB | [mnicnc404/CartoonGan-tensorflow](https://github.com/mnicnc404/CartoonGan-tensorflow)|
 | [CartoonGAN_Paprika](https://drive.google.com/file/d/1-5x3TYugodcnGYiEEDitFqMQPVHsCDs_/view?usp=sharing)　| 44.6MB | [mnicnc404/CartoonGan-tensorflow](https://github.com/mnicnc404/CartoonGan-tensorflow)|
+| [DCGAN](https://drive.google.com/file/d/132GrmmuETSLTml1zWyLUnIksclP-8vGw/view?usp=sharing)　| 9.2MB | [TensorFlowCore](https://www.tensorflow.org/tutorials/generative/dcgan)|
+
 
 #### [UGATIT_selfie2anime](https://drive.google.com/file/d/1cOB1comTnd5I22htZ4_OJ7tFQuQEI2ne/view?usp=sharing) | 1.12GB | [taki0112/UGATIT](https://github.com/taki0112/UGATIT)
 <img width="256" alt="スクリーンショット 2020-05-19 11 09 03" src="https://user-images.githubusercontent.com/23278992/85667417-881d7d00-b6f8-11ea-8d1c-0d66b2b72de9.png">
@@ -36,6 +38,8 @@ See the section below for how to use it in Xcode.
 #### [WarpGAN Caricature](https://drive.google.com/file/d/1QjfA6DSOu7Za1zY-b9ajX6tsIWe9-C16/view?usp=sharing)
 <img width="256" src="https://user-images.githubusercontent.com/23278992/144672418-2a16f40f-713c-4a07-bd40-6b436bae2717.png">→<img width="256" src="https://user-images.githubusercontent.com/23278992/144672310-3e34b96a-2610-428d-aa02-ad283b0c2c33.png">
 
+#### [DCGAN](https://drive.google.com/file/d/132GrmmuETSLTml1zWyLUnIksclP-8vGw/view?usp=sharing)
+<img width="256" src="https://qiita-user-contents.imgix.net/https%3A%2F%2Fqiita-image-store.s3.ap-northeast-1.amazonaws.com%2F0%2F235259%2F4cfdc82e-3d41-6bb6-94ee-961f2b279476.png?ixlib=rb-4.0.0&auto=format&gif-q=60&q=75&w=1400&fit=max&s=debc364c9af2890047500cec02f72444">
 
 ## How to use in a xcode project.
 
