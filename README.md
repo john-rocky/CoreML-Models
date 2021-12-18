@@ -56,9 +56,7 @@ See the section below for how to use it in Xcode.
 
 ## How to use in a xcode project.
 
-### 1,Use [CoreGANContainer](https://github.com/john-rocky/CoreGANContainer). You can use models with dragging&dropping into the container project. 
-
-### 2,Or implement Vision request.
+### Option 1,implement Vision request.
 
 ```swift:
 
@@ -75,6 +73,15 @@ let handler = VNImageRequestHandler(ciImage: ciimage,options: [:])
 }
 ```
 
+If the model has Image type output:
+
+```swift
+let result = request?.results?.first as! VNPixelBufferObservation
+let uiimage = UIImage(ciImage: CIImage(cvPixelBuffer: result.pixelBuffer))
+```
+
+Else the model has Multiarray type output:
+
 For visualizing multiArray as image, Mr. Hollance’s “CoreML Helpers” are very convenient.
 [CoreML Helpers](https://github.com/hollance/CoreMLHelpers)
 
@@ -86,6 +93,10 @@ func coreMLCompletionHandler（request：VNRequest？、error：Error？）{
    let multiArray = result.featureValue.multiArrayValue
    let cgimage = multiArray？.cgImage（min：-1、max：1、channel：nil）
 ```
+
+### Option 2,Use [CoreGANContainer](https://github.com/john-rocky/CoreGANContainer). You can use models with dragging&dropping into the container project. 
+
+
 
 
 Apps made by Core ML models.
