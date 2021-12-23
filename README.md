@@ -20,6 +20,13 @@ See the section below for how to use it in Xcode.
 #### [U2Net](https://drive.google.com/file/d/1cpm-x12Ih7Cqd_kOjfTvtt4ipGS3BpCx/view?usp=sharing)
 <img width="256" src="https://camo.qiitausercontent.com/a8e89c72c0950db66d63415b9010d203aae22617/68747470733a2f2f71696974612d696d6167652d73746f72652e73332e61702d6e6f727468656173742d312e616d617a6f6e6177732e636f6d2f302f3233353235392f36303037393162322d633534332d613537652d303639622d3863663130373932643662392e6a706567">→<img width="256" src="https://camo.qiitausercontent.com/4f502487cd9e9e02d150ad63b33683a1446e7516/68747470733a2f2f71696974612d696d6167652d73746f72652e73332e61702d6e6f727468656173742d312e616d617a6f6e6177732e636f6d2f302f3233353235392f39636532633237612d643134322d663136352d343365662d6532373966646337386333382e706e67">
 
+## Super Resolution
+| Google Drive Link | Size | Output |Original Project |
+| ------------- | ------------- | ------------- | ------------- |
+| [Real ESRGAN](https://drive.google.com/file/d/1uK41SGHyQf_h6trI9bCb83VIBlfKFkag/view?usp=sharing) | 66.9 MB | Image(RGB 1280 × 1280)| [xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)  |
+#### [Real ESRGAN](https://drive.google.com/file/d/1cpm-x12Ih7Cqd_kOjfTvtt4ipGS3BpCx/view?usp=sharing)
+<img width="256" src="https://user-images.githubusercontent.com/23278992/147282886-60da9a52-5bb1-47f1-a77b-99546bd25fc8.png">→<img width="256" src="https://user-images.githubusercontent.com/23278992/147282923-24fdf622-a147-450b-b6f4-9fce5dd74376.JPG">
+
 ## GAN
 
 | Google Drive Link | Size | Output | Original Project |
