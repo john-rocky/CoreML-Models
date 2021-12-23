@@ -6,26 +6,26 @@ You can get the model converted to CoreML format from the link of Google drive.
 See the section below for how to use it in Xcode.
 
 ## Image Classifier
-| Google Drive Link | Size | Original Project |
-| ------------- | ------------- | ------------- |
+| Google Drive Link | Size | Original Project | License |
+| ------------- | ------------- | ------------- |------------- |
 | [Efficientnetb0](https://drive.google.com/file/d/1mJq8SMuDaCQHW77ui3fAfe5o3Qu2GKMi/view?usp=sharing) | 22.7 MB | [TensorFlowHub](https://tfhub.dev/tensorflow/efficientnet/b0/classification/1)  |
 
 ## Segmentation
 
-| Google Drive Link | Size | Output |Original Project |
-| ------------- | ------------- | ------------- | ------------- |
-| [U2Net](https://drive.google.com/file/d/1cpm-x12Ih7Cqd_kOjfTvtt4ipGS3BpCx/view?usp=sharing) | 175.9 MB | Image(GRAYSCALE 320 × 320)| [xuebinqin/U-2-Net](https://github.com/xuebinqin)  |
-| [U2Netp](https://drive.google.com/file/d/1D-quPGy33PzSEC6A7EBNv7mCyuiBlO08/view?usp=sharing) | 4.6 MB | Image(GRAYSCALE 320 × 320) | [xuebinqin/U-2-Net](https://github.com/xuebinqin)  |
+| Google Drive Link | Size | Output |Original Project | License |
+| ------------- | ------------- | ------------- | ------------- |------------- |
+| [U2Net](https://drive.google.com/file/d/1cpm-x12Ih7Cqd_kOjfTvtt4ipGS3BpCx/view?usp=sharing) | 175.9 MB | Image(GRAYSCALE 320 × 320)| [xuebinqin/U-2-Net](https://github.com/xuebinqin)  | [Apache](https://github.com/john-rocky/CoreML-Models/blob/master/Apache-LICENSE)|
+| [U2Netp](https://drive.google.com/file/d/1D-quPGy33PzSEC6A7EBNv7mCyuiBlO08/view?usp=sharing) | 4.6 MB | Image(GRAYSCALE 320 × 320) | [xuebinqin/U-2-Net](https://github.com/xuebinqin)  | | [Apache](https://github.com/john-rocky/CoreML-Models/blob/master/Apache-LICENSE)|
 
 #### [U2Net](https://drive.google.com/file/d/1cpm-x12Ih7Cqd_kOjfTvtt4ipGS3BpCx/view?usp=sharing)
 <img width="256" src="https://camo.qiitausercontent.com/a8e89c72c0950db66d63415b9010d203aae22617/68747470733a2f2f71696974612d696d6167652d73746f72652e73332e61702d6e6f727468656173742d312e616d617a6f6e6177732e636f6d2f302f3233353235392f36303037393162322d633534332d613537652d303639622d3863663130373932643662392e6a706567">→<img width="256" src="https://camo.qiitausercontent.com/4f502487cd9e9e02d150ad63b33683a1446e7516/68747470733a2f2f71696974612d696d6167652d73746f72652e73332e61702d6e6f727468656173742d312e616d617a6f6e6177732e636f6d2f302f3233353235392f39636532633237612d643134322d663136352d343365662d6532373966646337386333382e706e67">
 
 ## Super Resolution
-| Google Drive Link | Size | Output |Original Project |
-| ------------- | ------------- | ------------- | ------------- |
+| Google Drive Link | Size | Output |Original Project | License |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
 | [Real ESRGAN](https://drive.google.com/file/d/1uK41SGHyQf_h6trI9bCb83VIBlfKFkag/view?usp=sharing) | 66.9 MB | Image(RGB 1280 × 1280)| [xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)  |
 #### [Real ESRGAN](https://drive.google.com/file/d/1cpm-x12Ih7Cqd_kOjfTvtt4ipGS3BpCx/view?usp=sharing)
-<img width="256" src="https://user-images.githubusercontent.com/23278992/147282886-60da9a52-5bb1-47f1-a77b-99546bd25fc8.png">→<img width="256" src="https://user-images.githubusercontent.com/23278992/147282923-24fdf622-a147-450b-b6f4-9fce5dd74376.JPG">
+<img width="256" src="https://user-images.githubusercontent.com/23278992/147282886-60da9a52-5bb1-47f1-a77b-99546bd25fc8.png">→<img width="256" src="https://user-images.githubusercontent.com/23278992/147282923-24fdf622-a147-450b-b6f4-9fce5dd74376.JPG"> | [BSD 3-Clause License](https://github.com/john-rocky/CoreML-Models/blob/master/Real-ESRGAN-License) |
 
 ## GAN
 
