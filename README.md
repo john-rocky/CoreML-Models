@@ -100,17 +100,6 @@ See the section below for how to use it in Xcode.
 | [DCGAN](https://drive.google.com/file/d/132GrmmuETSLTml1zWyLUnIksclP-8vGw/view?usp=sharing)　| 9.2MB | MultiArray | [TensorFlowCore](https://www.tensorflow.org/tutorials/generative/dcgan)|
 
 
-
-
-
-
-
-
-
-
-
-
-
 ## How to use in a xcode project.
 
 ### Option 1,implement Vision request.
