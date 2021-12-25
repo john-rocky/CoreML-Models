@@ -1,5 +1,5 @@
 # CoreML-Models
-Collection of Converted CoreML Models
+Converted CoreML Model Zoo.
 
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
