@@ -8,16 +8,17 @@ Converted CoreML Model Zoo.
 - [Segmentation](#segmentation)
   - [U2Net](#u2net)
 - [Super Resolution](#superresolution)
-  - [Real ESRGAN](#realeSRGAN)
+  - [Real ESRGAN](#realesrgan)
 - [Image Generation](#imagegeneration)
   - [MobileStyleGAN](#mobilestylegan)
   - [AnimeGAN2Face_Paint_512_v2](#animegan2face_paint_512_v2)
   - [Photo2Cartoon](#photo2cartoon)
   - [AnimeGANv2_Hayao](#animeGANv2_hayao)
   - [AnimeGANv2_Paprika](#animeGANv2_paprika)
-  - []()
-  - []()
-  - []()
+  - [WarpGAN Caricature](#warpgancaricature)
+  - [UGATIT_selfie2anime](#ugatit_selfie2anime)
+  - [DCGAN](#dcgan)
+  
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
 See the section below for how to use it in Xcode.
