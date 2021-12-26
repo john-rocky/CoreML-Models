@@ -27,7 +27,7 @@ The license for each model conforms to the license for the original project.
 ## Super Resolution
 
 ### [Real ESRGAN](https://drive.google.com/file/d/1cpm-x12Ih7Cqd_kOjfTvtt4ipGS3BpCx/view?usp=sharing)
-<img width="256" src="https://user-images.githubusercontent.com/23278992/147282886-60da9a52-5bb1-47f1-a77b-99546bd25fc8.png">→<img width="256" src="https://user-images.githubusercontent.com/23278992/147282923-24fdf622-a147-450b-b6f4-9fce5dd74376.JPG"> 
+<img width="256" src="https://user-images.githubusercontent.com/23278992/147418048-1391e7a7-6e3e-40db-9e26-56fa32769936.png">→<img width="256" src="https://user-images.githubusercontent.com/23278992/147418046-c345f7bc-260b-4b45-ad24-649720023973.JPG"> 
 
 | Google Drive Link | Size | Output |Original Project | License |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
