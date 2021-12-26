@@ -115,6 +115,7 @@ The license for each model conforms to the license for the original project.
 | ------------- | ------------- | ------------- | ------------- | 
 | [UGATIT_selfie2anime](https://drive.google.com/file/d/1cOB1comTnd5I22htZ4_OJ7tFQuQEI2ne/view?usp=sharing) | 1.12GB | MultiArray | [taki0112/UGATIT](https://github.com/taki0112/UGATIT)  |
 
+### CartoonGAN
 
 | Google Drive Link | Size | Output | Original Project | 
 | ------------- | ------------- | ------------- | ------------- | 
