@@ -56,7 +56,7 @@ The license for each model conforms to the license for the original project.
 
 | Google Drive Link | Size | Output |Original Project | License |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
-| [Real ESRGAN](https://drive.google.com/file/d/1uK41SGHyQf_h6trI9bCb83VIBlfKFkag/view?usp=sharing) | 66.9 MB | Image(RGB 1280 × 1280)| [xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)  | [BSD 3-Clause License](https://github.com/john-rocky/CoreML-Models/blob/master/Real-ESRGAN-License) |
+| [Real ESRGAN](https://drive.google.com/file/d/1uK41SGHyQf_h6trI9bCb83VIBlfKFkag/view?usp=sharing) | 66.9 MB | Image(RGB original*3)| [xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)  | [BSD 3-Clause License](https://github.com/john-rocky/CoreML-Models/blob/master/Real-ESRGAN-License) |
 
 
 ## Image Generation
