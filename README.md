@@ -104,7 +104,7 @@ The license for each model conforms to the license for the original project.
 
 
 ### [WarpGAN Caricature](https://drive.google.com/file/d/1QjfA6DSOu7Za1zY-b9ajX6tsIWe9-C16/view?usp=sharing)
-<img width="256" src="https://user-images.githubusercontent.com/23278992/144672418-2a16f40f-713c-4a07-bd40-6b436bae2717.png">→<img width="256" src="https://user-images.githubusercontent.com/23278992/144672310-3e34b96a-2610-428d-aa02-ad283b0c2c33.png">
+<img width="256" src="https://user-images.githubusercontent.com/23278992/147397894-e2d3a1ef-7afa-410a-9580-f09ef7157c50.JPG">→<img width="256" src="https://user-images.githubusercontent.com/23278992/147421276-574edb28-f909-4830-afd0-5cb41328bdba.JPG">
 
 | Google Drive Link | Size | Output | Original Project | 
 | ------------- | ------------- | ------------- | ------------- | 
