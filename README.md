@@ -41,7 +41,7 @@ The license for each model conforms to the license for the original project.
 
 
 | Google Drive Link | Size | Output | Original Project | License | Sample Project |
-| ------------- | ------------- | ------------- | ------------- |  ------------- | 
+| ------------- | ------------- | ------------- | ------------- |  ------------- |  ------------- | 
 | [MobileStyleGAN](https://drive.google.com/drive/folders/1rUV6AXwp8JhPPmkog-0r0AUGzUvN9DmW?usp=sharing) | 38.6MB  | Image(Color 1024 × 1024)| [bes-dev/MobileStyleGAN.pytorch](https://github.com/bes-dev/MobileStyleGAN.pytorch)  | [Nvidia Source Code License-NC](https://github.com/bes-dev/MobileStyleGAN.pytorch/blob/develop/LICENSE-NVIDIA) | [CoreML-StyleGAN](https://github.com/john-rocky/CoreML-StyleGAN) |
 
 ### [AnimeGAN2Face_Paint_512_v2](https://drive.google.com/file/d/1phSgcAz3LNbk2v2RoSESmr7PFxTAHcxb/view?usp=sharing)
