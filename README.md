@@ -84,15 +84,12 @@ The license for each model conforms to the license for the original project.
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
 | [Photo2Cartoon](https://drive.google.com/file/d/1xFWZ9Rf1o_LtwBpmSw2zSwPGk2FY6Wya/view?usp=sharing) | 15.2 MB  | Image(Color 256 × 256)| [minivision-ai/photo2cartoon](https://github.com/minivision-ai/photo2cartoon) | [MIT](https://github.com/minivision-ai/photo2cartoon/blob/master/LICENSE) | The output is little bit different from the original model. It cause some operations were converted replaced　manually. |
 
-
-
-
-### [AnimeGANv2_Hayao](https://drive.google.com/file/d/1i_kwj41BxA1xZNu2B7yX2VVqNF66atMN/view?usp=sharing)
-<img width="256" src="https://user-images.githubusercontent.com/23278992/144670978-1447ce28-db49-4cf9-b484-3142ef703ade.jpg"> <img width="256" src="https://user-images.githubusercontent.com/23278992/144671089-cceb615f-82e0-4a2e-a199-01cb61a52ec5.png">
+### [AnimeGANv2_Hayao](https://drive.google.com/file/d/1G53oZ1hiMcLJs1loN_fe_VmBVfegh9ha/view?usp=sharing)
+<img width="256" src="https://user-images.githubusercontent.com/23278992/147421574-8f38367c-d5c5-442d-9742-7b2bb24d43e4.jpg"> <img width="256" src="https://user-images.githubusercontent.com/23278992/147421569-df8e2e59-fef8-4db4-9cb2-65ee960ef705.png">
 
 | Google Drive Link | Size | Output | Original Project | 
 | ------------- | ------------- | ------------- | ------------- | 
-| [AnimeGANv2_Hayao](https://drive.google.com/file/d/1i_kwj41BxA1xZNu2B7yX2VVqNF66atMN/view?usp=sharing)　| 8.7MB | MultiArray | [TachibanaYoshino/AnimeGANv2](https://github.com/TachibanaYoshino/AnimeGANv2)|
+| [AnimeGANv2_Hayao](https://drive.google.com/file/d/1G53oZ1hiMcLJs1loN_fe_VmBVfegh9ha/view?usp=sharing)　| 8.7MB | MultiArray | [TachibanaYoshino/AnimeGANv2](https://github.com/TachibanaYoshino/AnimeGANv2)|
 
 
 ### [AnimeGANv2_Paprika](https://drive.google.com/file/d/1wuoaVoI8-HOOQ1kUiZkVJ9GWnPbtPnWF/view?usp=sharing)
