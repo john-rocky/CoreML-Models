@@ -4,12 +4,17 @@ Converted CoreML Model Zoo.
 <img width="1280" src="https://user-images.githubusercontent.com/23278992/147420041-fdeb1fbb-7e93-41c6-84d6-80d7c1c45200.jpeg">
 
 - [Image Classifier](#imageclassifier)
+  - [Efficientnetb0](#efficientnetb0)
 - [Segmentation](#segmentation)
 - [Super Resolution](#superresolution)
 - [Image Generation](#imagegeneration)
   - [MobileStyleGAN](#mobilestylegan)
   - [AnimeGAN2Face_Paint_512_v2](#animegan2face_paint_512_v2)
   - [Photo2Cartoon](#photo2cartoon)
+  - [AnimeGANv2_Hayao](#animeGANv2_hayao)
+  - [AnimeGANv2_Paprika](#animeGANv2_paprika)
+  - []()
+  - []()
   - []()
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
