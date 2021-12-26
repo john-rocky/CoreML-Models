@@ -3,11 +3,14 @@ Converted CoreML Model Zoo.
 
 <img width="1280" src="https://user-images.githubusercontent.com/23278992/147420041-fdeb1fbb-7e93-41c6-84d6-80d7c1c45200.jpeg">
 
-- [Image Classifier](#Image Classifier)
-- Segmentation
-- Super Resolution
-- Image Generation
+- [Image Classifier](#imageclassifier)
+- [Segmentation](#segmentation)
+- [Super Resolution](#superresolution)
+- [Image Generation](#imagegeneration)
   - [MobileStyleGAN](#mobilestylegan)
+  - [AnimeGAN2Face_Paint_512_v2](#animegan2face_paint_512_v2)
+  - [Photo2Cartoon](#photo2cartoon)
+  - []()
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
 See the section below for how to use it in Xcode.
@@ -41,7 +44,7 @@ The license for each model conforms to the license for the original project.
 | [Real ESRGAN](https://drive.google.com/file/d/1uK41SGHyQf_h6trI9bCb83VIBlfKFkag/view?usp=sharing) | 66.9 MB | Image(RGB 1280 × 1280)| [xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)  | [BSD 3-Clause License](https://github.com/john-rocky/CoreML-Models/blob/master/Real-ESRGAN-License) |
 
 
-## GAN
+## Image Generation
 
 ### [MobileStyleGAN](https://drive.google.com/drive/folders/1rUV6AXwp8JhPPmkog-0r0AUGzUvN9DmW?usp=sharing)
 <img width="256" src="https://user-images.githubusercontent.com/23278992/147397892-773c55ca-55fc-422b-a95b-a729eda04077.JPG"> <img width="256" src="https://user-images.githubusercontent.com/23278992/147397894-e2d3a1ef-7afa-410a-9580-f09ef7157c50.JPG"> 
