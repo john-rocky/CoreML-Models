@@ -175,4 +175,13 @@ func coreMLCompletionHandler（request：VNRequest？、error：Error？）{
 
 ### Option 2,Use [CoreGANContainer](https://github.com/john-rocky/CoreGANContainer). You can use models with dragging&dropping into the container project. 
 
+# Auther
+
+Daisuke Majima
+Freelance engineer. iOS/MachineLearning/AR
+Feel free to contact: rockyshikoku@gmail.com
+
+[GitHub](https://github.com/john-rocky)
+[Twitter](https://twitter.com/JackdeS11)
+[Medium](https://rockyshikoku.medium.com/)
 
