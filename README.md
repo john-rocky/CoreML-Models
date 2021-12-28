@@ -3,6 +3,13 @@ Converted CoreML Model Zoo.
 
 <img width="1280" src="https://user-images.githubusercontent.com/23278992/147420041-fdeb1fbb-7e93-41c6-84d6-80d7c1c45200.jpeg">
 
+# How to use
+
+Take a look this model zoo, and if you found the CoreML model you want,
+download the model from google drive link and bundle it in your project.
+Or if the model have sample project link, try it and see how to use the model in the project.
+You are free to do or not.
+
 # Section Link
 
 - [Image Classifier](#imageclassifier)
@@ -184,10 +191,14 @@ func coreMLCompletionHandler（request：VNRequest？、error：Error？）{
 
 ### Option 2,Use [CoreGANContainer](https://github.com/john-rocky/CoreGANContainer). You can use models with dragging&dropping into the container project. 
 
+# Thanks
+Cover image was taken from Ghibli free images. 
+
 # Auther
 
 Daisuke Majima
 Freelance engineer. iOS/MachineLearning/AR
+I can work on mobile ML projects and AR project.
 Feel free to contact: rockyshikoku@gmail.com
 
 [GitHub](https://github.com/john-rocky)
