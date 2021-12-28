@@ -195,6 +195,8 @@ func coreMLCompletionHandler（request：VNRequest？、error：Error？）{
 
 # Thanks
 Cover image was taken from Ghibli free images. 
+On YOLOv5 convertion, [dbsystel/yolov5-coreml-tools](https://github.com/dbsystel/yolov5-coreml-tools) give me super inteligent convert script. 
+And all original projects
 
 # Auther
 
