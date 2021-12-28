@@ -7,6 +7,8 @@ Converted CoreML Model Zoo.
 
 - [Image Classifier](#imageclassifier)
   - [Efficientnetb0](#efficientnetb0)
+- [Object Detection](#objectdetection)
+  - [YOLOv5s](#yolov5s)
 - [Segmentation](#segmentation)
   - [U2Net](#u2net)
 - [Super Resolution](#superresolution)
@@ -39,9 +41,13 @@ The license for each model conforms to the license for the original project.
 
 ## Object Detection
 
+### YOLOv5s
+
 | Google Drive Link | Size | Original Project | License | Note |
 | ------------- | ------------- | ------------- |------------- |------------- |
-|[YOLOv5s](https://drive.google.com/file/d/11UI4n-_VV7uBiCN1NXhnriqfRCF4J8Dj/view?usp=sharing)|29.3MB|[GNU](https://github.com/ultralytics/yolov5/blob/master/LICENSE)|Non Maximum Suppression has not been implemented yet.|
+|[YOLOv5s](https://drive.google.com/file/d/11UI4n-_VV7uBiCN1NXhnriqfRCF4J8Dj/view?usp=sharing)|29.3MB|[ultralytics
+/
+yolov5](https://github.com/ultralytics/yolov5)|[GNU](https://github.com/ultralytics/yolov5/blob/master/LICENSE)|Non Maximum Suppression has not been implemented yet.|
 
 ## Segmentation
 
