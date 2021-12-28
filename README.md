@@ -40,7 +40,7 @@ The license for each model conforms to the license for the original project.
 
 ### Efficientnetb0
 
-<img width="256" alt="スクリーンショット 2021-12-27 6 34 43" src="https://user-images.githubusercontent.com/23278992/147420587-108b87f8-7996-4288-905a-ad53f9142221.png">
+<img width="512" alt="スクリーンショット 2021-12-27 6 34 43" src="https://user-images.githubusercontent.com/23278992/147420587-108b87f8-7996-4288-905a-ad53f9142221.png">
 
 | Google Drive Link | Size | Original Project | License |
 | ------------- | ------------- | ------------- |------------- |
