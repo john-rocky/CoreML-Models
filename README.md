@@ -37,6 +37,11 @@ The license for each model conforms to the license for the original project.
 | ------------- | ------------- | ------------- |------------- |
 | [Efficientnetb0](https://drive.google.com/file/d/1mJq8SMuDaCQHW77ui3fAfe5o3Qu2GKMi/view?usp=sharing) | 22.7 MB | [TensorFlowHub](https://tfhub.dev/tensorflow/efficientnet/b0/classification/1)  |
 
+## Object Detection
+
+| Google Drive Link | Size | Original Project | License | Note |
+| ------------- | ------------- | ------------- |------------- |------------- |
+|[YOLOv5s](https://drive.google.com/file/d/11UI4n-_VV7uBiCN1NXhnriqfRCF4J8Dj/view?usp=sharing)|29.3MB|[GNU](https://github.com/ultralytics/yolov5/blob/master/LICENSE)|Non Maximum Suppression has not been implemented yet.|
 
 ## Segmentation
 
