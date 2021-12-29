@@ -52,9 +52,9 @@ The license for each model conforms to the license for the original project.
 
 <img width="512" alt="スクリーンショット 2021-12-29 6 17 08" src="https://user-images.githubusercontent.com/23278992/147608051-be2ff345-22e8-4f82-83ed-7cc41ce4084d.png">
 
-| Google Drive Link | Size | Output | Original Project | License | Note |
-| ------------- | ------------- | ------------- | ------------- |------------- |------------- |
-|[YOLOv5s](https://drive.google.com/file/d/1KT-9eKO4F-LYIJVYJg7dy2LEW_hVUq0M/view?usp=sharing)|29.3MB| Confidence(MultiArray (Double 0 × 80)), coordinatesMultiArray (Double 0 × 4) |[ultralytics/yolov5](https://github.com/ultralytics/yolov5)|[GNU](https://github.com/ultralytics/yolov5/blob/master/LICENSE)|Non Maximum Suppression has been added.|
+| Google Drive Link | Size | Output | Original Project | License | Note | Sample Project |
+| ------------- | ------------- | ------------- | ------------- |------------- |------------- |------------- |
+|[YOLOv5s](https://drive.google.com/file/d/1KT-9eKO4F-LYIJVYJg7dy2LEW_hVUq0M/view?usp=sharing)|29.3MB| Confidence(MultiArray (Double 0 × 80)), coordinatesMultiArray (Double 0 × 4) |[ultralytics/yolov5](https://github.com/ultralytics/yolov5)|[GNU](https://github.com/ultralytics/yolov5/blob/master/LICENSE)|Non Maximum Suppression has been added.| [CoreML-YOLOv5](https://github.com/john-rocky/CoreML-YOLOv5) |
 
 ## Segmentation
 
