@@ -193,6 +193,28 @@ func coreMLCompletionHandler（request：VNRequest？、error：Error？）{
 
 ### Option 2,Use [CoreGANContainer](https://github.com/john-rocky/CoreGANContainer). You can use models with dragging&dropping into the container project. 
 
+# Make the model lighter
+You can make the model size lighter with Quantization if you want.
+https://coremltools.readme.io/docs/quantization
+>The lower the number of bits, more the chances of degrading the model accuracy. The loss in accuracy varies with the model.
+
+```python
+import coremltools as ct
+from coremltools.models.neural_network import quantization_utils
+
+# load full precision model
+model_fp32 = ct.models.MLModel('model.mlmodel')
+
+model_fp16 = quantization_utils.quantize_weights(model_fp32, nbits=16)
+# nbits can be 16(half size model), 8(1/4), 4(1/8), 2, 1
+```
+
+##### quantized sample image / nbits=32(original) / nbits=16 / nbits=8
+
+<img src="https://user-images.githubusercontent.com/23278992/147712147-0959c0b9-9d4b-4049-9dd9-7a9d1ffa0eed.JPEG" width=200> <img src="https://user-images.githubusercontent.com/23278992/147712215-dd0c8788-75ad-4676-804a-fdd47233daa6.JPG" width=200> <img src="https://user-images.githubusercontent.com/23278992/147712220-d02ab436-9716-4cdc-91d3-8b6f3aa01fac.JPG" width=200> <img src="https://user-images.githubusercontent.com/23278992/147712259-aabf5ecf-db59-476d-8f36-e6027dfb91e2.JPG" width=200>
+
+
+
 # Thanks
 Cover image was taken from Ghibli free images. 
 
