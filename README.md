@@ -14,6 +14,7 @@ You are free to do or not.
 
 - [Image Classifier](#imageclassifier)
   - [Efficientnetb0](#efficientnetb0)
+  - [Efficientnetv2](#efficientnetv2)
 - [Object Detection](#objectdetection)
   - [YOLOv5s](#yolov5s)
 - [Segmentation](#segmentation)
@@ -42,9 +43,18 @@ The license for each model conforms to the license for the original project.
 
 <img width="512" alt="スクリーンショット 2021-12-27 6 34 43" src="https://user-images.githubusercontent.com/23278992/147420587-108b87f8-7996-4288-905a-ad53f9142221.png">
 
-| Google Drive Link | Size | Original Project | License |
+| Google Drive Link | Size | Dataset |Original Project | License |
 | ------------- | ------------- | ------------- |------------- |
-| [Efficientnetb0](https://drive.google.com/file/d/1mJq8SMuDaCQHW77ui3fAfe5o3Qu2GKMi/view?usp=sharing) | 22.7 MB | [TensorFlowHub](https://tfhub.dev/tensorflow/efficientnet/b0/classification/1)  |
+| [Efficientnetb0](https://drive.google.com/file/d/1mJq8SMuDaCQHW77ui3fAfe5o3Qu2GKMi/view?usp=sharing) | 22.7 MB | ImageNet | [TensorFlowHub](https://tfhub.dev/tensorflow/efficientnet/b0/classification/1)  |
+
+
+### Efficientnetv2
+
+<img width="512" alt="スクリーンショット 2021-12-31 4 30 22" src="https://user-images.githubusercontent.com/23278992/147782567-bbf26186-8c84-4073-8df4-b08e06d4e791.png">
+
+| Google Drive Link | Size | Dataset |Original Project | License |
+| ------------- | ------------- | ------------- |------------- |
+| [Efficientnetb0](https://drive.google.com/file/d/12JiGwXh8pX3yjoG_GsJOKAnPd3lbVrrn/view?usp=sharing) | 85.8 MB | ImageNet | [Google/autoML](https://github.com/google/automl/tree/master/efficientnetv2)  | Apache2.0(https://github.com/google/automl/blob/master/LICENSE)|
 
 ## Object Detection
 
