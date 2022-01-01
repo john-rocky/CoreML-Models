@@ -15,17 +15,17 @@ You are free to do or not.
 
 # Section Link
 
-- [Image Classifier](#imageclassifier)
+- [**Image Classifier](#imageclassifier)
   - [Efficientnetb0](#efficientnetb0)
   - [Efficientnetv2](#efficientnetv2)
-- [Object Detection](#objectdetection)
+- [**Object Detection](#objectdetection)
   - [YOLOv5s](#yolov5s)
-- [Segmentation](#segmentation)
+- [**Segmentation](#segmentation)
   - [U2Net](#u2net)
   - [face-parsing](#face-parsing)
-- [Super Resolution](#superresolution)
+- [**Super Resolution](#superresolution)
   - [Real ESRGAN](#realesrgan)
-- [Image Generation](#imagegeneration)
+- [**Image Generation](#imagegeneration)
   - [MobileStyleGAN](#mobilestylegan)
   - [AnimeGAN2Face_Paint_512_v2](#animegan2face_paint_512_v2)
   - [Photo2Cartoon](#photo2cartoon)
