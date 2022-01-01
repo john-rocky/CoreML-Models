@@ -79,7 +79,7 @@ The license for each model conforms to the license for the original project.
 
 ### face-Parsing
 
-<ing src="https://user-images.githubusercontent.com/23278992/147860040-14a7e022-5490-4e51-98cd-cd421066dd8c.png" width=256> <ing src="https://user-images.githubusercontent.com/23278992/147860042-d27f37b0-227b-45ab-8d76-f6c6f2f5b3a4.png" width=256>
+<img src="https://user-images.githubusercontent.com/23278992/147860040-14a7e022-5490-4e51-98cd-cd421066dd8c.png" width=256> <img src="https://user-images.githubusercontent.com/23278992/147860042-d27f37b0-227b-45ab-8d76-f6c6f2f5b3a4.png" width=256>
 
 | Google Drive Link | Size | Output |Original Project | License | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
