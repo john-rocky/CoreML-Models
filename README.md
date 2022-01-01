@@ -19,6 +19,7 @@ You are free to do or not.
   - [YOLOv5s](#yolov5s)
 - [Segmentation](#segmentation)
   - [U2Net](#u2net)
+  - [face-parsing](#faceparsing)
 - [Super Resolution](#superresolution)
   - [Real ESRGAN](#realesrgan)
 - [Image Generation](#imagegeneration)
