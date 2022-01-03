@@ -116,8 +116,7 @@ The license for each model conforms to the license for the original project.
 
 | Google Drive Link | Size | Output | Original Project | License | Usage |
 | ------------- | ------------- | ------------- | ------------- | ------------- |  ------------- | 
-| [Anime2Sketch](https://drive.google.com/file/d/1-52NnZ1kajZI5Rk0tn3DegpU38la_jYk/view?usp=sharing) | 217.7MB  | Image(Color 512 × 512)| [Mukosame/
-Anime2Sketch](https://github.com/Mukosame/Anime2Sketch)  | [MIT](https://github.com/Mukosame/Anime2Sketch/blob/master/LICENSE)| Drop an image to preview|
+| [Anime2Sketch](https://drive.google.com/file/d/1-52NnZ1kajZI5Rk0tn3DegpU38la_jYk/view?usp=sharing) | 217.7MB  | Image(Color 512 × 512)| [Mukosame/Anime2Sketch](https://github.com/Mukosame/Anime2Sketch)  | [MIT](https://github.com/Mukosame/Anime2Sketch/blob/master/LICENSE)| Drop an image to preview|
 
 
 ### [AnimeGAN2Face_Paint_512_v2](https://drive.google.com/file/d/1phSgcAz3LNbk2v2RoSESmr7PFxTAHcxb/view?usp=sharing)
