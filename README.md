@@ -18,22 +18,28 @@ You are free to do or not.
 - [**Image Classifier**](#imageclassifier)
   - [Efficientnetb0](#efficientnetb0)
   - [Efficientnetv2](#efficientnetv2)
+  
 - [**Object Detection**](#objectdetection)
   - [YOLOv5s](#yolov5s)
+  
 - [**Segmentation**](#segmentation)
   - [U2Net](#u2net)
   - [face-parsing](#face-parsing)
+  
 - [**Super Resolution**](#superresolution)
   - [Real ESRGAN](#realesrgan)
+  
 - [**Image Generation**](#imagegeneration)
   - [MobileStyleGAN](#mobilestylegan)
+  - [DCGAN](#dcgan)
+
+- [**Image2Image**](#image2image)
   - [AnimeGAN2Face_Paint_512_v2](#animegan2face_paint_512_v2)
   - [Photo2Cartoon](#photo2cartoon)
   - [AnimeGANv2_Hayao](#animeGANv2_hayao)
   - [AnimeGANv2_Paprika](#animeGANv2_paprika)
   - [WarpGAN Caricature](#warpgancaricature)
   - [UGATIT_selfie2anime](#ugatit_selfie2anime)
-  - [DCGAN](#dcgan)
   
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
@@ -108,8 +114,16 @@ The license for each model conforms to the license for the original project.
 | ------------- | ------------- | ------------- | ------------- |  ------------- |  ------------- | 
 | [MobileStyleGAN](https://drive.google.com/drive/folders/1rUV6AXwp8JhPPmkog-0r0AUGzUvN9DmW?usp=sharing) | 38.6MB  | Image(Color 1024 × 1024)| [bes-dev/MobileStyleGAN.pytorch](https://github.com/bes-dev/MobileStyleGAN.pytorch)  | [Nvidia Source Code License-NC](https://github.com/bes-dev/MobileStyleGAN.pytorch/blob/develop/LICENSE-NVIDIA) | [CoreML-StyleGAN](https://github.com/john-rocky/CoreML-StyleGAN) |
 
-# Image2Image
 
+### [DCGAN](https://drive.google.com/file/d/132GrmmuETSLTml1zWyLUnIksclP-8vGw/view?usp=sharing)
+<img width="256" src="https://user-images.githubusercontent.com/23278992/144690829-3a4cebcf-ee73-4df0-b8db-1dfc2e616798.png">
+
+| Google Drive Link | Size | Output | Original Project | 
+| ------------- | ------------- | ------------- | ------------- | 
+| [DCGAN](https://drive.google.com/file/d/132GrmmuETSLTml1zWyLUnIksclP-8vGw/view?usp=sharing)　| 9.2MB | MultiArray | [TensorFlowCore](https://www.tensorflow.org/tutorials/generative/dcgan)|
+
+
+# Image2Image
 
 ### [Anime2Sketch](https://drive.google.com/file/d/1-52NnZ1kajZI5Rk0tn3DegpU38la_jYk/view?usp=sharing)
 <img width="256" src="https://user-images.githubusercontent.com/23278992/147990751-9ac35e43-b9a6-4db2-af5c-37978322240d.jpeg"> <img width="256" src="https://user-images.githubusercontent.com/23278992/147990892-d676142c-62c4-433d-9835-337b1293bfc4.jpeg">
@@ -175,12 +189,6 @@ The license for each model conforms to the license for the original project.
 | [CartoonGAN_Paprika](https://drive.google.com/file/d/1-5x3TYugodcnGYiEEDitFqMQPVHsCDs_/view?usp=sharing)　| 44.6MB | MultiArray | [mnicnc404/CartoonGan-tensorflow](https://github.com/mnicnc404/CartoonGan-tensorflow)|
 
 
-### [DCGAN](https://drive.google.com/file/d/132GrmmuETSLTml1zWyLUnIksclP-8vGw/view?usp=sharing)
-<img width="256" src="https://user-images.githubusercontent.com/23278992/144690829-3a4cebcf-ee73-4df0-b8db-1dfc2e616798.png">
-
-| Google Drive Link | Size | Output | Original Project | 
-| ------------- | ------------- | ------------- | ------------- | 
-| [DCGAN](https://drive.google.com/file/d/132GrmmuETSLTml1zWyLUnIksclP-8vGw/view?usp=sharing)　| 9.2MB | MultiArray | [TensorFlowCore](https://www.tensorflow.org/tutorials/generative/dcgan)|
 
 
 ## How to use in a xcode project.
