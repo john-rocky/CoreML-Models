@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  CoreML-Models
+//  CoreML-Models-Sampler
 //
 //  Created by 間嶋大輔 on 2022/01/05.
 //
@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        Text("world!")
+        Text("Hello, world!")
             .padding()
     }
 }

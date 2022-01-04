@@ -7,61 +7,61 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		733DCBEC2784ED970049B4C4 /* CoreML_ModelsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCBEB2784ED970049B4C4 /* CoreML_ModelsApp.swift */; };
-		733DCBEE2784ED970049B4C4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCBED2784ED970049B4C4 /* ContentView.swift */; };
-		733DCBF02784ED990049B4C4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 733DCBEF2784ED990049B4C4 /* Assets.xcassets */; };
-		733DCBF32784ED990049B4C4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 733DCBF22784ED990049B4C4 /* Preview Assets.xcassets */; };
-		733DCBFD2784ED990049B4C4 /* CoreML_ModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCBFC2784ED990049B4C4 /* CoreML_ModelsTests.swift */; };
-		733DCC072784ED990049B4C4 /* CoreML_ModelsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC062784ED990049B4C4 /* CoreML_ModelsUITests.swift */; };
-		733DCC092784ED990049B4C4 /* CoreML_ModelsUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC082784ED990049B4C4 /* CoreML_ModelsUITestsLaunchTests.swift */; };
+		733DCC32278512F70049B4C4 /* CoreML_Models_SamplerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC31278512F70049B4C4 /* CoreML_Models_SamplerApp.swift */; };
+		733DCC34278512F70049B4C4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC33278512F70049B4C4 /* ContentView.swift */; };
+		733DCC36278512FC0049B4C4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 733DCC35278512FC0049B4C4 /* Assets.xcassets */; };
+		733DCC39278512FC0049B4C4 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 733DCC38278512FC0049B4C4 /* Preview Assets.xcassets */; };
+		733DCC43278512FD0049B4C4 /* CoreML_Models_SamplerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC42278512FD0049B4C4 /* CoreML_Models_SamplerTests.swift */; };
+		733DCC4D278512FD0049B4C4 /* CoreML_Models_SamplerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC4C278512FD0049B4C4 /* CoreML_Models_SamplerUITests.swift */; };
+		733DCC4F278512FD0049B4C4 /* CoreML_Models_SamplerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC4E278512FD0049B4C4 /* CoreML_Models_SamplerUITestsLaunchTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		733DCBF92784ED990049B4C4 /* PBXContainerItemProxy */ = {
+		733DCC3F278512FD0049B4C4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 733DCBE02784ED970049B4C4 /* Project object */;
+			containerPortal = 733DCC26278512F70049B4C4 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 733DCBE72784ED970049B4C4;
-			remoteInfo = "CoreML-Models";
+			remoteGlobalIDString = 733DCC2D278512F70049B4C4;
+			remoteInfo = "CoreML-Models-Sampler";
 		};
-		733DCC032784ED990049B4C4 /* PBXContainerItemProxy */ = {
+		733DCC49278512FD0049B4C4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 733DCBE02784ED970049B4C4 /* Project object */;
+			containerPortal = 733DCC26278512F70049B4C4 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 733DCBE72784ED970049B4C4;
-			remoteInfo = "CoreML-Models";
+			remoteGlobalIDString = 733DCC2D278512F70049B4C4;
+			remoteInfo = "CoreML-Models-Sampler";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		733DCBE82784ED970049B4C4 /* CoreML-Models.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "CoreML-Models.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		733DCBEB2784ED970049B4C4 /* CoreML_ModelsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreML_ModelsApp.swift; sourceTree = "<group>"; };
-		733DCBED2784ED970049B4C4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		733DCBEF2784ED990049B4C4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		733DCBF22784ED990049B4C4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		733DCBF82784ED990049B4C4 /* CoreML-ModelsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CoreML-ModelsTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		733DCBFC2784ED990049B4C4 /* CoreML_ModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreML_ModelsTests.swift; sourceTree = "<group>"; };
-		733DCC022784ED990049B4C4 /* CoreML-ModelsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CoreML-ModelsUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		733DCC062784ED990049B4C4 /* CoreML_ModelsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreML_ModelsUITests.swift; sourceTree = "<group>"; };
-		733DCC082784ED990049B4C4 /* CoreML_ModelsUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreML_ModelsUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		733DCC2E278512F70049B4C4 /* CoreML-Models-Sampler.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "CoreML-Models-Sampler.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		733DCC31278512F70049B4C4 /* CoreML_Models_SamplerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreML_Models_SamplerApp.swift; sourceTree = "<group>"; };
+		733DCC33278512F70049B4C4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		733DCC35278512FC0049B4C4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		733DCC38278512FC0049B4C4 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		733DCC3E278512FD0049B4C4 /* CoreML-Models-SamplerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CoreML-Models-SamplerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		733DCC42278512FD0049B4C4 /* CoreML_Models_SamplerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreML_Models_SamplerTests.swift; sourceTree = "<group>"; };
+		733DCC48278512FD0049B4C4 /* CoreML-Models-SamplerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CoreML-Models-SamplerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		733DCC4C278512FD0049B4C4 /* CoreML_Models_SamplerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreML_Models_SamplerUITests.swift; sourceTree = "<group>"; };
+		733DCC4E278512FD0049B4C4 /* CoreML_Models_SamplerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreML_Models_SamplerUITestsLaunchTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		733DCBE52784ED970049B4C4 /* Frameworks */ = {
+		733DCC2B278512F70049B4C4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		733DCBF52784ED990049B4C4 /* Frameworks */ = {
+		733DCC3B278512FD0049B4C4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		733DCBFF2784ED990049B4C4 /* Frameworks */ = {
+		733DCC45278512FD0049B4C4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -71,142 +71,142 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		733DCBDF2784ED970049B4C4 = {
+		733DCC25278512F70049B4C4 = {
 			isa = PBXGroup;
 			children = (
-				733DCBEA2784ED970049B4C4 /* CoreML-Models */,
-				733DCBFB2784ED990049B4C4 /* CoreML-ModelsTests */,
-				733DCC052784ED990049B4C4 /* CoreML-ModelsUITests */,
-				733DCBE92784ED970049B4C4 /* Products */,
+				733DCC30278512F70049B4C4 /* CoreML-Models-Sampler */,
+				733DCC41278512FD0049B4C4 /* CoreML-Models-SamplerTests */,
+				733DCC4B278512FD0049B4C4 /* CoreML-Models-SamplerUITests */,
+				733DCC2F278512F70049B4C4 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		733DCBE92784ED970049B4C4 /* Products */ = {
+		733DCC2F278512F70049B4C4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				733DCBE82784ED970049B4C4 /* CoreML-Models.app */,
-				733DCBF82784ED990049B4C4 /* CoreML-ModelsTests.xctest */,
-				733DCC022784ED990049B4C4 /* CoreML-ModelsUITests.xctest */,
+				733DCC2E278512F70049B4C4 /* CoreML-Models-Sampler.app */,
+				733DCC3E278512FD0049B4C4 /* CoreML-Models-SamplerTests.xctest */,
+				733DCC48278512FD0049B4C4 /* CoreML-Models-SamplerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		733DCBEA2784ED970049B4C4 /* CoreML-Models */ = {
+		733DCC30278512F70049B4C4 /* CoreML-Models-Sampler */ = {
 			isa = PBXGroup;
 			children = (
-				733DCBEB2784ED970049B4C4 /* CoreML_ModelsApp.swift */,
-				733DCBED2784ED970049B4C4 /* ContentView.swift */,
-				733DCBEF2784ED990049B4C4 /* Assets.xcassets */,
-				733DCBF12784ED990049B4C4 /* Preview Content */,
+				733DCC31278512F70049B4C4 /* CoreML_Models_SamplerApp.swift */,
+				733DCC33278512F70049B4C4 /* ContentView.swift */,
+				733DCC35278512FC0049B4C4 /* Assets.xcassets */,
+				733DCC37278512FC0049B4C4 /* Preview Content */,
 			);
-			path = "CoreML-Models";
+			path = "CoreML-Models-Sampler";
 			sourceTree = "<group>";
 		};
-		733DCBF12784ED990049B4C4 /* Preview Content */ = {
+		733DCC37278512FC0049B4C4 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				733DCBF22784ED990049B4C4 /* Preview Assets.xcassets */,
+				733DCC38278512FC0049B4C4 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		733DCBFB2784ED990049B4C4 /* CoreML-ModelsTests */ = {
+		733DCC41278512FD0049B4C4 /* CoreML-Models-SamplerTests */ = {
 			isa = PBXGroup;
 			children = (
-				733DCBFC2784ED990049B4C4 /* CoreML_ModelsTests.swift */,
+				733DCC42278512FD0049B4C4 /* CoreML_Models_SamplerTests.swift */,
 			);
-			path = "CoreML-ModelsTests";
+			path = "CoreML-Models-SamplerTests";
 			sourceTree = "<group>";
 		};
-		733DCC052784ED990049B4C4 /* CoreML-ModelsUITests */ = {
+		733DCC4B278512FD0049B4C4 /* CoreML-Models-SamplerUITests */ = {
 			isa = PBXGroup;
 			children = (
-				733DCC062784ED990049B4C4 /* CoreML_ModelsUITests.swift */,
-				733DCC082784ED990049B4C4 /* CoreML_ModelsUITestsLaunchTests.swift */,
+				733DCC4C278512FD0049B4C4 /* CoreML_Models_SamplerUITests.swift */,
+				733DCC4E278512FD0049B4C4 /* CoreML_Models_SamplerUITestsLaunchTests.swift */,
 			);
-			path = "CoreML-ModelsUITests";
+			path = "CoreML-Models-SamplerUITests";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		733DCBE72784ED970049B4C4 /* CoreML-Models */ = {
+		733DCC2D278512F70049B4C4 /* CoreML-Models-Sampler */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 733DCC0C2784ED990049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-Models" */;
+			buildConfigurationList = 733DCC52278512FD0049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-Models-Sampler" */;
 			buildPhases = (
-				733DCBE42784ED970049B4C4 /* Sources */,
-				733DCBE52784ED970049B4C4 /* Frameworks */,
-				733DCBE62784ED970049B4C4 /* Resources */,
+				733DCC2A278512F70049B4C4 /* Sources */,
+				733DCC2B278512F70049B4C4 /* Frameworks */,
+				733DCC2C278512F70049B4C4 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = "CoreML-Models";
-			productName = "CoreML-Models";
-			productReference = 733DCBE82784ED970049B4C4 /* CoreML-Models.app */;
+			name = "CoreML-Models-Sampler";
+			productName = "CoreML-Models-Sampler";
+			productReference = 733DCC2E278512F70049B4C4 /* CoreML-Models-Sampler.app */;
 			productType = "com.apple.product-type.application";
 		};
-		733DCBF72784ED990049B4C4 /* CoreML-ModelsTests */ = {
+		733DCC3D278512FD0049B4C4 /* CoreML-Models-SamplerTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 733DCC0F2784ED990049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-ModelsTests" */;
+			buildConfigurationList = 733DCC55278512FD0049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-Models-SamplerTests" */;
 			buildPhases = (
-				733DCBF42784ED990049B4C4 /* Sources */,
-				733DCBF52784ED990049B4C4 /* Frameworks */,
-				733DCBF62784ED990049B4C4 /* Resources */,
+				733DCC3A278512FD0049B4C4 /* Sources */,
+				733DCC3B278512FD0049B4C4 /* Frameworks */,
+				733DCC3C278512FD0049B4C4 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				733DCBFA2784ED990049B4C4 /* PBXTargetDependency */,
+				733DCC40278512FD0049B4C4 /* PBXTargetDependency */,
 			);
-			name = "CoreML-ModelsTests";
-			productName = "CoreML-ModelsTests";
-			productReference = 733DCBF82784ED990049B4C4 /* CoreML-ModelsTests.xctest */;
+			name = "CoreML-Models-SamplerTests";
+			productName = "CoreML-Models-SamplerTests";
+			productReference = 733DCC3E278512FD0049B4C4 /* CoreML-Models-SamplerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		733DCC012784ED990049B4C4 /* CoreML-ModelsUITests */ = {
+		733DCC47278512FD0049B4C4 /* CoreML-Models-SamplerUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 733DCC122784ED990049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-ModelsUITests" */;
+			buildConfigurationList = 733DCC58278512FD0049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-Models-SamplerUITests" */;
 			buildPhases = (
-				733DCBFE2784ED990049B4C4 /* Sources */,
-				733DCBFF2784ED990049B4C4 /* Frameworks */,
-				733DCC002784ED990049B4C4 /* Resources */,
+				733DCC44278512FD0049B4C4 /* Sources */,
+				733DCC45278512FD0049B4C4 /* Frameworks */,
+				733DCC46278512FD0049B4C4 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				733DCC042784ED990049B4C4 /* PBXTargetDependency */,
+				733DCC4A278512FD0049B4C4 /* PBXTargetDependency */,
 			);
-			name = "CoreML-ModelsUITests";
-			productName = "CoreML-ModelsUITests";
-			productReference = 733DCC022784ED990049B4C4 /* CoreML-ModelsUITests.xctest */;
+			name = "CoreML-Models-SamplerUITests";
+			productName = "CoreML-Models-SamplerUITests";
+			productReference = 733DCC48278512FD0049B4C4 /* CoreML-Models-SamplerUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		733DCBE02784ED970049B4C4 /* Project object */ = {
+		733DCC26278512F70049B4C4 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1320;
 				LastUpgradeCheck = 1320;
 				TargetAttributes = {
-					733DCBE72784ED970049B4C4 = {
+					733DCC2D278512F70049B4C4 = {
 						CreatedOnToolsVersion = 13.2.1;
 					};
-					733DCBF72784ED990049B4C4 = {
+					733DCC3D278512FD0049B4C4 = {
 						CreatedOnToolsVersion = 13.2.1;
-						TestTargetID = 733DCBE72784ED970049B4C4;
+						TestTargetID = 733DCC2D278512F70049B4C4;
 					};
-					733DCC012784ED990049B4C4 = {
+					733DCC47278512FD0049B4C4 = {
 						CreatedOnToolsVersion = 13.2.1;
-						TestTargetID = 733DCBE72784ED970049B4C4;
+						TestTargetID = 733DCC2D278512F70049B4C4;
 					};
 				};
 			};
-			buildConfigurationList = 733DCBE32784ED970049B4C4 /* Build configuration list for PBXProject "CoreML-Models" */;
+			buildConfigurationList = 733DCC29278512F70049B4C4 /* Build configuration list for PBXProject "CoreML-Models-Sampler" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -214,36 +214,36 @@
 				en,
 				Base,
 			);
-			mainGroup = 733DCBDF2784ED970049B4C4;
-			productRefGroup = 733DCBE92784ED970049B4C4 /* Products */;
+			mainGroup = 733DCC25278512F70049B4C4;
+			productRefGroup = 733DCC2F278512F70049B4C4 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				733DCBE72784ED970049B4C4 /* CoreML-Models */,
-				733DCBF72784ED990049B4C4 /* CoreML-ModelsTests */,
-				733DCC012784ED990049B4C4 /* CoreML-ModelsUITests */,
+				733DCC2D278512F70049B4C4 /* CoreML-Models-Sampler */,
+				733DCC3D278512FD0049B4C4 /* CoreML-Models-SamplerTests */,
+				733DCC47278512FD0049B4C4 /* CoreML-Models-SamplerUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		733DCBE62784ED970049B4C4 /* Resources */ = {
+		733DCC2C278512F70049B4C4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				733DCBF32784ED990049B4C4 /* Preview Assets.xcassets in Resources */,
-				733DCBF02784ED990049B4C4 /* Assets.xcassets in Resources */,
+				733DCC39278512FC0049B4C4 /* Preview Assets.xcassets in Resources */,
+				733DCC36278512FC0049B4C4 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		733DCBF62784ED990049B4C4 /* Resources */ = {
+		733DCC3C278512FD0049B4C4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		733DCC002784ED990049B4C4 /* Resources */ = {
+		733DCC46278512FD0049B4C4 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -253,49 +253,49 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		733DCBE42784ED970049B4C4 /* Sources */ = {
+		733DCC2A278512F70049B4C4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				733DCBEE2784ED970049B4C4 /* ContentView.swift in Sources */,
-				733DCBEC2784ED970049B4C4 /* CoreML_ModelsApp.swift in Sources */,
+				733DCC34278512F70049B4C4 /* ContentView.swift in Sources */,
+				733DCC32278512F70049B4C4 /* CoreML_Models_SamplerApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		733DCBF42784ED990049B4C4 /* Sources */ = {
+		733DCC3A278512FD0049B4C4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				733DCBFD2784ED990049B4C4 /* CoreML_ModelsTests.swift in Sources */,
+				733DCC43278512FD0049B4C4 /* CoreML_Models_SamplerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		733DCBFE2784ED990049B4C4 /* Sources */ = {
+		733DCC44278512FD0049B4C4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				733DCC092784ED990049B4C4 /* CoreML_ModelsUITestsLaunchTests.swift in Sources */,
-				733DCC072784ED990049B4C4 /* CoreML_ModelsUITests.swift in Sources */,
+				733DCC4D278512FD0049B4C4 /* CoreML_Models_SamplerUITests.swift in Sources */,
+				733DCC4F278512FD0049B4C4 /* CoreML_Models_SamplerUITestsLaunchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		733DCBFA2784ED990049B4C4 /* PBXTargetDependency */ = {
+		733DCC40278512FD0049B4C4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 733DCBE72784ED970049B4C4 /* CoreML-Models */;
-			targetProxy = 733DCBF92784ED990049B4C4 /* PBXContainerItemProxy */;
+			target = 733DCC2D278512F70049B4C4 /* CoreML-Models-Sampler */;
+			targetProxy = 733DCC3F278512FD0049B4C4 /* PBXContainerItemProxy */;
 		};
-		733DCC042784ED990049B4C4 /* PBXTargetDependency */ = {
+		733DCC4A278512FD0049B4C4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 733DCBE72784ED970049B4C4 /* CoreML-Models */;
-			targetProxy = 733DCC032784ED990049B4C4 /* PBXContainerItemProxy */;
+			target = 733DCC2D278512F70049B4C4 /* CoreML-Models-Sampler */;
+			targetProxy = 733DCC49278512FD0049B4C4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		733DCC0A2784ED990049B4C4 /* Debug */ = {
+		733DCC50278512FD0049B4C4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -356,7 +356,7 @@
 			};
 			name = Debug;
 		};
-		733DCC0B2784ED990049B4C4 /* Release */ = {
+		733DCC51278512FD0049B4C4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -411,14 +411,14 @@
 			};
 			name = Release;
 		};
-		733DCC0D2784ED990049B4C4 /* Debug */ = {
+		733DCC53278512FD0049B4C4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"CoreML-Models/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"CoreML-Models-Sampler/Preview Content\"";
 				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -432,7 +432,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-Models";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-Models-Sampler";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -440,14 +440,14 @@
 			};
 			name = Debug;
 		};
-		733DCC0E2784ED990049B4C4 /* Release */ = {
+		733DCC54278512FD0049B4C4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"CoreML-Models/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"CoreML-Models-Sampler/Preview Content\"";
 				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -461,7 +461,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-Models";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-Models-Sampler";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -469,7 +469,7 @@
 			};
 			name = Release;
 		};
-		733DCC102784ED990049B4C4 /* Debug */ = {
+		733DCC56278512FD0049B4C4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -480,16 +480,16 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-ModelsTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-Models-SamplerTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CoreML-Models.app/CoreML-Models";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CoreML-Models-Sampler.app/CoreML-Models-Sampler";
 			};
 			name = Debug;
 		};
-		733DCC112784ED990049B4C4 /* Release */ = {
+		733DCC57278512FD0049B4C4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -500,16 +500,16 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-ModelsTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-Models-SamplerTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CoreML-Models.app/CoreML-Models";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CoreML-Models-Sampler.app/CoreML-Models-Sampler";
 			};
 			name = Release;
 		};
-		733DCC132784ED990049B4C4 /* Debug */ = {
+		733DCC59278512FD0049B4C4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -518,16 +518,16 @@
 				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-ModelsUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-Models-SamplerUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "CoreML-Models";
+				TEST_TARGET_NAME = "CoreML-Models-Sampler";
 			};
 			name = Debug;
 		};
-		733DCC142784ED990049B4C4 /* Release */ = {
+		733DCC5A278512FD0049B4C4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
@@ -536,55 +536,55 @@
 				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-ModelsUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.daisukemajima.CoreML-Models-SamplerUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "CoreML-Models";
+				TEST_TARGET_NAME = "CoreML-Models-Sampler";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		733DCBE32784ED970049B4C4 /* Build configuration list for PBXProject "CoreML-Models" */ = {
+		733DCC29278512F70049B4C4 /* Build configuration list for PBXProject "CoreML-Models-Sampler" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				733DCC0A2784ED990049B4C4 /* Debug */,
-				733DCC0B2784ED990049B4C4 /* Release */,
+				733DCC50278512FD0049B4C4 /* Debug */,
+				733DCC51278512FD0049B4C4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		733DCC0C2784ED990049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-Models" */ = {
+		733DCC52278512FD0049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-Models-Sampler" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				733DCC0D2784ED990049B4C4 /* Debug */,
-				733DCC0E2784ED990049B4C4 /* Release */,
+				733DCC53278512FD0049B4C4 /* Debug */,
+				733DCC54278512FD0049B4C4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		733DCC0F2784ED990049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-ModelsTests" */ = {
+		733DCC55278512FD0049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-Models-SamplerTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				733DCC102784ED990049B4C4 /* Debug */,
-				733DCC112784ED990049B4C4 /* Release */,
+				733DCC56278512FD0049B4C4 /* Debug */,
+				733DCC57278512FD0049B4C4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		733DCC122784ED990049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-ModelsUITests" */ = {
+		733DCC58278512FD0049B4C4 /* Build configuration list for PBXNativeTarget "CoreML-Models-SamplerUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				733DCC132784ED990049B4C4 /* Debug */,
-				733DCC142784ED990049B4C4 /* Release */,
+				733DCC59278512FD0049B4C4 /* Debug */,
+				733DCC5A278512FD0049B4C4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 733DCBE02784ED970049B4C4 /* Project object */;
+	rootObject = 733DCC26278512F70049B4C4 /* Project object */;
 }

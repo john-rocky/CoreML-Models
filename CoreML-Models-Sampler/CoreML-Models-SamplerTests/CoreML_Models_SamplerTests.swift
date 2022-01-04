@@ -1,14 +1,14 @@
 //
-//  CoreML_ModelsTests.swift
-//  CoreML-ModelsTests
+//  CoreML_Models_SamplerTests.swift
+//  CoreML-Models-SamplerTests
 //
 //  Created by 間嶋大輔 on 2022/01/05.
 //
 
 import XCTest
-@testable import CoreML_Models
+@testable import CoreML_Models_Sampler
 
-class CoreML_ModelsTests: XCTestCase {
+class CoreML_Models_SamplerTests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

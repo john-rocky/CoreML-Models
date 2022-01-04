@@ -1,13 +1,13 @@
 //
-//  CoreML_ModelsUITestsLaunchTests.swift
-//  CoreML-ModelsUITests
+//  CoreML_Models_SamplerUITestsLaunchTests.swift
+//  CoreML-Models-SamplerUITests
 //
 //  Created by 間嶋大輔 on 2022/01/05.
 //
 
 import XCTest
 
-class CoreML_ModelsUITestsLaunchTests: XCTestCase {
+class CoreML_Models_SamplerUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
