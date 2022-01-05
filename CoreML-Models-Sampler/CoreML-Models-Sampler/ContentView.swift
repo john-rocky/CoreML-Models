@@ -9,8 +9,22 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        NavigationView {
+            VStack {
+                Text("CoreML-Models")
+                    .font(.title)
+                List {
+                    NavigationLink(
+                        destination: ImageClassificationView(modelName: "efficientnet"),
+                        label: {
+                            Text("EfficientNet")
+                                .font(.headline)
+                        })
+                }
+            }.navigationBarTitle("")
+            .navigationBarHidden(true)
+            .navigationViewStyle(StackNavigationViewStyle())
+        }
     }
 }
 

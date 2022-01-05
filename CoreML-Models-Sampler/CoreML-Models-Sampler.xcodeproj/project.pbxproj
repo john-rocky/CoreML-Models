@@ -14,6 +14,12 @@
 		733DCC43278512FD0049B4C4 /* CoreML_Models_SamplerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC42278512FD0049B4C4 /* CoreML_Models_SamplerTests.swift */; };
 		733DCC4D278512FD0049B4C4 /* CoreML_Models_SamplerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC4C278512FD0049B4C4 /* CoreML_Models_SamplerUITests.swift */; };
 		733DCC4F278512FD0049B4C4 /* CoreML_Models_SamplerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC4E278512FD0049B4C4 /* CoreML_Models_SamplerUITestsLaunchTests.swift */; };
+		733DCC5F278513930049B4C4 /* ImageClassificationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC5B278513910049B4C4 /* ImageClassificationViewModel.swift */; };
+		733DCC60278513930049B4C4 /* SwiftUIPHPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC5C278513920049B4C4 /* SwiftUIPHPicker.swift */; };
+		733DCC61278513930049B4C4 /* ImageClassificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC5D278513920049B4C4 /* ImageClassificationView.swift */; };
+		733DCC62278513930049B4C4 /* ImageClassification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCC5E278513930049B4C4 /* ImageClassification.swift */; };
+		733DCCB827864AAD0049B4C4 /* models in Resources */ = {isa = PBXBuildFile; fileRef = 733DCCB727864AAC0049B4C4 /* models */; };
+		733DCCBA27864AF10049B4C4 /* ImageClassificationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733DCCB927864AF10049B4C4 /* ImageClassificationModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +50,12 @@
 		733DCC48278512FD0049B4C4 /* CoreML-Models-SamplerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "CoreML-Models-SamplerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		733DCC4C278512FD0049B4C4 /* CoreML_Models_SamplerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreML_Models_SamplerUITests.swift; sourceTree = "<group>"; };
 		733DCC4E278512FD0049B4C4 /* CoreML_Models_SamplerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreML_Models_SamplerUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		733DCC5B278513910049B4C4 /* ImageClassificationViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageClassificationViewModel.swift; sourceTree = "<group>"; };
+		733DCC5C278513920049B4C4 /* SwiftUIPHPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftUIPHPicker.swift; sourceTree = "<group>"; };
+		733DCC5D278513920049B4C4 /* ImageClassificationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageClassificationView.swift; sourceTree = "<group>"; };
+		733DCC5E278513930049B4C4 /* ImageClassification.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageClassification.swift; sourceTree = "<group>"; };
+		733DCCB727864AAC0049B4C4 /* models */ = {isa = PBXFileReference; lastKnownFileType = folder; path = models; sourceTree = "<group>"; };
+		733DCCB927864AF10049B4C4 /* ImageClassificationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageClassificationModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +86,7 @@
 		733DCC25278512F70049B4C4 = {
 			isa = PBXGroup;
 			children = (
+				733DCCB727864AAC0049B4C4 /* models */,
 				733DCC30278512F70049B4C4 /* CoreML-Models-Sampler */,
 				733DCC41278512FD0049B4C4 /* CoreML-Models-SamplerTests */,
 				733DCC4B278512FD0049B4C4 /* CoreML-Models-SamplerUITests */,
@@ -96,6 +109,11 @@
 			children = (
 				733DCC31278512F70049B4C4 /* CoreML_Models_SamplerApp.swift */,
 				733DCC33278512F70049B4C4 /* ContentView.swift */,
+				733DCC5E278513930049B4C4 /* ImageClassification.swift */,
+				733DCCB927864AF10049B4C4 /* ImageClassificationModel.swift */,
+				733DCC5D278513920049B4C4 /* ImageClassificationView.swift */,
+				733DCC5B278513910049B4C4 /* ImageClassificationViewModel.swift */,
+				733DCC5C278513920049B4C4 /* SwiftUIPHPicker.swift */,
 				733DCC35278512FC0049B4C4 /* Assets.xcassets */,
 				733DCC37278512FC0049B4C4 /* Preview Content */,
 			);
@@ -232,6 +250,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				733DCC39278512FC0049B4C4 /* Preview Assets.xcassets in Resources */,
+				733DCCB827864AAD0049B4C4 /* models in Resources */,
 				733DCC36278512FC0049B4C4 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -257,8 +276,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				733DCCBA27864AF10049B4C4 /* ImageClassificationModel.swift in Sources */,
 				733DCC34278512F70049B4C4 /* ContentView.swift in Sources */,
+				733DCC60278513930049B4C4 /* SwiftUIPHPicker.swift in Sources */,
+				733DCC5F278513930049B4C4 /* ImageClassificationViewModel.swift in Sources */,
+				733DCC62278513930049B4C4 /* ImageClassification.swift in Sources */,
 				733DCC32278512F70049B4C4 /* CoreML_Models_SamplerApp.swift in Sources */,
+				733DCC61278513930049B4C4 /* ImageClassificationView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -427,6 +451,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -456,6 +481,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
