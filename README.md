@@ -34,6 +34,7 @@ You are free to do or not.
   - [DCGAN](#dcgan)
 
 - [**Image2Image**](#image2image)
+  - [Anime2Sketch](#anime2sketch)
   - [AnimeGAN2Face_Paint_512_v2](#animegan2face_paint_512_v2)
   - [Photo2Cartoon](#photo2cartoon)
   - [AnimeGANv2_Hayao](#animeGANv2_hayao)
@@ -64,7 +65,7 @@ The license for each model conforms to the license for the original project.
 
 | Google Drive Link | Size | Dataset |Original Project | License |
 | ------------- | ------------- | ------------- |------------- |------------- |
-| [Efficientnetb0](https://drive.google.com/file/d/12JiGwXh8pX3yjoG_GsJOKAnPd3lbVrrn/view?usp=sharing) | 85.8 MB | ImageNet | [Google/autoML](https://github.com/google/automl/tree/master/efficientnetv2)  | [Apache2.0](https://github.com/google/automl/blob/master/LICENSE)|
+| [Efficientnetv2](https://drive.google.com/file/d/12JiGwXh8pX3yjoG_GsJOKAnPd3lbVrrn/view?usp=sharing) | 85.8 MB | ImageNet | [Google/autoML](https://github.com/google/automl/tree/master/efficientnetv2)  | [Apache2.0](https://github.com/google/automl/blob/master/LICENSE)|
 
 ## Object Detection
 
