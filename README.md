@@ -76,7 +76,7 @@ An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.
 
 | Google Drive Link | Size | Dataset |Original Project | License |
 | ------------- | ------------- | ------------- |------------- |------------- |
-| [VisionTransformer-B16](https://drive.google.com/file/d/12JiGwXh8pX3yjoG_GsJOKAnPd3lbVrrn/view?usp=sharing) | 347.5 MB | ImageNet | [google-research/vision_transformer](https://github.com/google-research/vision_transformer)  | [Apache2.0](https://github.com/google-research/vision_transformer/blob/main/LICENSE)|
+| [VisionTransformer-B16](https://drive.google.com/file/d/1VPo8Cjv7dyicM4lcJ6TgxnD4AN3ldMQp/view?usp=sharing) | 347.5 MB | ImageNet | [google-research/vision_transformer](https://github.com/google-research/vision_transformer)  | [Apache2.0](https://github.com/google-research/vision_transformer/blob/main/LICENSE)|
 
 ## Object Detection
 
