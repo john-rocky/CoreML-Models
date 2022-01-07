@@ -70,6 +70,8 @@ The license for each model conforms to the license for the original project.
 
 ### VisionTransformer
 
+An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.
+
 <img width="256" alt="スクリーンショット 2022-01-07 10 37 20" src="https://user-images.githubusercontent.com/23278992/148479622-ec5300a6-4e9f-4342-8ea5-dbe1a221318a.png">
 
 | Google Drive Link | Size | Dataset |Original Project | License |
