@@ -63,7 +63,7 @@ The license for each model conforms to the license for the original project.
 
 ### Efficientnetv2
 
-<img width="512" alt="スクリーンショット 2021-12-31 4 30 22" src="https://user-images.githubusercontent.com/23278992/147782567-bbf26186-8c84-4073-8df4-b08e06d4e791.png">
+<img width="256" alt="スクリーンショット 2021-12-31 4 30 22" src="https://user-images.githubusercontent.com/23278992/147782567-bbf26186-8c84-4073-8df4-b08e06d4e791.png">
 
 | Google Drive Link | Size | Dataset |Original Project | License |
 | ------------- | ------------- | ------------- |------------- |------------- |
@@ -93,7 +93,7 @@ Local Features Coupling Global Representations for Visual Recognition.
 
 ### YOLOv5s
 
-<img width="512" alt="スクリーンショット 2021-12-29 6 17 08" src="https://user-images.githubusercontent.com/23278992/147608051-be2ff345-22e8-4f82-83ed-7cc41ce4084d.png">
+<img width="256" alt="スクリーンショット 2021-12-29 6 17 08" src="https://user-images.githubusercontent.com/23278992/147608051-be2ff345-22e8-4f82-83ed-7cc41ce4084d.png">
 
 | Google Drive Link | Size | Output | Original Project | License | Note | Sample Project |
 | ------------- | ------------- | ------------- | ------------- |------------- |------------- |------------- |
