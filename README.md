@@ -58,16 +58,16 @@ The license for each model conforms to the license for the original project.
 
 | Google Drive Link | Size | Dataset |Original Project | License |
 | ------------- | ------------- | ------------- |------------- |------------- |
-| [Efficientnetb0](https://drive.google.com/file/d/1mJq8SMuDaCQHW77ui3fAfe5o3Qu2GKMi/view?usp=sharing) | 22.7 MB | ImageNet | [TensorFlowHub](https://tfhub.dev/tensorflow/efficientnet/b0/classification/1)  |
+| [Efficientnetb0](https://drive.google.com/file/d/1mJq8SMuDaCQHW77ui3fAfe5o3Qu2GKMi/view?usp=sharing) | 22.7 MB | ImageNet | [TensorFlowHub](https://tfhub.dev/tensorflow/efficientnet/b0/classification/1)  |[Apache2.0](https://opensource.org/licenses/Apache-2.0)|
 
 
 ### Efficientnetv2
 
 <img width="256" alt="スクリーンショット 2021-12-31 4 30 22" src="https://user-images.githubusercontent.com/23278992/147782567-bbf26186-8c84-4073-8df4-b08e06d4e791.png">
 
-| Google Drive Link | Size | Dataset |Original Project | License |
-| ------------- | ------------- | ------------- |------------- |------------- |
-| [Efficientnetv2](https://drive.google.com/file/d/12JiGwXh8pX3yjoG_GsJOKAnPd3lbVrrn/view?usp=sharing) | 85.8 MB | ImageNet | [Google/autoML](https://github.com/google/automl/tree/master/efficientnetv2)  | [Apache2.0](https://github.com/google/automl/blob/master/LICENSE)|
+| Google Drive Link | Size | Dataset |Original Project | License | Year|
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |
+| [Efficientnetv2](https://drive.google.com/file/d/12JiGwXh8pX3yjoG_GsJOKAnPd3lbVrrn/view?usp=sharing) | 85.8 MB | ImageNet | [Google/autoML](https://github.com/google/automl/tree/master/efficientnetv2)  | [Apache2.0](https://github.com/google/automl/blob/master/LICENSE)|2021|
 
 ### VisionTransformer
 
@@ -75,9 +75,9 @@ An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.
 
 <img width="256" alt="スクリーンショット 2022-01-07 10 37 05" src="https://user-images.githubusercontent.com/23278992/148482246-64269fb4-fda4-4bd5-b219-5bf860fd77e7.png">
 
-| Google Drive Link | Size | Dataset |Original Project | License |
-| ------------- | ------------- | ------------- |------------- |------------- |
-| [VisionTransformer-B16](https://drive.google.com/file/d/1VPo8Cjv7dyicM4lcJ6TgxnD4AN3ldMQp/view?usp=sharing) | 347.5 MB | ImageNet | [google-research/vision_transformer](https://github.com/google-research/vision_transformer)  | [Apache2.0](https://github.com/google-research/vision_transformer/blob/main/LICENSE)|
+| Google Drive Link | Size | Dataset |Original Project | License |Year|
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |
+| [VisionTransformer-B16](https://drive.google.com/file/d/1VPo8Cjv7dyicM4lcJ6TgxnD4AN3ldMQp/view?usp=sharing) | 347.5 MB | ImageNet | [google-research/vision_transformer](https://github.com/google-research/vision_transformer)  | [Apache2.0](https://github.com/google-research/vision_transformer/blob/main/LICENSE)|2021|
 
 ### Conformer
 
@@ -85,9 +85,9 @@ Local Features Coupling Global Representations for Visual Recognition.
 
 <img width="256" alt="スクリーンショット 2022-01-07 11 34 33" src="https://user-images.githubusercontent.com/23278992/148482144-2d5bb7e8-ed67-4146-9f9d-c95fe94735d3.png">
 
-| Google Drive Link | Size | Dataset |Original Project | License |
-| ------------- | ------------- | ------------- |------------- |------------- |
-| [Conformer-tiny-p16](https://github.com/pengzhiliang/Conformer) | 94.1 MB | ImageNet | [pengzhiliang/Conformer](https://github.com/pengzhiliang/Conformer)  | [Apache2.0](https://github.com/google-research/vision_transformer/blob/main/LICENSE)|
+| Google Drive Link | Size | Dataset |Original Project | License |Year|
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |
+| [Conformer-tiny-p16](https://github.com/pengzhiliang/Conformer) | 94.1 MB | ImageNet | [pengzhiliang/Conformer](https://github.com/pengzhiliang/Conformer)  | [Apache2.0](https://github.com/google-research/vision_transformer/blob/main/LICENSE)|2021|
 
 ## Object Detection
 
