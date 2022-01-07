@@ -19,6 +19,7 @@ You are free to do or not.
   - [Efficientnetb0](#efficientnetb0)
   - [Efficientnetv2](#efficientnetv2)
   - [VisionTransformer](#visiontransformer)
+  - [Conformer](#conformer)
   
 - [**Object Detection**](#objectdetection)
   - [YOLOv5s](#yolov5s)
@@ -77,6 +78,16 @@ An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.
 | Google Drive Link | Size | Dataset |Original Project | License |
 | ------------- | ------------- | ------------- |------------- |------------- |
 | [VisionTransformer-B16](https://drive.google.com/file/d/1VPo8Cjv7dyicM4lcJ6TgxnD4AN3ldMQp/view?usp=sharing) | 347.5 MB | ImageNet | [google-research/vision_transformer](https://github.com/google-research/vision_transformer)  | [Apache2.0](https://github.com/google-research/vision_transformer/blob/main/LICENSE)|
+
+### Conformer
+
+Local Features Coupling Global Representations for Visual Recognition.
+
+<img width="256" alt="スクリーンショット 2022-01-07 11 34 33" src="https://user-images.githubusercontent.com/23278992/148482144-2d5bb7e8-ed67-4146-9f9d-c95fe94735d3.png">
+
+| Google Drive Link | Size | Dataset |Original Project | License |
+| ------------- | ------------- | ------------- |------------- |------------- |
+| [Conformer-tiny-p16](https://github.com/pengzhiliang/Conformer) | 94.1 MB | ImageNet | [pengzhiliang/Conformer](https://github.com/pengzhiliang/Conformer)  | [Apache2.0](https://github.com/google-research/vision_transformer/blob/main/LICENSE)|
 
 ## Object Detection
 
