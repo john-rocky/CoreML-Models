@@ -18,6 +18,7 @@ You are free to do or not.
 - [**Image Classifier**](#imageclassifier)
   - [Efficientnetb0](#efficientnetb0)
   - [Efficientnetv2](#efficientnetv2)
+  - [VisionTransformer](#visiontransformer)
   
 - [**Object Detection**](#objectdetection)
   - [YOLOv5s](#yolov5s)
@@ -50,7 +51,7 @@ The license for each model conforms to the license for the original project.
 
 ## Image Classifier
 
-### Efficientnetb0
+### Efficientnet
 
 <img width="512" alt="スクリーンショット 2021-12-27 6 34 43" src="https://user-images.githubusercontent.com/23278992/147420587-108b87f8-7996-4288-905a-ad53f9142221.png">
 
@@ -66,6 +67,14 @@ The license for each model conforms to the license for the original project.
 | Google Drive Link | Size | Dataset |Original Project | License |
 | ------------- | ------------- | ------------- |------------- |------------- |
 | [Efficientnetv2](https://drive.google.com/file/d/12JiGwXh8pX3yjoG_GsJOKAnPd3lbVrrn/view?usp=sharing) | 85.8 MB | ImageNet | [Google/autoML](https://github.com/google/automl/tree/master/efficientnetv2)  | [Apache2.0](https://github.com/google/automl/blob/master/LICENSE)|
+
+### VisionTransformer
+
+<img width="256" alt="スクリーンショット 2022-01-07 10 37 20" src="https://user-images.githubusercontent.com/23278992/148479622-ec5300a6-4e9f-4342-8ea5-dbe1a221318a.png">
+
+| Google Drive Link | Size | Dataset |Original Project | License |
+| ------------- | ------------- | ------------- |------------- |------------- |
+| [VisionTransformer-B16](https://drive.google.com/file/d/12JiGwXh8pX3yjoG_GsJOKAnPd3lbVrrn/view?usp=sharing) | 347.5 MB | ImageNet | [google-research/vision_transformer](https://github.com/google-research/vision_transformer)  | [Apache2.0](https://github.com/google-research/vision_transformer/blob/main/LICENSE)|
 
 ## Object Detection
 
