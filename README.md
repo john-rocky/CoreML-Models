@@ -29,6 +29,7 @@ You are free to do or not.
 - [**Segmentation**](#segmentation)
   - [U2Net](#u2net)
   - [face-parsing](#face-parsing)
+  - [Segformer](#segformer)
   
 - [**Super Resolution**](#superresolution)
   - [Real ESRGAN](#realesrgan)
@@ -139,6 +140,14 @@ Making VGG-style ConvNets Great Again
 | Google Drive Link | Size | Output |Original Project | License | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [face-Parsing](https://drive.google.com/file/d/1I_cu8x0k6d1AEV_VPLyMu3Pqg3hwmo7g/view?usp=sharing) | 53.2 MB | MultiArray(1 x 512 × 512)| [zllrunning/face-parsing.PyTorch](https://github.com/zllrunning/face-parsing.PyTorch)  | [MIT](https://github.com/zllrunning/face-parsing.PyTorch/blob/master/LICENSE)|[CoreML-face-parsing](https://github.com/john-rocky/CoreML-Face-Parsing) |
+
+### Segformer
+
+<img src="https://user-images.githubusercontent.com/23278992/148621010-5ecf6b90-c501-4cf8-91e1-446850030265.png" width=256> <img src="https://user-images.githubusercontent.com/23278992/148621013-44d9cd29-ef3c-4250-bbd9-4e4093385a54.JPG" width=256>
+
+| Google Drive Link | Size | Output |Original Project | License | year |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [SegFormer_mit-b0_1024x1024_cityscapes](https://drive.google.com/file/d/1-lcNjJM85DZh5-xQv4jlKL6I1ZMBk2uu/view?usp=sharing) | 14.9 MB | MultiArray(512 × 1024)| [NVlabs/SegFormer](https://github.com/NVlabs/SegFormer)  | [NVIDIA](https://github.com/NVlabs/SegFormer/blob/master/LICENSE)|2021|
 
 ## Super Resolution
 
