@@ -73,7 +73,7 @@ The license for each model conforms to the license for the original project.
 
 An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.
 
-<img width="256" alt="スクリーンショット 2022-01-07 10 37 20" src="https://user-images.githubusercontent.com/23278992/148479622-ec5300a6-4e9f-4342-8ea5-dbe1a221318a.png">
+<img width="256" alt="スクリーンショット 2022-01-07 10 37 05" src="https://user-images.githubusercontent.com/23278992/148482246-64269fb4-fda4-4bd5-b219-5bf860fd77e7.png">
 
 | Google Drive Link | Size | Dataset |Original Project | License |
 | ------------- | ------------- | ------------- |------------- |------------- |
