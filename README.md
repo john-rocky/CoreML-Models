@@ -94,7 +94,7 @@ Local Features Coupling Global Representations for Visual Recognition.
 
 Data-efficient Image Transformers
 
-<img width="256" src="https://user-images.githubusercontent.com/23278992/148483613-38e501aa-91bc-40ad-b456-c2e56bf46105.jpeg">
+<img width="256" alt="スクリーンショット 2022-01-07 11 50 25" src="https://user-images.githubusercontent.com/23278992/148484220-38494287-49b4-4992-9ceb-9dc7b75a250e.png">
 
 | Google Drive Link | Size | Dataset |Original Project | License |Year|
 | ------------- | ------------- | ------------- |------------- |------------- |------------- |
