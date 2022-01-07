@@ -21,6 +21,7 @@ You are free to do or not.
   - [VisionTransformer](#visiontransformer)
   - [Conformer](#conformer)
   - [DeiT](#deit)
+  - [RepVGG](#repvgg)
   
 - [**Object Detection**](#objectdetection)
   - [YOLOv5s](#yolov5s)
@@ -98,7 +99,17 @@ Data-efficient Image Transformers
 
 | Google Drive Link | Size | Dataset |Original Project | License |Year|
 | ------------- | ------------- | ------------- |------------- |------------- |------------- |
-| [CDeiT-base384](https://drive.google.com/file/d/1-7J-b0fTjmZi2VDPrDCWKBsCYGxYP5yW/view?usp=sharing) | 350.5 MB | ImageNet | [facebookresearch/deit](https://github.com/facebookresearch/deit)  | [Apache2.0](https://github.com/facebookresearch/deit/blob/main/LICENSE)|2021|
+| [DeiT-base384](https://drive.google.com/file/d/1-7J-b0fTjmZi2VDPrDCWKBsCYGxYP5yW/view?usp=sharing) | 350.5 MB | ImageNet | [facebookresearch/deit](https://github.com/facebookresearch/deit)  | [Apache2.0](https://github.com/facebookresearch/deit/blob/main/LICENSE)|2021|
+
+### RepVGG
+
+Making VGG-style ConvNets Great Again
+
+<img width="256" alt="スクリーンショット 2022-01-08 5 00 53" src="https://user-images.githubusercontent.com/23278992/148600326-69dd9666-2709-4318-914b-30db8c294fd3.png">
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year|
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |
+| [RepVGG-A0](https://drive.google.com/file/d/1i8mDvRGn2_OjzIG9ioVJyQrefVliKsh_/view?usp=sharing) | 350.5 MB | ImageNet | [DingXiaoH/RepVGG](https://github.com/DingXiaoH/RepVGG)  | [MIT](https://github.com/DingXiaoH/RepVGG/blob/main/LICENSE)|2021|
 
 ## Object Detection
 
