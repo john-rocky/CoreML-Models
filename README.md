@@ -20,6 +20,7 @@ You are free to do or not.
   - [Efficientnetv2](#efficientnetv2)
   - [VisionTransformer](#visiontransformer)
   - [Conformer](#conformer)
+  - [DeiT](#deit)
   
 - [**Object Detection**](#objectdetection)
   - [YOLOv5s](#yolov5s)
@@ -87,7 +88,17 @@ Local Features Coupling Global Representations for Visual Recognition.
 
 | Google Drive Link | Size | Dataset |Original Project | License |Year|
 | ------------- | ------------- | ------------- |------------- |------------- |------------- |
-| [Conformer-tiny-p16](https://github.com/pengzhiliang/Conformer) | 94.1 MB | ImageNet | [pengzhiliang/Conformer](https://github.com/pengzhiliang/Conformer)  | [Apache2.0](https://github.com/google-research/vision_transformer/blob/main/LICENSE)|2021|
+| [Conformer-tiny-p16](https://drive.google.com/file/d/1-4qVbuTYr4r4o08656iGtV8KKblAVVyr/view?usp=sharing) | 94.1 MB | ImageNet | [pengzhiliang/Conformer](https://github.com/pengzhiliang/Conformer)  | [Apache2.0](https://github.com/google-research/vision_transformer/blob/main/LICENSE)|2021|
+
+### DeiT
+
+Data-efficient Image Transformers
+
+<img width="256" src="https://user-images.githubusercontent.com/23278992/148483613-38e501aa-91bc-40ad-b456-c2e56bf46105.jpeg">
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year|
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |
+| [CDeiT-base384](https://drive.google.com/file/d/1-7J-b0fTjmZi2VDPrDCWKBsCYGxYP5yW/view?usp=sharing) | 350.5 MB | ImageNet | [facebookresearch/deit](https://github.com/facebookresearch/deit)  | [Apache2.0](https://github.com/facebookresearch/deit/blob/main/LICENSE)|2021|
 
 ## Object Detection
 
