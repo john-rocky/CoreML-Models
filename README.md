@@ -30,6 +30,7 @@ You are free to do or not.
   - [U2Net](#u2net)
   - [face-parsing](#face-parsing)
   - [Segformer](#segformer)
+  - [BiseNetv2](#bisenetv2)
   
 - [**Super Resolution**](#superresolution)
   - [Real ESRGAN](#realesrgan)
@@ -148,6 +149,14 @@ Making VGG-style ConvNets Great Again
 | Google Drive Link | Size | Output |Original Project | License | year |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [SegFormer_mit-b0_1024x1024_cityscapes](https://drive.google.com/file/d/1-lcNjJM85DZh5-xQv4jlKL6I1ZMBk2uu/view?usp=sharing) | 14.9 MB | MultiArray(512 × 1024)| [NVlabs/SegFormer](https://github.com/NVlabs/SegFormer)  | [NVIDIA](https://github.com/NVlabs/SegFormer/blob/master/LICENSE)|2021|
+
+### Segformer
+
+<img src="https://user-images.githubusercontent.com/23278992/148663182-c1f3b9dd-8db4-49be-bf92-97a898a8b477.jpg" width=256> <img src="https://user-images.githubusercontent.com/23278992/148663183-327dc684-342d-43f1-a8d8-ebf817c91bdd.JPG" width=256>
+
+| Google Drive Link | Size | Output |Original Project | License | year |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [SegFormer_mit-b0_1024x1024_cityscapes](https://drive.google.com/file/d/1-20x0-TP8zqXCzDhH06TyL03SJRFYY9n/view?usp=sharing) | 12.8 MB | MultiArray | [ycszen/BiSeNet](https://github.com/ycszen/BiSeNet)  | Apache2.0 |2021|
 
 ## Super Resolution
 
