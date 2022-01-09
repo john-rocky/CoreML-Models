@@ -15,7 +15,7 @@ You are free to do or not.
 
 # Section Link
 
-- [**Image Classifier**](#imageclassifier)
+- [**Image Classifier**](#image-classifier)
   - [Efficientnetb0](#efficientnetb0)
   - [Efficientnetv2](#efficientnetv2)
   - [VisionTransformer](#visiontransformer)
@@ -23,7 +23,7 @@ You are free to do or not.
   - [DeiT](#deit)
   - [RepVGG](#repvgg)
   
-- [**Object Detection**](#objectdetection)
+- [**Object Detection**](#object-detection)
   - [YOLOv5s](#yolov5s)
   
 - [**Segmentation**](#segmentation)
@@ -32,12 +32,12 @@ You are free to do or not.
   - [Segformer](#segformer)
   - [BiseNetv2](#bisenetv2)
   
-- [**Super Resolution**](#superresolution)
+- [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#realesrgan)
 
 - [**Low Light Enhancement**](#low-light-enhancement)
   - [StableLLVE](#stablellve)
-- [**Image Generation**](#imagegeneration)
+- [**Image Generation**](#image-generation)
   - [MobileStyleGAN](#mobilestylegan)
   - [DCGAN](#dcgan)
 
