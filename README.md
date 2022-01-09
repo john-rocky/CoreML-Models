@@ -175,7 +175,7 @@ Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation
 
 ## Low Light Enhancement
 
-<img width="256" src="https://user-images.githubusercontent.com/23278992/148664146-68f0e4ec-d432-4b75-94a0-0c737c959e9c.jpg"> <img width="256" src="https://user-images.githubusercontent.com/23278992/148664149-6b3c29dc-f8e0-4e91-9b4d-f811b268fc5b.jpg"> 
+<img width="256" src="https://user-images.githubusercontent.com/23278992/148664179-4d0cd417-d8f9-4d0e-bc05-cff3a4a30b5a.jpg"> <img width="256" src="https://user-images.githubusercontent.com/23278992/148664149-6b3c29dc-f8e0-4e91-9b4d-f811b268fc5b.jpg"> 
 
 | Google Drive Link | Size | Output |Original Project | License |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
