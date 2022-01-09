@@ -35,7 +35,7 @@ You are free to do or not.
 - [**Super Resolution**](#superresolution)
   - [Real ESRGAN](#realesrgan)
 
-- [**Low Light Enhancement**]
+- [**Low Light Enhancement**](#lowlightenhancement)
   - [StableLLVE](#stablellve)
 - [**Image Generation**](#imagegeneration)
   - [MobileStyleGAN](#mobilestylegan)
