@@ -34,6 +34,7 @@ You are free to do or not.
   
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#realesrgan)
+  - [BSRGAN](#realesrgan)
 
 - [**Low Light Enhancement**](#low-light-enhancement)
   - [StableLLVE](#stablellve)
