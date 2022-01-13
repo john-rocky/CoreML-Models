@@ -202,7 +202,7 @@ Multi-Stage Progressive Image Restoration.
 
 Debluring
 
-<img width="400" src="https://user-images.githubusercontent.com/23278992/149243549-5e9d52c2-5b9c-48b5-ac9e-c185987cd835.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/149243509-7eff6ae8-65c2-45ba-bfa2-d730657ab2bd.png"> 
+<img width="400" src="https://user-images.githubusercontent.com/23278992/149243725-79c68d8e-db6c-4114-ac64-738cd6b5c37c.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/149243509-7eff6ae8-65c2-45ba-bfa2-d730657ab2bd.png"> 
 
 Denoising
 
