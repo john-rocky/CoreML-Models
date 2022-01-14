@@ -222,17 +222,6 @@ Deraining
 | [MPRNetDeNoising](https://drive.google.com/file/d/1-04xou-UgoflZb7MqTBycCpuLWKUAj0i/view?usp=sharing) | 108 MB | Image(RGB 512x512)| [swz30/MPRNet](https://github.com/swz30/MPRNet)  | [MIT](https://github.com/swz30/MPRNet/blob/main/LICENSE.md) |2021|
 | [MPRNetDeraining](https://drive.google.com/file/d/1tGvjj49yaDym24vGdGqr1VKOtGd7ALKB/view?usp=sharing) | 24.5 MB | Image(RGB 512x512)| [swz30/MPRNet](https://github.com/swz30/MPRNet)  | [MIT](https://github.com/swz30/MPRNet/blob/main/LICENSE.md) |2021|
 
-
-### StableLLVE
-
-Learning Temporal Consistency for Low Light Video Enhancement from Single Images.
-
-<img width="400" src="https://user-images.githubusercontent.com/23278992/148664179-4d0cd417-d8f9-4d0e-bc05-cff3a4a30b5a.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/148664220-c756198f-e8c5-4ea8-8737-59c004d2f08c.jpg"> 
-
-| Google Drive Link | Size | Output |Original Project | License |Year|
-| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| [StableLLVE](https://drive.google.com/file/d/1-9xry7XeCJYsZadxcfTscjGi_Sna5NhM/view?usp=sharing) | 17.3 MB | Image(RGB 512x512)| [zkawfanx/StableLLVE](https://github.com/zkawfanx/StableLLVE)  | [ACADEMIC PUBLIC LICENSE](https://github.com/zkawfanx/StableLLVE/blob/main/LICENSE) |2021|
-
 # Image Generation
 
 ### [MobileStyleGAN](https://drive.google.com/drive/folders/1rUV6AXwp8JhPPmkog-0r0AUGzUvN9DmW?usp=sharing)
