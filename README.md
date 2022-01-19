@@ -31,6 +31,8 @@ You are free to do or not.
   - [face-parsing](#face-parsing)
   - [Segformer](#segformer)
   - [BiseNetv2](#bisenetv2)
+  - [DNL](#dnl)
+
   
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#realesrgan)
