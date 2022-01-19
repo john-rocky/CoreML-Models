@@ -192,6 +192,17 @@ Interlaced Sparse Self-Attention for Semantic Segmentation
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
 | [isanet_r50-d8_512x512_80k_ade20k](https://drive.google.com/file/d/114ypGU9S1BOT2otl7P_gsmZbA3bCmz5K/view?usp=sharing) | 141.5 MB | MultiArray[512x512] |ADE20K| [openseg-group/openseg.pytorch](https://github.com/openseg-group/openseg.pytorch) | [MIT](https://github.com/openseg-group/openseg.pytorch/blob/master/LICENSE) |ArXiv'2019/IJCV'2021|
 
+### FastFCN
+
+Rethinking Dilated Convolution in the Backbone for Semantic Segmentation
+
+<img src="https://user-images.githubusercontent.com/23278992/150237380-3b8522e6-e310-436e-b5c3-60b7ff8cb606.jpg" width=400> <img src="https://user-images.githubusercontent.com/23278992/150237372-1d17f4e2-cf1b-49f0-82b8-d9e6644ff465.png" width=400>
+
+| Google Drive Link | Size | Output |Dataset|Original Project | License | year |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
+| [fastfcn_r50-d32_jpu_aspp_512x512_80k_ade20k](https://drive.google.com/file/d/1-2CUR1M-a4xzUxdf5enU_9cUdxONmFbT/view?usp=sharing) | 326.2 MB | MultiArray[512x512] |ADE20K| [wuhuikai/FastFCN](https://github.com/wuhuikai/FastFCN) | [MIT](https://github.com/wuhuikai/FastFCN/blob/master/LICENSE) |ArXiv'2019|
+
+
 # Super Resolution
 
 ### [Real ESRGAN](https://drive.google.com/file/d/1cpm-x12Ih7Cqd_kOjfTvtt4ipGS3BpCx/view?usp=sharing)
