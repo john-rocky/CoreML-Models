@@ -33,6 +33,7 @@ You are free to do or not.
   - [BiseNetv2](#bisenetv2)
   - [DNL](#dnl)
   - [ISANet](#isanet)
+  - [FastFCN](#fastfcn)
 
   
 - [**Super Resolution**](#super-resolution)
