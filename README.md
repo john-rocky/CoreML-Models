@@ -32,6 +32,7 @@ You are free to do or not.
   - [Segformer](#segformer)
   - [BiseNetv2](#bisenetv2)
   - [DNL](#dnl)
+  - [ISANet](#isanet)
 
   
 - [**Super Resolution**](#super-resolution)
@@ -180,6 +181,16 @@ Disentangled Non-Local Neural Networks
 | Google Drive Link | Size | Output |Dataset|Original Project | License | year |
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
 | [dnl_r50-d8_512x512_80k_ade20k](https://drive.google.com/file/d/1DOnPGocotsjXknBuNqikgpFVpmH6s_E3/view?usp=sharing) | 190.8 MB | MultiArray[512x512] |ADE20K| [yinmh17/DNL-Semantic-Segmentation](https://github.com/yinmh17/DNL-Semantic-Segmentation)  | [Apache2.0](https://github.com/yinmh17/DNL-Semantic-Segmentation/blob/master/LICENSE) |2020|
+
+### ISANet
+
+Interlaced Sparse Self-Attention for Semantic Segmentation
+
+<img src="https://user-images.githubusercontent.com/23278992/150234575-7dcb8521-4ebd-46aa-bd19-4c1036b514dc.jpg" width=400> <img src="https://user-images.githubusercontent.com/23278992/150234561-41478d2a-b411-48df-9980-8553c381e530.png" width=400>
+
+| Google Drive Link | Size | Output |Dataset|Original Project | License | year |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
+| [isanet_r50-d8_512x512_80k_ade20k](https://drive.google.com/file/d/114ypGU9S1BOT2otl7P_gsmZbA3bCmz5K/view?usp=sharing) | 141.5 MB | MultiArray[512x512] |ADE20K| [openseg-group/openseg.pytorch](https://github.com/openseg-group/openseg.pytorch) | [Apache2.0](https://github.com/yinmh17/DNL-Semantic-Segmentation/blob/master/LICENSE) |ArXiv'2019/IJCV'2021|
 
 # Super Resolution
 
