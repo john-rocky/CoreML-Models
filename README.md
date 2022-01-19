@@ -169,6 +169,16 @@ Bilateral Network with Guided Aggregation for Real-time Semantic Segmentation
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [BiSeNetV2_1024x1024_cityscapes](https://drive.google.com/file/d/1-20x0-TP8zqXCzDhH06TyL03SJRFYY9n/view?usp=sharing) | 12.8 MB | MultiArray | [ycszen/BiSeNet](https://github.com/ycszen/BiSeNet)  | Apache2.0 |2021|
 
+### DNL
+
+Disentangled Non-Local Neural Networks
+
+<img src="https://user-images.githubusercontent.com/23278992/150061280-23a1de7c-2e12-41d2-9056-7c4b375193a6.jpg" width=400> <img src="https://user-images.githubusercontent.com/23278992/150061290-eed50b79-f5c0-4fa4-b5bf-728b9029f34c.png" width=400>
+
+| Google Drive Link | Size | Output |Dataset|Original Project | License | year |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
+| [dnl_r50-d8_512x512_80k_ade20k](https://drive.google.com/file/d/1DOnPGocotsjXknBuNqikgpFVpmH6s_E3/view?usp=sharing) | 190.8 MB | MultiArray[512x512] |ADE20K| [yinmh17/DNL-Semantic-Segmentation](https://github.com/yinmh17/DNL-Semantic-Segmentation)  | [Apache2.0](https://github.com/yinmh17/DNL-Semantic-Segmentation/blob/master/LICENSE) |2020|
+
 # Super Resolution
 
 ### [Real ESRGAN](https://drive.google.com/file/d/1cpm-x12Ih7Cqd_kOjfTvtt4ipGS3BpCx/view?usp=sharing)
