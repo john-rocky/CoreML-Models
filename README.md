@@ -35,6 +35,7 @@ You are free to do or not.
   - [ISANet](#isanet)
   - [FastFCN](#fastfcn)
   - [GCNet](#gcnet)
+  - [DANet](#danet)
   
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#realesrgan)
@@ -212,6 +213,16 @@ Non-local Networks Meet Squeeze-Excitation Networks and Beyond
 | Google Drive Link | Size | Output |Dataset|Original Project | License | year |
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
 | [gcnet_r50-d8_512x512_20k_voc12aug](https://drive.google.com/file/d/1-DfjorbUDFXOVasSPoGk7GP1XC_OnNVT/view?usp=sharing) | 189 MB | MultiArray[512x512] |PascalVOC| [xvjiarui/GCNet](https://github.com/xvjiarui/GCNet) | [Apache License 2.0](https://github.com/xvjiarui/GCNet/blob/master/LICENSE) |ICCVW'2019/TPAMI'2020|
+
+### DANet
+
+Dual Attention Network for Scene Segmentation(CVPR2019)
+
+<img src="https://user-images.githubusercontent.com/23278992/150419837-980a0e0f-6333-4853-b638-6e6854e093e3.jpg" width=400> <img src="https://user-images.githubusercontent.com/23278992/150419740-052fca9b-0519-440c-bffd-5abc7a5ac240.png" width=400>
+
+| Google Drive Link | Size | Output |Dataset|Original Project | License | year |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
+| [danet_r50-d8_512x1024_40k_cityscapes](https://drive.google.com/file/d/1A45r_725V7edPTSrjA4T-T03rPD6Sj2z/view?usp=sharing) | 189.7 MB | MultiArray[512x512] |PascalVOC| [junfu1115/DANet](https://github.com/junfu1115/DANet/) | [MIT](https://github.com/junfu1115/DANet/blob/master/LICENSE) |CVPR2019|
 
 # Super Resolution
 
