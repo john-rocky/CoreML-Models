@@ -34,7 +34,7 @@ You are free to do or not.
   - [DNL](#dnl)
   - [ISANet](#isanet)
   - [FastFCN](#fastfcn)
-
+  - [GCNet](#gcnet)
   
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#realesrgan)
@@ -203,6 +203,15 @@ Rethinking Dilated Convolution in the Backbone for Semantic Segmentation
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
 | [fastfcn_r50-d32_jpu_aspp_512x512_80k_ade20k](https://drive.google.com/file/d/1-2CUR1M-a4xzUxdf5enU_9cUdxONmFbT/view?usp=sharing) | 326.2 MB | MultiArray[512x512] |ADE20K| [wuhuikai/FastFCN](https://github.com/wuhuikai/FastFCN) | [MIT](https://github.com/wuhuikai/FastFCN/blob/master/LICENSE) |ArXiv'2019|
 
+### GCNet
+
+Non-local Networks Meet Squeeze-Excitation Networks and Beyond
+
+<img src="https://user-images.githubusercontent.com/23278992/150239404-9d6438ec-cee5-44b9-9179-436ac5ceaab2.jpg" width=400> <img src="https://user-images.githubusercontent.com/23278992/150239421-cceaae77-eb6b-468d-a069-72750fc6b0f4.png" width=400>
+
+| Google Drive Link | Size | Output |Dataset|Original Project | License | year |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
+| [gcnet_r50-d8_512x512_20k_voc12aug](https://drive.google.com/file/d/1-DfjorbUDFXOVasSPoGk7GP1XC_OnNVT/view?usp=sharing) | 189 MB | MultiArray[512x512] |PascalVOC| [xvjiarui/GCNet](https://github.com/xvjiarui/GCNet) | [Apache License 2.0](https://github.com/xvjiarui/GCNet/blob/master/LICENSE) |ICCVW'2019/TPAMI'2020|
 
 # Super Resolution
 
