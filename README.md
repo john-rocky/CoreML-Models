@@ -45,7 +45,7 @@ You are free to do or not.
 
 - [**Image Restoration**](#image-restroration)
   - [MPRNet](#mprnet)
-  - 
+  
 - [**Image Generation**](#image-generation)
   - [MobileStyleGAN](#mobilestylegan)
   - [DCGAN](#dcgan)
