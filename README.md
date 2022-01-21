@@ -229,7 +229,7 @@ Dual Attention Network for Scene Segmentation(CVPR2019)
 
 Panoptic Feature Pyramid Networks
 
-<img src="https://user-images.githubusercontent.com/23278992/150614015-6b712113-6b8f-484e-88dc-124b76229153.jpg" width=400> <img src="https://user-images.githubusercontent.com/23278992/150614022-590eb6fa-075f-4ff7-8ad5-b9d502b8763b.pn" width=400>
+<img src="https://user-images.githubusercontent.com/23278992/150614015-6b712113-6b8f-484e-88dc-124b76229153.jpg" width=400> <img src="https://user-images.githubusercontent.com/23278992/150614022-590eb6fa-075f-4ff7-8ad5-b9d502b8763b.png" width=400>
 
 | Google Drive Link | Size | Output |Dataset|Original Project | License | year |
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
