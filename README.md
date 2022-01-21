@@ -36,7 +36,8 @@ You are free to do or not.
   - [FastFCN](#fastfcn)
   - [GCNet](#gcnet)
   - [DANet](#danet)
-  
+  - [Semantic FPN](#semantic-fpn)
+
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#realesrgan)
   - [BSRGAN](#realesrgan)
@@ -223,6 +224,16 @@ Dual Attention Network for Scene Segmentation(CVPR2019)
 | Google Drive Link | Size | Output |Dataset|Original Project | License | year |
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
 | [danet_r50-d8_512x1024_40k_cityscapes](https://drive.google.com/file/d/1A45r_725V7edPTSrjA4T-T03rPD6Sj2z/view?usp=sharing) | 189.7 MB | MultiArray[512x1024] |CityScapes| [junfu1115/DANet](https://github.com/junfu1115/DANet/) | [MIT](https://github.com/junfu1115/DANet/blob/master/LICENSE) |CVPR2019|
+
+### Semantic-FPN
+
+Panoptic Feature Pyramid Networks
+
+<img src="https://user-images.githubusercontent.com/23278992/150614015-6b712113-6b8f-484e-88dc-124b76229153.jpg" width=400> <img src="https://user-images.githubusercontent.com/23278992/150614022-590eb6fa-075f-4ff7-8ad5-b9d502b8763b.pn" width=400>
+
+| Google Drive Link | Size | Output |Dataset|Original Project | License | year |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
+| [fpn_r50_512x1024_80k_cityscapes](https://drive.google.com/file/d/1_IVhCnJ--54P7qVGLo8-ks_LRGXJQXht/view?usp=sharing) | 108.6 MB | MultiArray[512x1024] |CityScapes| [facebookresearch/detectron2](https://github.com/facebookresearch/detectron2) | [Apache License 2.0](https://github.com/facebookresearch/detectron2/blob/main/LICENSE) |2019|
 
 # Super Resolution
 
