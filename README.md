@@ -66,7 +66,6 @@ You can get the model converted to CoreML format from the link of Google drive.
 See the section below for how to use it in Xcode.
 The license for each model conforms to the license for the original project.
 
-
 # Image Classifier
 
 ### Efficientnet
