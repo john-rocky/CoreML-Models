@@ -1,6 +1,5 @@
 # CoreML-Models
 Converted CoreML Model Zoo.
-https://colab.research.google.com/drive/1WGAxMaikjNIfqdGRndEOmNyeVf33nGNh?usp=sharing
 <img width="1280" src="https://user-images.githubusercontent.com/23278992/147420041-fdeb1fbb-7e93-41c6-84d6-80d7c1c45200.jpeg">
 
 CoreML is a machine learning framework by Apple.
