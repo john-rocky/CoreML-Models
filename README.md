@@ -41,6 +41,7 @@ You are free to do or not.
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#realesrgan)
   - [BSRGAN](#realesrgan)
+  - [AESRGAN](#aesrgan)
 
 - [**Low Light Enhancement**](#low-light-enhancement)
   - [StableLLVE](#stablellve)
@@ -250,6 +251,12 @@ Panoptic Feature Pyramid Networks
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
 | [BSRGAN](https://drive.google.com/file/d/1-3K89vJZ5OUAh4xdSAifgnL52jbl2fVf/view?usp=sharing) | 66.9 MB | Image(RGB 2048x2048)| [cszn/BSRGAN](https://github.com/cszn/BSRGAN)  |  |2021|
 
+### [A_ESRGAN](https://drive.google.com/file/d/1-0rKVQtFXNWfIBIpvyemjuO3O00GZBeb/view?usp=sharing)
+<img width="400" src="https://user-images.githubusercontent.com/23278992/151077592-a993a19c-8a05-471a-8924-c7302f7af84b.png"> <img width="400" src="https://user-images.githubusercontent.com/23278992/151077667-62bdbe2b-8e00-4816-945a-14890ccf1bcd.png"> 
+
+| Google Drive Link | Size | Output |Original Project | License |year |Conversion Script|
+| ------------- | ------------- | ------------- | ------------- | ------------- |------------- |------------- |
+| [A_ESRGAN](https://drive.google.com/file/d/1-0rKVQtFXNWfIBIpvyemjuO3O00GZBeb/view?usp=sharing) | 63.8 MB | Image(RGB 1024x1024)| [aesrgan/A-ESRGANN](https://github.com/aesrgan/A-ESRGAN)  | [BSD 3-Clause License](https://github.com/aesrgan/A-ESRGAN/blob/main/LICENSE) |2021|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1UxtSXnVYOXEfTVdIeoP7HQEjsyVbqOKa?usp=sharing)|
 
 # Low Light Enhancement
 
