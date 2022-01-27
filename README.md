@@ -42,6 +42,7 @@ You are free to do or not.
   - [Real ESRGAN](#realesrgan)
   - [BSRGAN](#realesrgan)
   - [A-ESRGAN](#a-esrgan)
+  - [Beby-GAN](#beby-gan)
 
 - [**Low Light Enhancement**](#low-light-enhancement)
   - [StableLLVE](#stablellve)
@@ -257,6 +258,16 @@ Panoptic Feature Pyramid Networks
 | Google Drive Link | Size | Output |Original Project | License |year |Conversion Script|
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |------------- |
 | [A-ESRGAN](https://drive.google.com/file/d/1-0rKVQtFXNWfIBIpvyemjuO3O00GZBeb/view?usp=sharing) | 63.8 MB | Image(RGB 1024x1024)| [aesrgan/A-ESRGANN](https://github.com/aesrgan/A-ESRGAN)  | [BSD 3-Clause License](https://github.com/aesrgan/A-ESRGAN/blob/main/LICENSE) |2021|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1UxtSXnVYOXEfTVdIeoP7HQEjsyVbqOKa?usp=sharing)|
+
+### [Beby-GAN](https://drive.google.com/file/d/1-3o0tNU19tWT1659svDUu7ldsUptksb9/view?usp=sharing)
+
+Best-Buddy GANs for Highly Detailed Image Super-Resolution
+
+<img width="400" src="https://user-images.githubusercontent.com/23278992/151281793-af299aac-e672-4d05-bd27-588435466a80.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/151281535-d4b26a1c-9cb2-4d55-9050-2582656eb73f.jpg"> 
+
+| Google Drive Link | Size | Output |Original Project | License |year |
+| ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
+| [Beby-GAN](https://drive.google.com/file/d/1-3o0tNU19tWT1659svDUu7ldsUptksb9/view?usp=sharing) | 66.9 MB | Image(RGB 2048x2048)| [dvlab-research/Simple-SR](https://github.com/dvlab-research/Simple-SR)  | [MIT](https://github.com/dvlab-research/Simple-SR/blob/master/LICENSE) |2021|
 
 # Low Light Enhancement
 
