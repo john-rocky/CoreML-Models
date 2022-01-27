@@ -263,7 +263,7 @@ Panoptic Feature Pyramid Networks
 
 Best-Buddy GANs for Highly Detailed Image Super-Resolution
 
-<img width="400" src="https://user-images.githubusercontent.com/23278992/151281793-af299aac-e672-4d05-bd27-588435466a80.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/151281535-d4b26a1c-9cb2-4d55-9050-2582656eb73f.jpg"> 
+<img width="400" src="https://user-images.githubusercontent.com/23278992/151282027-14a5d386-60a8-4152-bff1-a0416db81d7a.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/151282014-1177b73d-a2b3-40eb-9a87-9cbe8ace504b.jpg"> 
 
 | Google Drive Link | Size | Output |Original Project | License |year |
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
