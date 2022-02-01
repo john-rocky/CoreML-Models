@@ -285,7 +285,7 @@ Learning Temporal Consistency for Low Light Video Enhancement from Single Images
 
 Zero-Reference Deep Curve Estimation for Low-Light Image Enhancement
 
-<img width="400" src="https://user-images.githubusercontent.com/23278992/151897265-7c3c0295-69c3-4c90-9dcc-d04bbcfd41a3.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/151897250-251d115c-6bba-4436-a319-fa247f91150a.jpg"> 
+<img width="400" src="https://user-images.githubusercontent.com/23278992/151897265-7c3c0295-69c3-4c90-9dcc-d04bbcfd41a3.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/151897430-f16d84f0-170c-4e54-a08d-ad4d5b6ca47a.jpg"> 
 
 | Google Drive Link | Size | Output |Original Project | License |Year|Conversion Script|
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
