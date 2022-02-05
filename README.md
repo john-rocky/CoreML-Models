@@ -274,7 +274,7 @@ Best-Buddy GANs for Highly Detailed Image Super-Resolution
 
 The Residual in Residual Dense Network for image super-scaling.
 
-<img width="400" src="https://user-images.githubusercontent.com/23278992/152622984-fbc911c5-901c-4ce3-93b6-753f35dea531.png"> <img width="400" src="https://user-images.githubusercontent.com/23278992/152622988-795c1279-43f7-4d8a-a2ea-a786bcd6a34b.png"> 
+<img width="400" src="https://user-images.githubusercontent.com/23278992/152622988-795c1279-43f7-4d8a-a2ea-a786bcd6a34b.png"> <img width="400" src="https://user-images.githubusercontent.com/23278992/152622984-fbc911c5-901c-4ce3-93b6-753f35dea531.png">
 
 | Google Drive Link | Size | Output |Original Project | License |year |
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
