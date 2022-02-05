@@ -43,6 +43,7 @@ You are free to do or not.
   - [BSRGAN](#realesrgan)
   - [A-ESRGAN](#a-esrgan)
   - [Beby-GAN](#beby-gan)
+  - [RRDN](#rrdn)
 
 - [**Low Light Enhancement**](#low-light-enhancement)
   - [StableLLVE](#stablellve)
@@ -268,6 +269,16 @@ Best-Buddy GANs for Highly Detailed Image Super-Resolution
 | Google Drive Link | Size | Output |Original Project | License |year |
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
 | [Beby-GAN](https://drive.google.com/file/d/1-3o0tNU19tWT1659svDUu7ldsUptksb9/view?usp=sharing) | 66.9 MB | Image(RGB 2048x2048)| [dvlab-research/Simple-SR](https://github.com/dvlab-research/Simple-SR)  | [MIT](https://github.com/dvlab-research/Simple-SR/blob/master/LICENSE) |2021|
+
+### [RRDN](https://drive.google.com/file/d/1-M30vR0xMuYDn2p5O4KZrUnUXy4SNThF/view?usp=sharing)
+
+The Residual in Residual Dense Network for image super-scaling.
+
+<img width="400" src="https://user-images.githubusercontent.com/23278992/152622984-fbc911c5-901c-4ce3-93b6-753f35dea531.png"> <img width="400" src="https://user-images.githubusercontent.com/23278992/152622988-795c1279-43f7-4d8a-a2ea-a786bcd6a34b.png"> 
+
+| Google Drive Link | Size | Output |Original Project | License |year |
+| ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
+| [RRDN](https://drive.google.com/file/d/1-M30vR0xMuYDn2p5O4KZrUnUXy4SNThF/view?usp=sharing) | 16.8 MB | Image(RGB 2048x2048)| [idealo/image-super-resolution](https://github.com/idealo/image-super-resolution)  | [Apache2.0](https://github.com/idealo/image-super-resolution/blob/master/LICENSE) |2018|
 
 # Low Light Enhancement
 
