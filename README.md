@@ -37,6 +37,7 @@ You are free to do or not.
   - [GCNet](#gcnet)
   - [DANet](#danet)
   - [Semantic FPN](#semantic-fpn)
+  - [cloths_segmentation](#cloths_segmentation)
 
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#realesrgan)
@@ -236,6 +237,16 @@ Panoptic Feature Pyramid Networks
 | Google Drive Link | Size | Output |Dataset|Original Project | License | year |
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
 | [fpn_r50_512x1024_80k_cityscapes](https://drive.google.com/file/d/1_IVhCnJ--54P7qVGLo8-ks_LRGXJQXht/view?usp=sharing) | 108.6 MB | MultiArray[512x1024] |CityScapes| [facebookresearch/detectron2](https://github.com/facebookresearch/detectron2) | [Apache License 2.0](https://github.com/facebookresearch/detectron2/blob/main/LICENSE) |2019|
+
+### cloths_segmentation
+
+Code for binary segmentation of various cloths.
+
+<img src="https://user-images.githubusercontent.com/23278992/154873786-2b90e0d9-dd86-4397-8977-ea1464ca2f75.JPG" width=400> <img src="https://user-images.githubusercontent.com/23278992/154873792-54c12be0-d446-4789-bf00-bb89cab5a566.jpg" width=400>
+
+| Google Drive Link | Size | Output |Dataset|Original Project | License | year |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
+| [clothSegmentation](https://drive.google.com/file/d/1-2AydEgkth6UTD5bu13R0fJYoqZZMG3e/view?usp=sharing) | 50.1 MB | Image(GrayScale 640x960) |[fashion-2019-FGVC6](https://www.kaggle.com/c/imaterialist-fashion-2019-FGVC6)| [facebookresearch/detectron2](https://github.com/facebookresearch/detectron2) | [MIT](https://github.com/ternaus/cloths_segmentation/blob/main/LICENSE) |2020|
 
 # Super Resolution
 
