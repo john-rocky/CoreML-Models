@@ -242,7 +242,7 @@ Panoptic Feature Pyramid Networks
 
 Code for binary segmentation of various cloths.
 
-<img src="https://user-images.githubusercontent.com/23278992/154873786-2b90e0d9-dd86-4397-8977-ea1464ca2f75.JPG" width=400> <img src="https://user-images.githubusercontent.com/23278992/154873792-54c12be0-d446-4789-bf00-bb89cab5a566.jpg" width=400>
+<img src="https://user-images.githubusercontent.com/23278992/154873792-54c12be0-d446-4789-bf00-bb89cab5a566.jpg" width=400> <img src="https://user-images.githubusercontent.com/23278992/154873786-2b90e0d9-dd86-4397-8977-ea1464ca2f75.JPG" width=400>
 
 | Google Drive Link | Size | Output |Dataset|Original Project | License | year |
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
