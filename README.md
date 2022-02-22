@@ -22,6 +22,8 @@ You are free to do or not.
   - [Conformer](#conformer)
   - [DeiT](#deit)
   - [RepVGG](#repvgg)
+  - [RegNet](#regnet)
+
   
 - [**Object Detection**](#object-detection)
   - [YOLOv5s](#yolov5s)
@@ -128,6 +130,16 @@ Making VGG-style ConvNets Great Again
 | Google Drive Link | Size | Dataset |Original Project | License |Year|
 | ------------- | ------------- | ------------- |------------- |------------- |------------- |
 | [RepVGG-A0](https://drive.google.com/file/d/1i8mDvRGn2_OjzIG9ioVJyQrefVliKsh_/view?usp=sharing) | 33.3 MB | ImageNet | [DingXiaoH/RepVGG](https://github.com/DingXiaoH/RepVGG)  | [MIT](https://github.com/DingXiaoH/RepVGG/blob/main/LICENSE)|2021|
+
+### RegNet
+
+Designing Network Design Spaces
+
+<img width="400" alt="スクリーンショット 2022-02-23 7 38 23" src="https://user-images.githubusercontent.com/23278992/155233183-edf61ebe-922c-4b63-8a5e-7ef6c9f7eaa8.png">
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year|
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |
+| [regnet_y_400mf](https://drive.google.com/file/d/16jbUJ4gHSzdxxbYb99rOQe0FiKCuLyDB/view?usp=sharing) | 16.5 MB | ImageNet | [TORCHVISION.MODELS](https://pytorch.org/vision/stable/models.html#torchvision-models)  | [MIT](https://github.com/facebookresearch/pycls/blob/main/LICENSE)|2020|
 
 # Object Detection
 
