@@ -437,7 +437,7 @@ Deraining
 ### [Fast-Neural-Style-Transfer](https://drive.google.com/file/d/1o15OO0Kn0tq79fFkmBm3PES93IRQOxB-/view?usp=sharing)
 
 <img width="400" src="https://user-images.githubusercontent.com/23278992/155708074-ab651a7c-b882-40f1-9ce5-a94e80bac62d.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/155708089-ee888836-3f18-41a1-97fd-72e17e604c9a.jpg">
-<img width="400" src="https://user-images.githubusercontent.com/23278992/155707184-403ad161-6354-4ce4-87d4-284e323b1261.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/155706345-9cff3e9e-01bd-43c7-9f33-161613085f66.jpg">
+<img width="400" src="https://user-images.githubusercontent.com/23278992/155707184-403ad161-6354-4ce4-87d4-284e323b1261.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/155708401-f76481ad-1de7-4262-acc2-9dcb61c89784.jpg">
 <img width="400" src="https://user-images.githubusercontent.com/23278992/155707199-b77b2583-c355-4406-bc9a-3248492df2c7.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/155706861-97e629a0-4322-4924-94ed-cb10c966bfb8.jpg">
 
 | Google Drive Link | Size | Output |Original Project | License |Year|Conversion Script|
