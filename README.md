@@ -66,7 +66,7 @@ You are free to do or not.
   - [AnimeGANv2_Paprika](#animeGANv2_paprika)
   - [WarpGAN Caricature](#warpgancaricature)
   - [UGATIT_selfie2anime](#ugatit_selfie2anime)
-  - [Fast-Style-Transfer](#fast-style-transfer)
+  - [Fast-Neural-Style-Transfer](#fast-neural-style-transfer)
   
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
