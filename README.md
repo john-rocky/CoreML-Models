@@ -66,6 +66,7 @@ You are free to do or not.
   - [AnimeGANv2_Paprika](#animeGANv2_paprika)
   - [WarpGAN Caricature](#warpgancaricature)
   - [UGATIT_selfie2anime](#ugatit_selfie2anime)
+  - [Fast-Style-Transfer](#fast-style-transfer)
   
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
@@ -433,8 +434,15 @@ Deraining
 | [CartoonGAN_Hosoda](https://drive.google.com/file/d/1-5VB1g7kRt0KMe6u37fi_t18l-Zn_wr1/view?usp=sharing)　| 44.6MB | MultiArray | [mnicnc404/CartoonGan-tensorflow](https://github.com/mnicnc404/CartoonGan-tensorflow)|
 | [CartoonGAN_Paprika](https://drive.google.com/file/d/1-5x3TYugodcnGYiEEDitFqMQPVHsCDs_/view?usp=sharing)　| 44.6MB | MultiArray | [mnicnc404/CartoonGan-tensorflow](https://github.com/mnicnc404/CartoonGan-tensorflow)|
 
+### [Fast-Neural-Style-Transfer](https://drive.google.com/file/d/1o15OO0Kn0tq79fFkmBm3PES93IRQOxB-/view?usp=sharing)
 
+<img width="400" src="https://user-images.githubusercontent.com/23278992/147422391-847b3c75-3e6e-419e-9a53-f6138b9ac813.png"> <img width="400" src="https://user-images.githubusercontent.com/23278992/147422387-2b71a135-cd9c-4f02-8223-65bf365cda4e.png">
 
+| Google Drive Link | Size | Output |Original Project | License |Year|Conversion Script|
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [fast-neural-style-transfer-cuphead](https://drive.google.com/file/d/1-LLQF8T6MrcpdiYZkdGZAizkj7c-lJ9e/view?usp=sharing) | 6.4MB | Image(RGB 960x640)| [eriklindernoren/Fast-Neural-Style-Transfer](https://github.com/eriklindernoren/Fast-Neural-Style-Transfer)  | [MIT](https://github.com/eriklindernoren/Fast-Neural-Style-Transfer/blob/master/LICENSE) |2019|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1f6KOh9fuOmCP9vbNldqmyX6lqReGVtr4?usp=sharing)|
+| [fast-neural-style-transfer-cuphead](https://drive.google.com/file/d/1-LLQF8T6MrcpdiYZkdGZAizkj7c-lJ9e/view?usp=sharing) | ^ | ^ | ^ | ^ | ^ | ^ |
+| [fast-neural-style-transfer-cuphead](https://drive.google.com/file/d/1-LLQF8T6MrcpdiYZkdGZAizkj7c-lJ9e/view?usp=sharing) |  ^ | ^ | ^ | ^ | ^ | ^ |
 
 ## How to use in a xcode project.
 
