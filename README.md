@@ -47,6 +47,7 @@ You are free to do or not.
   - [A-ESRGAN](#a-esrgan)
   - [Beby-GAN](#beby-gan)
   - [RRDN](#rrdn)
+  - [Fast-SRGAN](#fast-srgan)
 
 - [**Low Light Enhancement**](#low-light-enhancement)
   - [StableLLVE](#stablellve)
@@ -304,6 +305,17 @@ The Residual in Residual Dense Network for image super-scaling.
 | Google Drive Link | Size | Output |Original Project | License |year |
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
 | [RRDN](https://drive.google.com/file/d/1-M30vR0xMuYDn2p5O4KZrUnUXy4SNThF/view?usp=sharing) | 16.8 MB | Image(RGB 2048x2048)| [idealo/image-super-resolution](https://github.com/idealo/image-super-resolution)  | [Apache2.0](https://github.com/idealo/image-super-resolution/blob/master/LICENSE) |2018|
+
+
+### [Fast-SRGAN](https://drive.google.com/file/d/1gYXbhcSUm5rhcCAmwLruonAhu8jvyDL8/view?usp=sharing)
+
+Fast-SRGAN.
+
+<img width="400" src="https://user-images.githubusercontent.com/23278992/156285673-a6239cec-41ec-46d8-a2fa-d0ad21498f1d.png"> <img width="400" src="https://user-images.githubusercontent.com/23278992/156285686-8d0333a2-b07f-4aa2-8a44-fe959758289f.png">
+
+| Google Drive Link | Size | Output |Original Project | License |year |
+| ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
+| [Fast-SRGAN](https://drive.google.com/file/d/1gYXbhcSUm5rhcCAmwLruonAhu8jvyDL8/view?usp=sharing) | 628 KB | Image(RGB 1024x1024)| [HasnainRaz/Fast-SRGAN](https://github.com/HasnainRaz/Fast-SRGAN)  | [MIT](https://github.com/HasnainRaz/Fast-SRGAN/blob/master/LICENSE) |2019|
 
 # Low Light Enhancement
 
