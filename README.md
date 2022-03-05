@@ -344,7 +344,7 @@ Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Net
 
 Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.
 
-<img width="400" src="https://user-images.githubusercontent.com/23278992/156899173-bdc1ceed-c3f6-4abd-b217-18667fc88cf6.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/156899267-65343f4e-a963-4680-83ba-7ecd7e6680a5.jpg">
+<img width="400" src="https://user-images.githubusercontent.com/23278992/156899905-40746d09-4580-4e30-b0b4-b146fd1975c2.png"> <img width="400" src="https://user-images.githubusercontent.com/23278992/156899906-ab5c8c4e-54af-4d55-874b-5d1e0aac961f.JPG">
 
 | Google Drive Link | Size | Output |Original Project | License |year |
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
