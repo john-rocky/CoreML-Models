@@ -48,6 +48,9 @@ You are free to do or not.
   - [Beby-GAN](#beby-gan)
   - [RRDN](#rrdn)
   - [Fast-SRGAN](#fast-srgan)
+  - [ESRGAN](#esrgan)
+  - [SRGAN](#srgan)
+  - [SRResNet](#srresnet)
 
 - [**Low Light Enhancement**](#low-light-enhancement)
   - [StableLLVE](#stablellve)
@@ -326,6 +329,26 @@ Enhanced-SRGAN.
 | Google Drive Link | Size | Output |Original Project | License |year |
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
 | [ESRGAN](https://drive.google.com/file/d/1fkRbh_gckuFlgr357OIdOrEJK4T_2Xkz/view?usp=sharing) | 66.9 MB | Image(RGB 2048x2048)| [xinntao/ESRGAN](https://github.com/xinntao/ESRGAN)  | [Apache 2.0](https://github.com/xinntao/ESRGAN/blob/master/LICENSE) |2018|
+
+### [SRGAN](https://drive.google.com/file/d/1-076W2o0wCtoODptikX1eOnlFBx2s3qK/view?usp=sharing)
+
+Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.
+
+<img width="400" src="https://user-images.githubusercontent.com/23278992/156899475-172b7ac5-a6ca-4b0b-a6d8-f0d0ddea986e.png"> <img width="400" src="https://user-images.githubusercontent.com/23278992/156899476-641af271-9b2e-4122-a048-099700d8335a.png">
+
+| Google Drive Link | Size | Output |Original Project | License |year |
+| ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
+| [SRGAN](https://drive.google.com/file/d/1fkRbh_gckuFlgr357OIdOrEJK4T_2Xkz/view?usp=sharing) | 6.1 MB | Image(RGB 2048x2048)| [dongheehand/SRGAN-PyTorch](https://github.com/dongheehand/SRGAN-PyTorch)  |  |2017|
+
+### [SRResNet](https://drive.google.com/file/d/1-2kYZgF_Z6vntrRsHmRiwyHJg5TC1PSW/view?usp=sharing)
+
+Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.
+
+<img width="400" src="https://user-images.githubusercontent.com/23278992/156899173-bdc1ceed-c3f6-4abd-b217-18667fc88cf6.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/156899267-65343f4e-a963-4680-83ba-7ecd7e6680a5.jpg">
+
+| Google Drive Link | Size | Output |Original Project | License |year |
+| ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
+| [SRResNet](https://drive.google.com/file/d/1fkRbh_gckuFlgr357OIdOrEJK4T_2Xkz/view?usp=sharing) | 6.1 MB | Image(RGB 2048x2048)| [dongheehand/SRGAN-PyTorch](https://github.com/dongheehand/SRGAN-PyTorch)  |  |2017|
 
 # Low Light Enhancement
 
