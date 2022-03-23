@@ -289,7 +289,7 @@ Code for binary segmentation of various cloths.
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |------------- |
 | [A-ESRGAN](https://drive.google.com/file/d/1-0rKVQtFXNWfIBIpvyemjuO3O00GZBeb/view?usp=sharing) | 63.8 MB | Image(RGB 1024x1024)| [aesrgan/A-ESRGANN](https://github.com/aesrgan/A-ESRGAN)  | [BSD 3-Clause License](https://github.com/aesrgan/A-ESRGAN/blob/main/LICENSE) |2021|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1UxtSXnVYOXEfTVdIeoP7HQEjsyVbqOKa?usp=sharing)|
 
-### [Beby-GAN](https://drive.google.com/file/d/1-3o0tNU19tWT1659svDUu7ldsUptksb9/view?usp=sharing)
+### [Beby-GAN](https://drive.google.com/file/d/1bJ7_NgR2KXI46JiFk5hH_6IdCHMyhN05/view?usp=sharing)
 
 Best-Buddy GANs for Highly Detailed Image Super-Resolution
 
