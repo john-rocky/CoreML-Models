@@ -57,7 +57,7 @@ You are free to do or not.
   - [Zero-DCE](#zero-dce)
 - [**Image Restoration**](#image-restroration)
   - [MPRNet](#mprnet)
-  - [MPRNetv2](#mprnetv2)
+  - [MIRNetv2](#mprnetv2)
   
 - [**Image Generation**](#image-generation)
   - [MobileStyleGAN](#mobilestylegan)
