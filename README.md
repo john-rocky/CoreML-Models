@@ -42,8 +42,8 @@ You are free to do or not.
   - [cloths_segmentation](#cloths_segmentation)
 
 - [**Super Resolution**](#super-resolution)
-  - [Real ESRGAN](#realesrgan)
-  - [BSRGAN](#realesrgan)
+  - [Real ESRGAN](#real-esrgan)
+  - [BSRGAN](#bsrgan)
   - [A-ESRGAN](#a-esrgan)
   - [Beby-GAN](#beby-gan)
   - [RRDN](#rrdn)
