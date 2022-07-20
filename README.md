@@ -177,12 +177,12 @@ Designing Network Design Spaces
 | [U2Net](https://drive.google.com/file/d/1cpm-x12Ih7Cqd_kOjfTvtt4ipGS3BpCx/view?usp=sharing) | 175.9 MB | Image(GRAYSCALE 320 × 320)| [xuebinqin/U-2-Net](https://github.com/xuebinqin)  | [Apache](https://github.com/john-rocky/CoreML-Models/blob/master/Apache-LICENSE)|
 | [U2Netp](https://drive.google.com/file/d/1D-quPGy33PzSEC6A7EBNv7mCyuiBlO08/view?usp=sharing) | 4.6 MB | Image(GRAYSCALE 320 × 320) | [xuebinqin/U-2-Net](https://github.com/xuebinqin)  |  [Apache](https://github.com/john-rocky/CoreML-Models/blob/master/Apache-LICENSE)|
 
-### [IS-Net](https://drive.google.com/file/d/1-7MTs1Y58Xsg0StA0cCwzxLsvxkcG_Jf/view?usp=sharing)
+### [IS-Net](https://drive.google.com/drive/folders/13CkOTBCYc3FjGTU26lmCsRYsOkeHnAMA?usp=sharing)
 <img width="400" src="https://user-images.githubusercontent.com/23278992/179818731-b919c8a2-f5c9-4a80-8666-e3034d1e86f0.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/179818740-38336aec-c9c5-4471-b529-ae45286062b5.JPG">
 
 | Google Drive Link | Size | Output |Original Project | License | Year | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- |------------- | ------------- |------------- |
-| [IS-Net](https://drive.google.com/file/d/1-7MTs1Y58Xsg0StA0cCwzxLsvxkcG_Jf/view?usp=sharing) | 176.1 MB | Image(GRAYSCALE 1024 × 2048)| [xuebinqin/DIS](https://github.com/xuebinqin/DIS)  | [Apache](https://github.com/xuebinqin/DIS/blob/main/LICENSE.md)| 2022 |[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1xWD7LZbI-_09LXmiYMdhA28V2qujvOlZ?usp=sharing)|
+| [IS-Net](https://drive.google.com/drive/folders/13CkOTBCYc3FjGTU26lmCsRYsOkeHnAMA?usp=sharing) | 176.1 MB | Image(GRAYSCALE 1024 × 1024, 1024 × 2048)| [xuebinqin/DIS](https://github.com/xuebinqin/DIS)  | [Apache](https://github.com/xuebinqin/DIS/blob/main/LICENSE.md)| 2022 |[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1xWD7LZbI-_09LXmiYMdhA28V2qujvOlZ?usp=sharing)|
 
 ### face-Parsing
 
