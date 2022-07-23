@@ -372,7 +372,7 @@ Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Net
 
 Lightweight Image Super-Resolution with Enhanced CNN.
 
-<img width="400" src="https://user-images.githubusercontent.com/23278992/180625939-308f7176-488a-40a1-ab6e-428dc01bbf67.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/180625941-3a6b44a6-35e1-4ff9-a85b-c5efc81fc101.jpg">
+<img width="400" src="https://user-images.githubusercontent.com/23278992/180625941-3a6b44a6-35e1-4ff9-a85b-c5efc81fc101.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/180625939-308f7176-488a-40a1-ab6e-428dc01bbf67.jpg">
 
 | Google Drive Link | Size | Output |Original Project | License |year | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |------------- |
