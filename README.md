@@ -53,6 +53,7 @@ You are free to do or not.
   - [ESRGAN](#esrgan)
   - [SRGAN](#srgan)
   - [SRResNet](#srresnet)
+  - [LESRCNN](#lesrcnn)
 
 - [**Low Light Enhancement**](#low-light-enhancement)
   - [StableLLVE](#stablellve)
@@ -366,6 +367,16 @@ Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Net
 | Google Drive Link | Size | Output |Original Project | License |year |
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
 | [SRResNet](https://drive.google.com/file/d/1fkRbh_gckuFlgr357OIdOrEJK4T_2Xkz/view?usp=sharing) | 6.1 MB | Image(RGB 2048x2048)| [dongheehand/SRGAN-PyTorch](https://github.com/dongheehand/SRGAN-PyTorch)  |  |2017|
+
+### [LESRCNN](https://drive.google.com/file/d/1-0zgxURZwqX0mAAVy69K-owE7QP-7NfJ/view?usp=sharing)
+
+Lightweight Image Super-Resolution with Enhanced CNN.
+
+<img width="400" src="https://user-images.githubusercontent.com/23278992/180625939-308f7176-488a-40a1-ab6e-428dc01bbf67.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/180625941-3a6b44a6-35e1-4ff9-a85b-c5efc81fc101.jpg">
+
+| Google Drive Link | Size | Output |Original Project | License |year | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- |------------- |------------- |
+| [LESRCNN](https://drive.google.com/file/d/1-0zgxURZwqX0mAAVy69K-owE7QP-7NfJ/view?usp=sharing) | 4.3 MB | Image(RGB 512x512)| [hellloxiaotian/LESRCNN](https://github.com/hellloxiaotian/LESRCNN)  |  |2020|![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Q6piAJvXSmb-DcdFipcRUEYuHi9fnTm7?usp=sharing)|
 
 # Low Light Enhancement
 
