@@ -45,6 +45,7 @@ You are free to do or not.
 
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#real-esrgan)
+  - [GFPGAN](#gfpgan)
   - [BSRGAN](#bsrgan)
   - [A-ESRGAN](#a-esrgan)
   - [Beby-GAN](#beby-gan)
@@ -54,7 +55,8 @@ You are free to do or not.
   - [SRGAN](#srgan)
   - [SRResNet](#srresnet)
   - [LESRCNN](#lesrcnn)
-
+  - [MMRealSR](#mmrealsr)
+  
 - [**Low Light Enhancement**](#low-light-enhancement)
   - [StableLLVE](#stablellve)
   - [Zero-DCE](#zero-dce)
@@ -293,6 +295,16 @@ Code for binary segmentation of various cloths.
 | [Real ESRGAN4x](https://drive.google.com/file/d/16JEWh48fgQc8az7avROePOd-PYda0Yi2/view?usp=sharing) | 66.9 MB | Image(RGB 2048x2048)| [xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)  | [BSD 3-Clause License](https://github.com/xinntao/Real-ESRGAN/blob/master/LICENSE) |2021|
 | [Real ESRGAN Anime4x](https://drive.google.com/file/d/1qXdLx46Lpqya7Txc5Wvgkd2Dqlnqm3Qm/view?usp=sharing) | 66.9 MB | Image(RGB 2048x2048)| [xinntao/Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN)  | [BSD 3-Clause License](https://github.com/xinntao/Real-ESRGAN/blob/master/LICENSE) |2021|
 
+### [GFPGAN](https://drive.google.com/file/d/1-3fF4aPnh8ygUOmKItIrZ318xI9JGmQx/view?usp=sharing)
+
+Towards Real-World Blind Face Restoration with Generative Facial Prior
+
+<img width="400" src="https://user-images.githubusercontent.com/23278992/186315786-56634605-e357-4e9e-a0d9-51bb526bf69f.png"> <img width="400" src="https://user-images.githubusercontent.com/23278992/186316328-1fc64a6f-a443-4df2-bb86-0af343cd8a64.png"> 
+
+| Google Drive Link | Size | Output |Original Project | License |year |
+| ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
+| [GFPGAN](https://drive.google.com/file/d/1-3fF4aPnh8ygUOmKItIrZ318xI9JGmQx/view?usp=sharing) | 337.4 MB | Image(RGB 512x512)| [TencentARC/GFPGAN](https://github.com/TencentARC/GFPGAN)  | [Apache2.0](https://github.com/TencentARC/GFPGAN/blob/master/LICENSE) |2021|
+
 ### [BSRGAN](https://drive.google.com/file/d/1-3K89vJZ5OUAh4xdSAifgnL52jbl2fVf/view?usp=sharing)
 <img width="400" src="https://user-images.githubusercontent.com/23278992/148810656-4c5faa33-1be9-45f6-b31a-defd931cb1f8.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/148811822-56844bc7-b197-44d5-8454-757890c890b5.jpg"> 
 
@@ -377,6 +389,17 @@ Lightweight Image Super-Resolution with Enhanced CNN.
 | Google Drive Link | Size | Output |Original Project | License |year | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |------------- |
 | [LESRCNN](https://drive.google.com/file/d/1-0zgxURZwqX0mAAVy69K-owE7QP-7NfJ/view?usp=sharing) | 4.3 MB | Image(RGB 512x512)| [hellloxiaotian/LESRCNN](https://github.com/hellloxiaotian/LESRCNN)  |  |2020|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Q6piAJvXSmb-DcdFipcRUEYuHi9fnTm7?usp=sharing)|
+
+### [MMRealSR](https://drive.google.com/file/d/1-HwMLvOy_hHycHNhojob6uT8t6tRyWqb/view?usp=sharing)
+
+Metric Learning based Interactive Modulation for Real-World Super-Resolution
+
+<img width="400" src="https://user-images.githubusercontent.com/23278992/186336018-9c5d5700-28a7-438e-bc07-5ca2a8e843cd.png"> <img width="400" src="https://user-images.githubusercontent.com/23278992/186336038-5e877d1a-33b1-4f54-9e4d-192f9bb765fe.png">
+
+| Google Drive Link | Size | Output |Original Project | License |year | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- |------------- |------------- |
+| [MMRealSRGAN](https://drive.google.com/file/d/1-HwMLvOy_hHycHNhojob6uT8t6tRyWqb/view?usp=sharing) | 104.6 MB | Image(RGB 1024x1024)| [TencentARC/MM-RealSR](https://github.com/TencentARC/MM-RealSR)  | [BSD 3-Clause](https://github.com/TencentARC/MM-RealSR/blob/main/LICENSE) |2022|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1zhUhQhdtP02N2pFIxsO5lin7tDOExZCo?usp=sharing)|
+| [MMRealSRNet](https://drive.google.com/file/d/1-77P8AtHFh5kca2kYZ6X7GaUueoa3el_/view?usp=sharing) | 104.6 MB | Image(RGB 1024x1024)| [TencentARC/MM-RealSR](https://github.com/TencentARC/MM-RealSR)  | [BSD 3-Clause](https://github.com/TencentARC/MM-RealSR/blob/main/LICENSE) |2022|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1zhUhQhdtP02N2pFIxsO5lin7tDOExZCo?usp=sharing)|
 
 # Low Light Enhancement
 
