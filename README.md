@@ -182,7 +182,6 @@ Designing Network Design Spaces
 
 ### [IS-Net](https://drive.google.com/drive/folders/13CkOTBCYc3FjGTU26lmCsRYsOkeHnAMA?usp=sharing)
 <img width="400" src="https://user-images.githubusercontent.com/23278992/179818731-b919c8a2-f5c9-4a80-8666-e3034d1e86f0.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/179818740-38336aec-c9c5-4471-b529-ae45286062b5.JPG">
-<img width="400" src="https://user-images.githubusercontent.com/23278992/186721588-9ca83e45-2d11-4206-8076-87c7160e5f24.jpg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/186721378-e9cc93f5-d05d-44ae-a62f-c282e4c11ee7.JPG">
 
 | Google Drive Link | Size | Output |Original Project | License | Year | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- |------------- | ------------- |------------- |
