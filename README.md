@@ -576,7 +576,7 @@ Low Light Enhancement
 
 Learning to Cartoonize Using White-box Cartoon Representations
 
-<img width="400" alt="https://user-images.githubusercontent.com/23278992/189335273-d05f9cdb-1375-4553-8146-2f598676a95b.jpg"> <img width="400" alt="https://user-images.githubusercontent.com/23278992/189335456-5184b222-9b55-429e-850a-adf4879a47fc.jpg">
+<img width="400" img src="https://user-images.githubusercontent.com/23278992/189335273-d05f9cdb-1375-4553-8146-2f598676a95b.jpg"> <img width="400" img src="https://user-images.githubusercontent.com/23278992/189335456-5184b222-9b55-429e-850a-adf4879a47fc.jpg">
 
 | Google Drive Link | Size | Output | Original Project | License |Year|
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
