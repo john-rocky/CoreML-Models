@@ -77,7 +77,7 @@ You are free to do or not.
   - [WarpGAN Caricature](#warpgancaricature)
   - [UGATIT_selfie2anime](#ugatit_selfie2anime)
   - [Fast-Neural-Style-Transfer](#fast-neural-style-transfer)
-  - [White_box_Cartoonization](#white-box-cartoonization)
+  - [White_box_Cartoonization](#white_box_cartoonization)
 
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
