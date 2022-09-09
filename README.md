@@ -580,7 +580,7 @@ Learning to Cartoonize Using White-box Cartoon Representations
 
 | Google Drive Link | Size | Output | Original Project | License |Year|
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
-| [White_box_Cartoonization](https://drive.google.com/file/d/1QGNJzEp0fo6oOryTos1dazEKaS34WzZC/view?usp=sharing) | 5.9MB(quantized) | Image(1536x1536) | [SystemErrorWang/White-box-Cartoonization](https://github.com/SystemErrorWang/White-box-Cartoonization)  |[creativecommons](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)|CVPR2020|
+| [White_box_Cartoonization](https://drive.google.com/file/d/1QGNJzEp0fo6oOryTos1dazEKaS34WzZC/view?usp=sharing) | 5.9MB | Image(1536x1536) | [SystemErrorWang/White-box-Cartoonization](https://github.com/SystemErrorWang/White-box-Cartoonization)  |[creativecommons](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)|CVPR2020|
 
 ## How to use in a xcode project.
 
