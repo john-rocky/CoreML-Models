@@ -588,7 +588,7 @@ Learning to Cartoonize Using White-box Cartoon Representations
 
 White-box facial image cartoonizaiton
 
-<img width="400" img src="https://user-images.githubusercontent.com/23278992/189454761-039697e7-f208-4fea-987f-3bec5b31b076.png"> <img width="400" img src="https://user-images.githubusercontent.com/23278992/189454801-19d6ef20-7361-41a5-b85b-5dbd7cf05adb.png">
+<img width="400" img src="https://user-images.githubusercontent.com/23278992/189454922-1a95ca25-4031-47a7-8914-9fb8e5c7ff58.png"> <img width="400" img src="https://user-images.githubusercontent.com/23278992/189454801-19d6ef20-7361-41a5-b85b-5dbd7cf05adb.png">
 
 | Google Drive Link | Size | Output | Original Project | License |Year|
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
