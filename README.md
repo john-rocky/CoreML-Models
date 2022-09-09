@@ -572,6 +572,16 @@ Low Light Enhancement
 | [fast-neural-style-transfer-starry-night](https://drive.google.com/file/d/1-HLHIrV_WwZJsEkZ34nTfqnlIHIe04Vy/view?usp=sharing) |  6.4MB | Image(RGB 960x640)| [eriklindernoren/Fast-Neural-Style-Transfer](https://github.com/eriklindernoren/Fast-Neural-Style-Transfer)  | [MIT](https://github.com/eriklindernoren/Fast-Neural-Style-Transfer/blob/master/LICENSE) |2019|
 | [fast-neural-style-transfer-mosaic](https://drive.google.com/file/d/1-GmnewjDz2Cs7-CfXPSFIgOruQvBbK2X/view?usp=sharing) |  6.4MB | Image(RGB 960x640)| [eriklindernoren/Fast-Neural-Style-Transfer](https://github.com/eriklindernoren/Fast-Neural-Style-Transfer)  | [MIT](https://github.com/eriklindernoren/Fast-Neural-Style-Transfer/blob/master/LICENSE) |2019|
 
+### [White_box_Cartoonization](https://drive.google.com/file/d/1QGNJzEp0fo6oOryTos1dazEKaS34WzZC/view?usp=sharing)
+
+Learning to Cartoonize Using White-box Cartoon Representations
+
+<img width="400" alt="https://user-images.githubusercontent.com/23278992/189335273-d05f9cdb-1375-4553-8146-2f598676a95b.jpg"> <img width="400" alt="https://user-images.githubusercontent.com/23278992/189335456-5184b222-9b55-429e-850a-adf4879a47fc.jpg">
+
+| Google Drive Link | Size | Output | Original Project | License |Year|
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
+| [White_box_Cartoonization](https://drive.google.com/file/d/1QGNJzEp0fo6oOryTos1dazEKaS34WzZC/view?usp=sharing) | 5.9MB(quantized) | Image(1536x1536) | [SystemErrorWang/White-box-Cartoonization](https://github.com/SystemErrorWang/White-box-Cartoonization)  |[creativecommons](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)|CVPR2020|
+
 ## How to use in a xcode project.
 
 ### Option 1,implement Vision request.
