@@ -78,6 +78,7 @@ You are free to do or not.
   - [UGATIT_selfie2anime](#ugatit_selfie2anime)
   - [Fast-Neural-Style-Transfer](#fast-neural-style-transfer)
   - [White_box_Cartoonization](#white_box_cartoonization)
+  - [FacialCartoonization](#facialcartoonization)
 
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
@@ -582,6 +583,16 @@ Learning to Cartoonize Using White-box Cartoon Representations
 | Google Drive Link | Size | Output | Original Project | License |Year|
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
 | [White_box_Cartoonization](https://drive.google.com/file/d/1QGNJzEp0fo6oOryTos1dazEKaS34WzZC/view?usp=sharing) | 5.9MB | Image(1536x1536) | [SystemErrorWang/White-box-Cartoonization](https://github.com/SystemErrorWang/White-box-Cartoonization)  |[creativecommons](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)|CVPR2020|
+
+### [FacialCartoonization](https://drive.google.com/file/d/1CJH4tuR3ArKvxrmAE_44lbsAwUzjtyXi/view?usp=sharing)
+
+White-box facial image cartoonizaiton
+
+<img width="400" img src="https://user-images.githubusercontent.com/23278992/189454761-039697e7-f208-4fea-987f-3bec5b31b076.png"> <img width="400" img src="https://user-images.githubusercontent.com/23278992/189454801-19d6ef20-7361-41a5-b85b-5dbd7cf05adb.png">
+
+| Google Drive Link | Size | Output | Original Project | License |Year|
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
+| [FacialCartoonization](https://drive.google.com/file/d/1CJH4tuR3ArKvxrmAE_44lbsAwUzjtyXi/view?usp=sharing) | 8.4MB | Image(256x256) | [SystemErrorWang/FacialCartoonization](https://github.com/SystemErrorWang/FacialCartoonization)  |[creativecommons](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)|2020|
 
 ## How to use in a xcode project.
 
