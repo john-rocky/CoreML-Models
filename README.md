@@ -28,6 +28,7 @@ You are free to do or not.
 - [**Object Detection**](#object-detection)
   - [YOLOv5s](#yolov5s)
   - [YOLOv7](#yolov7)
+  - [YOLOv8](#yolov8)
 
 - [**Segmentation**](#segmentation)
   - [U2Net](#u2net)
@@ -171,6 +172,14 @@ Designing Network Design Spaces
 | Google Drive Link | Size | Output | Original Project | License | Note | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
 |[YOLOv7](https://drive.google.com/file/d/1EKBC7tiwP1tDvXUm_ldD1Nq7hW8HofLe/view?usp=sharing)|147.9MB| Confidence(MultiArray (Double 0 × 80)), Coordinates (MultiArray (Double 0 × 4)) |[WongKinYiu/yolov7](https://github.com/WongKinYiu/yolov7)|[GNU](https://github.com/WongKinYiu/yolov7/blob/main/LICENSE.md)|Non Maximum Suppression has been added.| [CoreML-YOLOv5](https://github.com/john-rocky/CoreML-YOLOv5) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1QiTlFsN948Xt2e4WgqUB8DnGgwWwtVZS?usp=sharing) |
+
+### YOLOv8
+
+<img width="400" alt="スクリーンショット 2021-12-29 6 17 08" src="https://user-images.githubusercontent.com/23278992/211807010-d48854b3-beb0-46a8-bd99-cbb9351529b0.png">
+
+| Google Drive Link | Size | Output | Original Project | License | Note | Sample Project | 
+| ------------- | ------------- | ------------- | ------------- |------------- |------------- |------------- |
+|[YOLOv8s](https://drive.google.com/file/d/1pLRh1Y37KLEMpQn3v8qH-A12swakoHbI/view?usp=share_link)|45.1MB| Confidence(MultiArray (Double 0 × 80)), Coordinates (MultiArray (Double 0 × 4)) |[ultralytics/ultralytics](https://github.com/ultralytics/ultralytics)|[GNU](https://github.com/ultralytics/ultralytics/blob/main/LICENSE)|Non Maximum Suppression has been added.| [CoreML-YOLOv5](https://github.com/john-rocky/CoreML-YOLOv5) |
 
 # Segmentation
 
