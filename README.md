@@ -13,6 +13,8 @@ download the model from google drive link and bundle it in your project.
 Or if the model have sample project link, try it and see how to use the model in the project.
 You are free to do or not.
 
+**If you like this repository, please give me a star so I can do my best.**
+
 # Section Link
 
 - [**Image Classifier**](#image-classifier)
