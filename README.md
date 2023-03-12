@@ -629,7 +629,7 @@ Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-d
 <img width="400" img src="https://user-images.githubusercontent.com/23278992/224542700-701472b7-fa8c-4824-a966-f9490f7c780f.jpg"> <img width="400" img src="https://user-images.githubusercontent.com/23278992/224542703-11ed535f-40c6-4a45-8e3f-d42ce2b9c6f9.jpeg">
 
 | Google Drive Link | Size | Output | Original Project | License |Year|Conversion Script |
-| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
 | [MiDaS](https://drive.google.com/file/d/1agGnt5Cq5CGzoNDl9Nb-3u7pB5SrIbN4/view?usp=share_link) | 66.3MB | Image(256x256) | [isl-org/MiDaS](https://github.com/isl-org/MiDaS)  |[MIT](https://github.com/isl-org/MiDaS/blob/master/LICENSE)|2022|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/13cVDO6gYdQvbKimcfbgGOfuoQmrTbarU?usp=sharing) |
 
 ## How to use in a xcode project.
