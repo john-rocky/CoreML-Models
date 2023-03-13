@@ -89,6 +89,9 @@ You are free to do or not.
 - [**Monocular Depth Estimation**](#monocular-depth-estimation)
   - [MiDaS](#midas)
 
+- [**Models converted by someone other than me**](#models-converted-by-someone-other-than-me)
+  - [Stable Diffusion](#stable-diffusion)
+
 
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
@@ -630,6 +633,11 @@ Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-d
 | Google Drive Link | Size | Output | Original Project | License |Year|Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
 | [MiDaS_Small](https://drive.google.com/file/d/1agGnt5Cq5CGzoNDl9Nb-3u7pB5SrIbN4/view?usp=share_link) | 66.3MB | MultiArray(1x256x256) | [isl-org/MiDaS](https://github.com/isl-org/MiDaS)  |[MIT](https://github.com/isl-org/MiDaS/blob/master/LICENSE)|2022|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/13cVDO6gYdQvbKimcfbgGOfuoQmrTbarU?usp=sharing) |
+
+## Models converted by someone other than me.
+
+### [Stable Diffusion](https://github.com/apple/ml-stable-diffusion)
+[apple/ml-stable-diffusion](https://github.com/apple/ml-stable-diffusion)
 
 ## How to use in a xcode project.
 
