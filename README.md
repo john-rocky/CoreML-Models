@@ -25,6 +25,7 @@ You are free to do or not.
   - [DeiT](#deit)
   - [RepVGG](#repvgg)
   - [RegNet](#regnet)
+  - [MobileViTv2](#mobilevitv2)
 
   
 - [**Object Detection**](#object-detection)
@@ -166,6 +167,17 @@ Designing Network Design Spaces
 | Google Drive Link | Size | Dataset |Original Project | License |Year|
 | ------------- | ------------- | ------------- |------------- |------------- |------------- |
 | [regnet_y_400mf](https://drive.google.com/file/d/16jbUJ4gHSzdxxbYb99rOQe0FiKCuLyDB/view?usp=sharing) | 16.5 MB | ImageNet | [TORCHVISION.MODELS](https://pytorch.org/vision/stable/models.html#torchvision-models)  | [MIT](https://github.com/facebookresearch/pycls/blob/main/LICENSE)|2020|
+
+
+### MobileViTv2
+
+CVNets: A library for training computer vision networks
+
+<img width="400" alt="スクリーンショット 2022-02-23 7 38 23" src="https://user-images.githubusercontent.com/23278992/225600794-a0a4dc00-cc67-4614-82ed-3ed8633cf03e.png">
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year|
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |
+| [regnet_y_400mf](https://drive.google.com/file/d/1__aG67p6o5-NIchkHpfFJBszCpIhI0uf/view?usp=share_link) | 18.8 MB | ImageNet | [apple/ml-cvnets](https://github.com/apple/ml-cvnets)  | [apple](https://github.com/apple/ml-cvnets/blob/main/LICENSE)|2022|
 
 # Object Detection
 
