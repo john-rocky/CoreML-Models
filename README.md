@@ -175,9 +175,9 @@ CVNets: A library for training computer vision networks
 
 <img width="400" alt="スクリーンショット 2022-02-23 7 38 23" src="https://user-images.githubusercontent.com/23278992/225600794-a0a4dc00-cc67-4614-82ed-3ed8633cf03e.png">
 
-| Google Drive Link | Size | Dataset |Original Project | License |Year|
-| ------------- | ------------- | ------------- |------------- |------------- |------------- |
-| [regnet_y_400mf](https://drive.google.com/file/d/1__aG67p6o5-NIchkHpfFJBszCpIhI0uf/view?usp=share_link) | 18.8 MB | ImageNet | [apple/ml-cvnets](https://github.com/apple/ml-cvnets)  | [apple](https://github.com/apple/ml-cvnets/blob/main/LICENSE)|2022|
+| Google Drive Link | Size | Dataset |Original Project | License |Year|Conversion Script|
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
+| [MobileViTv2](https://drive.google.com/file/d/1__aG67p6o5-NIchkHpfFJBszCpIhI0uf/view?usp=share_link) | 18.8 MB | ImageNet | [apple/ml-cvnets](https://github.com/apple/ml-cvnets)  | [apple](https://github.com/apple/ml-cvnets/blob/main/LICENSE)|2022|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/drive/1QiTlFsN948Xt2e4WgqUB8DnGgwWwtVZS?usp=sharing](https://colab.research.google.com/drive/1UQwhFpVP_4Q9I6LXPdBSS0VDhIRdUBQA?usp=sharing)) |
 
 # Object Detection
 
