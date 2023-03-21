@@ -90,7 +90,7 @@ You are free to do or not.
 - [**Monocular Depth Estimation**](#monocular-depth-estimation)
   - [MiDaS](#midas)
   
-- [Stable Diffusion](#stable-diffusion) :text2image
+- [**Stable Diffusion](#stable-diffusion) :text2image**
   - [stable-diffusion-v1-5](#stable-diffusion-v1-5)
   - [pastel-mix](#pastel-mix)
   - [Orange Mix](#orange-mix)
