@@ -637,6 +637,8 @@ White-box facial image cartoonizaiton
 | ------------- | ------------- | ------------- | ------------- |------------- |------------- |------------- |
 |[AOT-GAN-for-Inpainting](https://drive.google.com/file/d/16rF46DFcDPherlpgjuL60065xcP2N3nv/view?usp=share_link)|60.8MB| MLMultiArray(3,512,512) |[researchmm/AOT-GAN-for-Inpainting](https://github.com/researchmm/AOT-GAN-for-Inpainting)|[Apache2.0](https://github.com/open-mmlab/mmediting/blob/master/LICENSE)|To use see sample.| [john-rocky/Inpainting-CoreML](https://github.com/john-rocky/Inpainting-CoreML) |
 
+# Monocular Depth Estimation
+
 ### [MiDaS](https://drive.google.com/file/d/1agGnt5Cq5CGzoNDl9Nb-3u7pB5SrIbN4/view?usp=share_link)
 Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer
 
