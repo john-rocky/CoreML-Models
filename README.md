@@ -690,6 +690,15 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
 | [Counterfeit-V2.5](https://drive.google.com/file/d/1Kt_8hnGUGnJAUnuergLki37GKnWjWOJp/view?usp=share_link) |[gsdf/Counterfeit-V2.5](https://huggingface.co/gsdf/Counterfeit-V2.5)|-|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
 
+
+### [anything-v4.5]()
+
+<img width="800" alt="スクリーンショット 2023-03-22 0 47 53" src="https://user-images.githubusercontent.com/23278992/226734890-8b48320f-5b4c-4f6c-bd56-07954f573582.png">
+
+| Google Drive Link  | Original Model | License | Run on mac |Conversion Script |Year|
+| ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
+| [anything-v4.5]() |[gsdf/Counterfeit-V2.5](https://huggingface.co/gsdf/Counterfeit-V2.5)|-|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
+
 ## Models converted by someone other than me.
 
 ### [Stable Diffusion](https://github.com/apple/ml-stable-diffusion)
