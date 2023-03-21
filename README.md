@@ -89,6 +89,9 @@ You are free to do or not.
   
 - [**Monocular Depth Estimation**](#monocular-depth-estimation)
   - [MiDaS](#midas)
+  
+- [Stable Diffusion](#stable-diffusion) :text2image
+  - [Stable-diffusion-v1-5](#stable-diffusion-v1-5)
 
 - [**Models converted by someone other than me**](#models-converted-by-someone-other-than-me)
   - [Stable Diffusion](#stable-diffusion)
@@ -647,6 +650,17 @@ Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-d
 | Google Drive Link | Size | Output | Original Project | License |Year|Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
 | [MiDaS_Small](https://drive.google.com/file/d/1agGnt5Cq5CGzoNDl9Nb-3u7pB5SrIbN4/view?usp=share_link) | 66.3MB | MultiArray(1x256x256) | [isl-org/MiDaS](https://github.com/isl-org/MiDaS)  |[MIT](https://github.com/isl-org/MiDaS/blob/master/LICENSE)|2022|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/13cVDO6gYdQvbKimcfbgGOfuoQmrTbarU?usp=sharing) |
+
+# Stable Diffusion
+
+### [stable-diffusion-v1-5]()
+
+<img width="400" alt="スクリーンショット 2023-03-21 18 52 18" src="https://user-images.githubusercontent.com/23278992/226571395-0815ebdb-39e1-4763-bb16-25c33c5ae9bb.png">
+
+| Google Drive Link  | Original Model |Original Project | License | Run on mac |Conversion Script |Year|
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
+| [stable-diffusion-v1-5]() |[runwayml/stable-diffusion-v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5)|[runwayml/stable-diffusion](https://github.com/runwayml/stable-diffusion)  |[Open RAIL M license](https://huggingface.co/runwayml/stable-diffusion-v1-5)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2022|
+
 
 ## Models converted by someone other than me.
 
