@@ -94,7 +94,7 @@ You are free to do or not.
   - [stable-diffusion-v1-5](#stable-diffusion-v1-5)
   - [pastel-mix](#pastel-mix)
   - [Orange Mix](#orange-mix)
-  - [Counterfeit-V2.5](#counterfeit-v2.5)
+  - [Counterfeit-V2.5](#counterfeit-v2-5)
 
 - [**Models converted by someone other than me**](#models-converted-by-someone-other-than-me)
   - [Stable Diffusion](#stable-diffusion)
