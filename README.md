@@ -673,14 +673,14 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
 | [pastelMixStylizedAnime_pastelMixPrunedFP16](https://drive.google.com/file/d/1cp3VoF1R-as8_lScWGUoxl-BNVX3d7vb/view?usp=share_link) |[andite/pastel-mix](https://huggingface.co/andite/pastel-mix)|[Fantasy.ai](https://huggingface.co/andite/pastel-mix)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
 
-### [Orange Mix]()
+### [Orange Mix](https://drive.google.com/file/d/1ueU-RuZIsl3b3F7uu_gBa_SfAtGTzTI5/view?usp=share_link)
 
 <img width="800" alt="スクリーンショット 2023-03-21 23 34 13" src="https://user-images.githubusercontent.com/23278992/226656177-8260d83c-6e93-4d9b-8fbd-154a0028f88d.png">
 
 
 | Google Drive Link  | Original Model | License | Run on mac |Conversion Script |Year|
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
-| [AOM3_orangemixs]() |[WarriorMama777/OrangeMixs](https://huggingface.co/WarriorMama777/OrangeMixs)|[CreativeML OpenRAIL-M](https://huggingface.co/WarriorMama777/OrangeMixs)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
+| [AOM3_orangemixs](https://drive.google.com/file/d/1ueU-RuZIsl3b3F7uu_gBa_SfAtGTzTI5/view?usp=share_link) |[WarriorMama777/OrangeMixs](https://huggingface.co/WarriorMama777/OrangeMixs)|[CreativeML OpenRAIL-M](https://huggingface.co/WarriorMama777/OrangeMixs)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
 
 ## Models converted by someone other than me.
 
