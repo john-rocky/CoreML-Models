@@ -94,7 +94,7 @@ You are free to do or not.
   - [stable-diffusion-v1-5](#stable-diffusion-v1-5)
   - [pastel-mix](#pastel-mix)
   - [Orange Mix](#orange-mix)
-  - [Counterfeit-V2.5](#counterfeit-v2-5)
+  - [Counterfeit-V2.5](#counterfeit)
 
 - [**Models converted by someone other than me**](#models-converted-by-someone-other-than-me)
   - [Stable Diffusion](#stable-diffusion)
@@ -682,7 +682,7 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
 | [AOM3_orangemixs](https://drive.google.com/file/d/1ueU-RuZIsl3b3F7uu_gBa_SfAtGTzTI5/view?usp=share_link) |[WarriorMama777/OrangeMixs](https://huggingface.co/WarriorMama777/OrangeMixs)|[CreativeML OpenRAIL-M](https://huggingface.co/WarriorMama777/OrangeMixs)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
 
-### [Counterfeit-V2.5](https://drive.google.com/file/d/1Kt_8hnGUGnJAUnuergLki37GKnWjWOJp/view?usp=share_link)
+### [Counterfeit](https://drive.google.com/file/d/1Kt_8hnGUGnJAUnuergLki37GKnWjWOJp/view?usp=share_link)
 
 <img width="800" alt="スクリーンショット 2023-03-22 0 47 53" src="https://user-images.githubusercontent.com/23278992/226731352-c6ad077d-6f91-4a03-a6e5-dd01ce398d9c.png">
 
