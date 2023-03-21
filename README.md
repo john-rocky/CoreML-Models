@@ -91,7 +91,8 @@ You are free to do or not.
   - [MiDaS](#midas)
   
 - [Stable Diffusion](#stable-diffusion) :text2image
-  - [Stable-diffusion-v1-5](#stable-diffusion-v1-5)
+  - [stable-diffusion-v1-5](#stable-diffusion-v1-5)
+  - [pastel-mix](#pastel-mix)
 
 - [**Models converted by someone other than me**](#models-converted-by-someone-other-than-me)
   - [Stable Diffusion](#stable-diffusion)
@@ -661,16 +662,15 @@ Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-d
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | 
 | [stable-diffusion-v1-5](https://drive.google.com/file/d/1dqYEdhSPi7y0Dgans-Fk7_ViNviUTUJj/view?usp=share_link) |[runwayml/stable-diffusion-v1-5](https://huggingface.co/runwayml/stable-diffusion-v1-5)|[runwayml/stable-diffusion](https://github.com/runwayml/stable-diffusion)  |[Open RAIL M license](https://huggingface.co/runwayml/stable-diffusion-v1-5)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2022|
 
-### [pastel-mix]
+### [pastel-mix](https://drive.google.com/file/d/1cp3VoF1R-as8_lScWGUoxl-BNVX3d7vb/view?usp=share_link)
 
 Pastel Mix - a stylized latent diffusion model.This model is intended to produce high-quality, highly detailed anime style with just a few prompts.
-Coming soon...
 
 <img width="400" alt="スクリーンショット 2023-03-21 19 54 13" src="https://user-images.githubusercontent.com/23278992/226585761-3eaba244-7fea-4529-af36-0962fe624936.png">
 
 | Google Drive Link  | Original Model | License | Run on mac |Conversion Script |Year|
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
-| [pastelMixStylizedAnime_pastelMixPrunedFP16] |[andite/pastel-mix](https://huggingface.co/andite/pastel-mix)||[Fantasy.ai](https://huggingface.co/andite/pastel-mix)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
+| [pastelMixStylizedAnime_pastelMixPrunedFP16](https://drive.google.com/file/d/1cp3VoF1R-as8_lScWGUoxl-BNVX3d7vb/view?usp=share_link) |[andite/pastel-mix](https://huggingface.co/andite/pastel-mix)||[Fantasy.ai](https://huggingface.co/andite/pastel-mix)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
 
 ## Models converted by someone other than me.
 
