@@ -700,6 +700,14 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
 | [anything-v4.5](https://drive.google.com/file/d/1yF55CGy4I3BKom_E70lLkU6N03nSvjDt/view?usp=share_link) |[andite/anything-v4.0](https://huggingface.co/andite/anything-v4.0)|[Fantasy.ai](https://huggingface.co/andite/anything-v4.0)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
 
+### [Openjourney](https://drive.google.com/file/d/1KIhSG7pHjgldg7r2mm1Yuwa85BceFLsk/view?usp=share_link)
+
+<img width="800" alt="スクリーンショット 2023-03-22 7 49 39" src="https://user-images.githubusercontent.com/23278992/226909583-42efdb55-e2f0-4331-be0d-7f4bcd2c8b2c.png">
+
+| Google Drive Link  | Original Model | License | Run on mac |Conversion Script |Year|
+| ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
+| [Openjourney](https://drive.google.com/file/d/1KIhSG7pHjgldg7r2mm1Yuwa85BceFLsk/view?usp=share_link) |[prompthero/openjourney](https://huggingface.co/prompthero/openjourney)|-|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
+
 ## Models converted by someone other than me.
 
 ### [Stable Diffusion](https://github.com/apple/ml-stable-diffusion)
