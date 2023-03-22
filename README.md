@@ -96,6 +96,7 @@ You are free to do or not.
   - [Orange Mix](#orange-mix)
   - [Counterfeit-V2.5](#counterfeit)
   - [anything-v4.5](#anything-v4)
+  - [Openjourney](#openjourney)
 
 - [**Models converted by someone other than me**](#models-converted-by-someone-other-than-me)
   - [Stable Diffusion](#stable-diffusion)
