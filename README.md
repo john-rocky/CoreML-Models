@@ -691,13 +691,13 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 | [Counterfeit-V2.5](https://drive.google.com/file/d/1Kt_8hnGUGnJAUnuergLki37GKnWjWOJp/view?usp=share_link) |[gsdf/Counterfeit-V2.5](https://huggingface.co/gsdf/Counterfeit-V2.5)|-|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
 
 
-### [anything-v4.5]()
+### [anything-v4.5](https://drive.google.com/file/d/1yF55CGy4I3BKom_E70lLkU6N03nSvjDt/view?usp=share_link)
 
 <img width="800" alt="スクリーンショット 2023-03-22 0 47 53" src="https://user-images.githubusercontent.com/23278992/226734890-8b48320f-5b4c-4f6c-bd56-07954f573582.png">
 
 | Google Drive Link  | Original Model | License | Run on mac |Conversion Script |Year|
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
-| [anything-v4.5]() |[andite/anything-v4.0](https://huggingface.co/andite/anything-v4.0)|[Fantasy.ai](https://huggingface.co/andite/anything-v4.0)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
+| [anything-v4.5](https://drive.google.com/file/d/1yF55CGy4I3BKom_E70lLkU6N03nSvjDt/view?usp=share_link) |[andite/anything-v4.0](https://huggingface.co/andite/anything-v4.0)|[Fantasy.ai](https://huggingface.co/andite/anything-v4.0)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
 
 ## Models converted by someone other than me.
 
