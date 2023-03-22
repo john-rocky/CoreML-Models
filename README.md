@@ -97,10 +97,7 @@ You are free to do or not.
   - [Counterfeit-V2.5](#counterfeit)
   - [anything-v4.5](#anything-v4)
   - [Openjourney](#openjourney)
-
-- [**Models converted by someone other than me**](#models-converted-by-someone-other-than-me)
-  - [Stable Diffusion](#stable-diffusion)
-
+  - [dreamlike-photoreal-2.0](#dreamlike-photoreal-2)
 
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
@@ -708,6 +705,14 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 | Google Drive Link  | Original Model | License | Run on mac |Conversion Script |Year|
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
 | [Openjourney](https://drive.google.com/file/d/1KIhSG7pHjgldg7r2mm1Yuwa85BceFLsk/view?usp=share_link) |[prompthero/openjourney](https://huggingface.co/prompthero/openjourney)|-|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
+
+### [dreamlike-photoreal-2](https://drive.google.com/file/d/1D5RXYE52wyXPq6TdCHM8DIkP4dxHafwt/view?usp=share_link)
+
+<img width="800" alt="dreamlike" src="https://user-images.githubusercontent.com/23278992/226922948-1af2334b-0798-4aef-bfb4-464438dde1b9.png">
+
+| Google Drive Link  | Original Model | License | Run on mac |Conversion Script |Year|
+| ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
+| [dreamlike-photoreal-2.0](https://drive.google.com/file/d/1D5RXYE52wyXPq6TdCHM8DIkP4dxHafwt/view?usp=share_link) |[dreamlike-art/dreamlike-photoreal-2.0](https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0)|[CreativeML OpenRAIL-M](https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
 
 ## Models converted by someone other than me.
 
