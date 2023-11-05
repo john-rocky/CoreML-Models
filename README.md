@@ -60,7 +60,8 @@ You are free to do or not.
   - [SRResNet](#srresnet)
   - [LESRCNN](#lesrcnn)
   - [MMRealSR](#mmrealsr)
-  
+  - [DASR](#dasr)
+      
 - [**Low Light Enhancement**](#low-light-enhancement)
   - [StableLLVE](#stablellve)
   - [Zero-DCE](#zero-dce)
@@ -442,6 +443,17 @@ Metric Learning based Interactive Modulation for Real-World Super-Resolution
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |------------- |
 | [MMRealSRGAN](https://drive.google.com/file/d/1-HwMLvOy_hHycHNhojob6uT8t6tRyWqb/view?usp=sharing) | 104.6 MB | Image(RGB 1024x1024)| [TencentARC/MM-RealSR](https://github.com/TencentARC/MM-RealSR)  | [BSD 3-Clause](https://github.com/TencentARC/MM-RealSR/blob/main/LICENSE) |2022|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1zhUhQhdtP02N2pFIxsO5lin7tDOExZCo?usp=sharing)|
 | [MMRealSRNet](https://drive.google.com/file/d/1-77P8AtHFh5kca2kYZ6X7GaUueoa3el_/view?usp=sharing) | 104.6 MB | Image(RGB 1024x1024)| [TencentARC/MM-RealSR](https://github.com/TencentARC/MM-RealSR)  | [BSD 3-Clause](https://github.com/TencentARC/MM-RealSR/blob/main/LICENSE) |2022|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1zhUhQhdtP02N2pFIxsO5lin7tDOExZCo?usp=sharing)|
+
+### [DASR](https://drive.google.com/drive/folders/10J2ehHewK2ppS5ToDqmtJ2Ei5k8vcdL0?usp=sharing)
+
+Pytorch implementation of "Unsupervised Degradation Representation Learning for Blind Super-Resolution", CVPR 2021
+
+<img width="400" src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/7e806f4d-0323-431a-89e8-816163e5c3f5"> <img width="400" src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/8589f89b-367d-4777-8ebd-6e78253c4b33">
+
+| Google Drive Link | Size | Output |Original Project | License |year|
+| ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
+| [DASR](https://drive.google.com/drive/folders/10J2ehHewK2ppS5ToDqmtJ2Ei5k8vcdL0?usp=sharing) | 12.1 MB | Image(RGB 1024x1024)| [The-Learning-And-Vision-Atelier-LAVA/DASR](https://github.com/The-Learning-And-Vision-Atelier-LAVA/DASR)  | [MIT](https://github.com/The-Learning-And-Vision-Atelier-LAVA/DASR/blob/main/LICENSE) |2022|
+
 
 # Low Light Enhancement
 
