@@ -87,7 +87,8 @@ You are free to do or not.
 
 - [**Inpainting**](#inpainting)
   - [AOT-GAN-for-Inpainting](#aot-gan-for-inpainting)
-  
+  - [Lama](#lama)
+
 - [**Monocular Depth Estimation**](#monocular-depth-estimation)
   - [MiDaS](#midas)
   
@@ -653,6 +654,14 @@ White-box facial image cartoonizaiton
 | Google Drive Link | Size | Output | Original Project | License | Note | Sample Project |
 | ------------- | ------------- | ------------- | ------------- |------------- |------------- |------------- |
 |[AOT-GAN-for-Inpainting](https://drive.google.com/file/d/16rF46DFcDPherlpgjuL60065xcP2N3nv/view?usp=share_link)|60.8MB| MLMultiArray(3,512,512) |[researchmm/AOT-GAN-for-Inpainting](https://github.com/researchmm/AOT-GAN-for-Inpainting)|[Apache2.0](https://github.com/open-mmlab/mmediting/blob/master/LICENSE)|To use see sample.| [john-rocky/Inpainting-CoreML](https://github.com/john-rocky/Inpainting-CoreML) |
+
+### [Lama](https://drive.google.com/drive/folders/1s_uICJQykFFxgVubpBNeLLDL0JsxgdCd?usp=sharing)
+
+<img width="400" src="https://private-user-images.githubusercontent.com/23278992/293049342-847f874b-7174-4317-8313-f82685bdd20c.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTEiLCJleHAiOjE3MDM2ODgwNTEsIm5iZiI6MTcwMzY4Nzc1MSwicGF0aCI6Ii8yMzI3ODk5Mi8yOTMwNDkzNDItODQ3Zjg3NGItNzE3NC00MzE3LTgzMTMtZjgyNjg1YmRkMjBjLmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFJV05KWUFYNENTVkVINTNBJTJGMjAyMzEyMjclMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjMxMjI3VDE0MzU1MVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPThjODQ2NzQ3NzMyMDMyZDJhNzAwYzViOWMwMzUxM2ZhMGJkZWRkYWU5ZmM0NzdkNmM4YjcwMDdmZmE2OTdhYjYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.VdfxYMUJCcp3FPKOWM_ZfoNM3YyUOKVak4ReWqJjCRw">
+
+| Google Drive Link | Size | Input | Output | Original Project | License | Note | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |------------- |
+|[Lama](https://drive.google.com/drive/folders/1s_uICJQykFFxgVubpBNeLLDL0JsxgdCd?usp=sharing)|216.6MB| Image (Color 800 × 800), Image (GrayScale 800 × 800)| Image (Color 800 × 800) |[advimman/lama](https://github.com/advimman/lama)|[Apache2.0](https://github.com/advimman/lama/blob/main/LICENSE)|To use see sample.| [john-rocky/lama-cleaner-iOS](https://github.com/john-rocky/lama-cleaner-iOS) | [mallman/CoreMLaMa](https://github.com/mallman/CoreMLaMa)|
 
 # Monocular Depth Estimation
 
