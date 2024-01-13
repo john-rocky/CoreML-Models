@@ -1,9 +1,9 @@
 # CoreML-Models
-Converted CoreML Model Zoo.
+Converted Core ML Model Zoo.
 
 <img width="1280" src="https://user-images.githubusercontent.com/23278992/147420041-fdeb1fbb-7e93-41c6-84d6-80d7c1c45200.jpeg">
 
-CoreML is a machine learning framework by Apple.
+Core ML is a machine learning framework by Apple.
 If you are iOS developer, you can easly use machine learning models in your Xcode project. 
 
 # How to use
