@@ -332,9 +332,9 @@ Code for binary segmentation of various cloths.
 
 ### easyportrait
 
-Code for binary segmentation of various cloths.
+EasyPortrait - Face Parsing and Portrait Segmentation Dataset.
 
-<img src="https://github.com/john-rocky/CoreML-Models/assets/23278992/6ab8ed6a-2de7-43fd-bb84-2fb77286bd6c" width=400> <img src="https://github.com/john-rocky/CoreML-Models/assets/23278992/cfc8f040-ca39-48be-a8e5-f58d98bfed4f" width=400>
+<img src="https://github.com/john-rocky/CoreML-Models/assets/23278992/6ab8ed6a-2de7-43fd-bb84-2fb77286bd6c" width=400> <img src="https://github.com/john-rocky/CoreML-Models/assets/23278992/a0b8e435-d04e-4a88-940b-bd5fb45cbc15" width=400>
 
 | Google Drive Link | Size | Output |Original Project | License | year | Swift sample |
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |
