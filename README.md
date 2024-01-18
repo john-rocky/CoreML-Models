@@ -46,6 +46,7 @@ You are free to do or not.
   - [DANet](#danet)
   - [Semantic FPN](#semantic-fpn)
   - [cloths_segmentation](#cloths_segmentation)
+  - [easyportrait](#easyportrait)
 
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#real-esrgan)
@@ -328,6 +329,16 @@ Code for binary segmentation of various cloths.
 | Google Drive Link | Size | Output |Dataset|Original Project | License | year |
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- | ------------- |
 | [clothSegmentation](https://drive.google.com/file/d/1-2AydEgkth6UTD5bu13R0fJYoqZZMG3e/view?usp=sharing) | 50.1 MB | Image(GrayScale 640x960) |[fashion-2019-FGVC6](https://www.kaggle.com/c/imaterialist-fashion-2019-FGVC6)| [facebookresearch/detectron2](https://github.com/facebookresearch/detectron2) | [MIT](https://github.com/ternaus/cloths_segmentation/blob/main/LICENSE) |2020|
+
+### easyportrait
+
+Code for binary segmentation of various cloths.
+
+<img src="https://github.com/john-rocky/CoreML-Models/assets/23278992/6ab8ed6a-2de7-43fd-bb84-2fb77286bd6c" width=400> <img src="https://github.com/john-rocky/CoreML-Models/assets/23278992/cfc8f040-ca39-48be-a8e5-f58d98bfed4f" width=400>
+
+| Google Drive Link | Size | Output |Original Project | License | year | Swift sample |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |
+| [easyportrait-segformer512-fp](https://drive.google.com/drive/folders/13BUhNpQHodAgcj6eJaPbzuSUaFn3JuU-?usp=sharing) | 7.6 MB | Image(GrayScale 512x512) * 9 |[hukenovs/easyportrait](https://github.com/hukenovs/easyportrait) | [Creative Commons](https://github.com/hukenovs/easyportrait/tree/main/license) |2023|[easyportrait-coreml](https://github.com/john-rocky/easyportrait-coreml)|
 
 # Super Resolution
 
