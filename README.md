@@ -336,9 +336,9 @@ EasyPortrait - Face Parsing and Portrait Segmentation Dataset.
 
 <img src="https://github.com/john-rocky/CoreML-Models/assets/23278992/6ab8ed6a-2de7-43fd-bb84-2fb77286bd6c" width=400> <img src="https://github.com/john-rocky/CoreML-Models/assets/23278992/a0b8e435-d04e-4a88-940b-bd5fb45cbc15" width=400>
 
-| Google Drive Link | Size | Output |Original Project | License | year | Swift sample |
-| ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |
-| [easyportrait-segformer512-fp](https://drive.google.com/drive/folders/13BUhNpQHodAgcj6eJaPbzuSUaFn3JuU-?usp=sharing) | 7.6 MB | Image(GrayScale 512x512) * 9 |[hukenovs/easyportrait](https://github.com/hukenovs/easyportrait) | [Creative Commons](https://github.com/hukenovs/easyportrait/tree/main/license) |2023|[easyportrait-coreml](https://github.com/john-rocky/easyportrait-coreml)|
+| Google Drive Link | Size | Output |Original Project | License | year | Swift sample |Conversion Script |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |------------- |
+| [easyportrait-segformer512-fp](https://drive.google.com/drive/folders/13BUhNpQHodAgcj6eJaPbzuSUaFn3JuU-?usp=sharing) | 7.6 MB | Image(GrayScale 512x512) * 9 |[hukenovs/easyportrait](https://github.com/hukenovs/easyportrait) | [Creative Commons](https://github.com/hukenovs/easyportrait/tree/main/license) |2023|[easyportrait-coreml](https://github.com/john-rocky/easyportrait-coreml)|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11a3XWFA8fa8V0a2zgWFqOMUaZgF4O1qt?usp=sharing)|
 
 # Super Resolution
 
