@@ -36,6 +36,7 @@ You are free to do or not.
 - [**Segmentation**](#segmentation)
   - [U2Net](#u2net)
   - [IS-Net](#is-net)
+  - [RMBG1.4](#rmbg1.4)
   - [face-parsing](#face-parsing)
   - [Segformer](#segformer)
   - [BiseNetv2](#bisenetv2)
@@ -231,6 +232,16 @@ CVNets: A library for training computer vision networks
 | ------------- | ------------- | ------------- | ------------- |------------- | ------------- |------------- |
 | [IS-Net](https://drive.google.com/drive/folders/13CkOTBCYc3FjGTU26lmCsRYsOkeHnAMA?usp=sharing) | 176.1 MB | Image(GRAYSCALE 1024 × 1024)| [xuebinqin/DIS](https://github.com/xuebinqin/DIS)  | [Apache](https://github.com/xuebinqin/DIS/blob/main/LICENSE.md)| 2022 |[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1xWD7LZbI-_09LXmiYMdhA28V2qujvOlZ?usp=sharing)|
 | [IS-Net-General-Use](https://drive.google.com/file/d/1Vglh1zPwTglroMvycnkLdFP6nCHf_GuH/view?usp=sharing) | 176.1 MB | Image(GRAYSCALE 1024 × 1024)| [xuebinqin/DIS](https://github.com/xuebinqin/DIS)  | [Apache](https://github.com/xuebinqin/DIS/blob/main/LICENSE.md)| 2022 |[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1xWD7LZbI-_09LXmiYMdhA28V2qujvOlZ?usp=sharing)|
+
+### RMBG1.4
+
+RMBG1.4 - The IS-Net enhanced with our unique training scheme and proprietary dataset. 
+
+<img src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/2a91ec10-fe94-43be-aedc-283e71fa9a1e" width=400> <img src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/04af501d-996d-48f4-b008-f0076dcbc117" width=400>
+
+| Google Drive Link | Size | Output |Original Project | License | year  |Conversion Script |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |
+| [RMBG.mlpackage](https://drive.google.com/drive/folders/1-33OTxUoO6en8sVsFEvt3Vt_FQ-hwJ3m?usp=sharing)/[RMBG.mlmodel](https://drive.google.com/file/d/1-_O7uLioAvi9q0wbJOiis0dqa8ho4A4o/view?usp=drive_link) | 176 MB | Image(GrayScale 1024x1024) |[briaai/RMBG-1.4](https://huggingface.co/briaai/RMBG-1.4) | [Creative Commons](https://huggingface.co/briaai/RMBG-1.4) |2024|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1KUTREfLbDklnKhaaJU2Q444TLxjmIXwN?usp=sharing)|
 
 ### face-Parsing
 
