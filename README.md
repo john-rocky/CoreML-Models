@@ -36,7 +36,7 @@ You are free to do or not.
 - [**Segmentation**](#segmentation)
   - [U2Net](#u2net)
   - [IS-Net](#is-net)
-  - [RMBG1.4](#rmbg1.4)
+  - [RMBG1.4](#rmbg1-4)
   - [face-parsing](#face-parsing)
   - [Segformer](#segformer)
   - [BiseNetv2](#bisenetv2)
