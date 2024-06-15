@@ -58,6 +58,7 @@ You are free to do or not.
   - [RRDN](#rrdn)
   - [Fast-SRGAN](#fast-srgan)
   - [ESRGAN](#esrgan)
+  - [UltraSharp](#ultrasharp)
   - [SRGAN](#srgan)
   - [SRResNet](#srresnet)
   - [LESRCNN](#lesrcnn)
