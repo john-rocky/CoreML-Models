@@ -426,6 +426,16 @@ Enhanced-SRGAN.
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
 | [ESRGAN](https://drive.google.com/file/d/1fkRbh_gckuFlgr357OIdOrEJK4T_2Xkz/view?usp=sharing) | 66.9 MB | Image(RGB 2048x2048)| [xinntao/ESRGAN](https://github.com/xinntao/ESRGAN)  | [Apache 2.0](https://github.com/xinntao/ESRGAN/blob/master/LICENSE) |2018|
 
+### [UltraSharp](https://drive.google.com/drive/folders/1-Q1SdS8iHWTfTs7FE39pUTEubPks30Ca?usp=drive_link)
+
+Pretrained: 4xESRGAN
+
+<img width="400" src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/b98ab056-23b0-486e-a52c-a88e857c1048"> <img width="400" src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/d4214ded-c9d2-4f18-8de3-222f912862b0">
+
+| Google Drive Link | Size | Output |Original Project | License |year |
+| ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
+| [UltraSharp](https://drive.google.com/drive/folders/1-Q1SdS8iHWTfTs7FE39pUTEubPks30Ca?usp=drive_link) | 34 MB | Image(RGB 1024x1024)| [Kim2019/](https://openmodeldb.info/models/4x-UltraSharp)  | [CC-BY-NC-SA-4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ja) |2021|
+
 ### [SRGAN](https://drive.google.com/file/d/1-076W2o0wCtoODptikX1eOnlFBx2s3qK/view?usp=sharing)
 
 Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network.
