@@ -517,7 +517,7 @@ Zero-Reference Deep Curve Estimation for Low-Light Image Enhancement
 
 Retinexformer: One-stage Retinex-based Transformer for Low-light Image Enhancement
 
-<img width="256" src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/296650ba-e2a9-49ba-b2d6-be02e8b56f09"> <img width="256" src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/8b7ae403-471e-48fe-b209-8a41b92bb3d8"> 
+<img width="256" src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/296650ba-e2a9-49ba-b2d6-be02e8b56f09"> <img width="256" src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/eac9f78a-2b00-442a-b73f-01760268184e"> 
 
 | Google Drive Link | Size | Output |Original Project | License |Year|Conversion Script|
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
