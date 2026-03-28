@@ -1,0 +1,15 @@
+# CoreML model files (download from Google Drive)
+*.mlpackage
+*.mlmodel
+*.mlmodelc
+*.mlpackage/
+
+# Converted models directory
+converted_models/
+creative_models/
+
+# Python conversion scripts
+convert_all.py
+convert_remaining.py
+__pycache__/
+*.pyc

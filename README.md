@@ -26,6 +26,14 @@ You are free to do or not.
   - [RepVGG](#repvgg)
   - [RegNet](#regnet)
   - [MobileViTv2](#mobilevitv2)
+  - [MobileNetV3-Small](#mobilenetv3-small)
+  - [ConvNeXt-Tiny](#convnext-tiny)
+  - [FastViT-T8](#fastvit-t8)
+  - [MobileOne-S0](#mobileone-s0)
+  - [EfficientFormerV2-S0](#efficientformerv2-s0)
+  - [GhostNetV2-100](#ghostnetv2-100)
+  - [PoolFormer-S12](#poolformer-s12)
+  - [LeViT-128S](#levit-128s)
 
   
 - [**Object Detection**](#object-detection)
@@ -48,6 +56,8 @@ You are free to do or not.
   - [Semantic FPN](#semantic-fpn)
   - [cloths_segmentation](#cloths_segmentation)
   - [easyportrait](#easyportrait)
+  - [DeepLabV3-MobileNetV3](#deeplabv3-mobilenetv3)
+  - [LRASPP-MobileNetV3](#lraspp-mobilenetv3)
 
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#real-esrgan)
@@ -105,6 +115,26 @@ You are free to do or not.
   - [anything-v4.5](#anything-v4)
   - [Openjourney](#openjourney)
   - [dreamlike-photoreal-2.0](#dreamlike-photoreal-2)
+
+- [**Face Manipulation**](#face-manipulation) **:NEW**
+  - [LivePortrait](#liveportrait)
+  - [FOMM](#fomm)
+  - [Wav2Lip](#wav2lip)
+  - [SimSwap](#simswap)
+  - [3DDFA_V2](#3ddfa_v2)
+  - [DPR Portrait Relighting](#dpr-portrait-relighting)
+
+- [**Image Harmonization**](#image-harmonization) **:NEW**
+  - [CDTNet](#cdtnet)
+
+- [**Audio Source Separation**](#audio-source-separation) **:NEW**
+  - [HTDemucs](#htdemucs)
+
+- [**Video Motion Magnification**](#video-motion-magnification) **:NEW**
+  - [STB-VMM](#stb-vmm)
+
+- [**Image Deblurring**](#image-deblurring) **:NEW**
+  - [NAFNet](#nafnet)
 
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
@@ -190,6 +220,70 @@ CVNets: A library for training computer vision networks
 | Google Drive Link | Size | Dataset |Original Project | License |Year|Conversion Script|
 | ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
 | [MobileViTv2](https://drive.google.com/file/d/1__aG67p6o5-NIchkHpfFJBszCpIhI0uf/view?usp=share_link) | 18.8 MB | ImageNet | [apple/ml-cvnets](https://github.com/apple/ml-cvnets)  | [apple](https://github.com/apple/ml-cvnets/blob/main/LICENSE)|2022|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/drive/1QiTlFsN948Xt2e4WgqUB8DnGgwWwtVZS?usp=sharing](https://colab.research.google.com/drive/1UQwhFpVP_4Q9I6LXPdBSS0VDhIRdUBQA?usp=sharing)) |
+
+### MobileNetV3-Small
+
+Lightweight classification model optimized for mobile devices. Ultra-fast inference with 67.7% top-1 accuracy.
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year| Sample Project |
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
+| MobileNetV3-Small (TBD) | 4.9 MB | ImageNet | [pytorch/vision](https://github.com/pytorch/vision)  | [BSD-3](https://github.com/pytorch/vision/blob/main/LICENSE)|2019| [MobileNetV3SmallDemo](sample_apps/MobileNetV3SmallDemo) |
+
+### ConvNeXt-Tiny
+
+A ConvNet for the 2020s. Pure CNN architecture that competes with Vision Transformers. 82.5% top-1 accuracy.
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year| Sample Project |
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
+| ConvNeXt-Tiny (TBD) | 54.6 MB | ImageNet | [facebookresearch/ConvNeXt](https://github.com/facebookresearch/ConvNeXt)  | [MIT](https://github.com/facebookresearch/ConvNeXt/blob/main/LICENSE)|2022| [ConvNeXtTinyDemo](sample_apps/ConvNeXtTinyDemo) |
+
+### FastViT-T8
+
+Apple's hybrid vision transformer. Ultra-fast inference with structural reparameterization. 76.2% top-1 accuracy.
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year| Sample Project |
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
+| FastViT-T8 (TBD) | 7.8 MB | ImageNet | [apple/ml-fastvit](https://github.com/apple/ml-fastvit)  | [Apple](https://github.com/apple/ml-fastvit/blob/main/LICENSE)|2023| [FastViTDemo](sample_apps/FastViTDemo) |
+
+### MobileOne-S0
+
+Apple's sub-millisecond mobile backbone. Optimized for on-device inference with reparameterizable architecture. 71.4% top-1 accuracy.
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year| Sample Project |
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
+| MobileOne-S0 (TBD) | 10.4 MB | ImageNet | [apple/ml-mobileone](https://github.com/apple/ml-mobileone)  | [Apple](https://github.com/apple/ml-mobileone/blob/main/LICENSE)|2022| [MobileOneDemo](sample_apps/MobileOneDemo) |
+
+### EfficientFormerV2-S0
+
+Rethinking Vision Transformers for MobileNet Size and Speed. Lightweight ViT for mobile. 76.2% top-1 accuracy.
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year| Sample Project |
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
+| EfficientFormerV2-S0 (TBD) | 7.2 MB | ImageNet | [snap-research/EfficientFormer](https://github.com/snap-research/EfficientFormer)  | [Apache2.0](https://github.com/snap-research/EfficientFormer/blob/main/LICENSE)|2023| [EfficientFormerV2Demo](sample_apps/EfficientFormerV2Demo) |
+
+### GhostNetV2-100
+
+GhostNetV2: Enhance Cheap Operation with Long-Range Attention. Ghost module with DFC attention. 75.3% top-1 accuracy.
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year| Sample Project |
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
+| GhostNetV2-100 (TBD) | 11.9 MB | ImageNet | [huawei-noah/Efficient-AI-Backbones](https://github.com/huawei-noah/Efficient-AI-Backbones)  | [Apache2.0](https://github.com/huawei-noah/Efficient-AI-Backbones/blob/master/LICENSE)|2022| [GhostNetV2Demo](sample_apps/GhostNetV2Demo) |
+
+### PoolFormer-S12
+
+MetaFormer is Actually What You Need for Vision. Uses simple pooling instead of attention. 77.2% top-1 accuracy.
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year| Sample Project |
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
+| PoolFormer-S12 (TBD) | 22.9 MB | ImageNet | [sail-sg/poolformer](https://github.com/sail-sg/poolformer)  | [Apache2.0](https://github.com/sail-sg/poolformer/blob/main/LICENSE)|2022| [PoolFormerDemo](sample_apps/PoolFormerDemo) |
+
+### LeViT-128S
+
+LeViT: A Vision Transformer in ConvNet's Clothing. Fast hybrid CNN-Transformer. 76.6% top-1 accuracy.
+
+| Google Drive Link | Size | Dataset |Original Project | License |Year| Sample Project |
+| ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
+| LeViT-128S (TBD) | 16.0 MB | ImageNet | [facebookresearch/LeViT](https://github.com/facebookresearch/LeViT)  | [Apache2.0](https://github.com/facebookresearch/LeViT/blob/main/LICENSE)|2021| [LeViTDemo](sample_apps/LeViTDemo) |
 
 # Object Detection
 
@@ -353,6 +447,22 @@ EasyPortrait - Face Parsing and Portrait Segmentation Dataset.
 | Google Drive Link | Size | Output |Original Project | License | year | Swift sample |Conversion Script |
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |------------- |
 | [easyportrait-segformer512-fp](https://drive.google.com/drive/folders/13BUhNpQHodAgcj6eJaPbzuSUaFn3JuU-?usp=sharing) | 7.6 MB | Image(GrayScale 512x512) * 9 |[hukenovs/easyportrait](https://github.com/hukenovs/easyportrait) | [Creative Commons](https://github.com/hukenovs/easyportrait/tree/main/license) |2023|[easyportrait-coreml](https://github.com/john-rocky/easyportrait-coreml)|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11a3XWFA8fa8V0a2zgWFqOMUaZgF4O1qt?usp=sharing)|
+
+### DeepLabV3-MobileNetV3
+
+DeepLabV3 with MobileNetV3-Large backbone. 21-class PASCAL VOC semantic segmentation (person, car, cat, dog, etc.).
+
+| Google Drive Link | Size | Output |Original Project | License | Year | Sample Project |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |
+| DeepLabV3-MobileNetV3 (TBD) | 21.1 MB | MultiArray (1x21x512x512) | [pytorch/vision](https://github.com/pytorch/vision) | [BSD-3](https://github.com/pytorch/vision/blob/main/LICENSE) |2019| [DeepLabV3Demo](sample_apps/DeepLabV3Demo) |
+
+### LRASPP-MobileNetV3
+
+Lite R-ASPP with MobileNetV3-Large backbone. Ultra-lightweight 21-class semantic segmentation (57.9 mIoU). Only 6.3 MB.
+
+| Google Drive Link | Size | Output |Original Project | License | Year | Sample Project |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |
+| LRASPP-MobileNetV3 (TBD) | 6.3 MB | MultiArray (1x21x512x512) | [pytorch/vision](https://github.com/pytorch/vision) | [BSD-3](https://github.com/pytorch/vision/blob/main/LICENSE) |2019| [LRASPPDemo](sample_apps/LRASPPDemo) |
 
 # Super Resolution
 
@@ -850,10 +960,106 @@ model_fp16 = quantization_utils.quantize_weights(model_fp32, nbits=16)
 
 <img src="https://user-images.githubusercontent.com/23278992/147712147-0959c0b9-9d4b-4049-9dd9-7a9d1ffa0eed.JPEG" width=200> <img src="https://user-images.githubusercontent.com/23278992/147712215-dd0c8788-75ad-4676-804a-fdd47233daa6.JPG" width=200> <img src="https://user-images.githubusercontent.com/23278992/147712220-d02ab436-9716-4cdc-91d3-8b6f3aa01fac.JPG" width=200> <img src="https://user-images.githubusercontent.com/23278992/147712259-aabf5ecf-db59-476d-8f36-e6027dfb91e2.JPG" width=200> <img src="https://user-images.githubusercontent.com/23278992/147712328-a44f538c-aa3e-431d-98ec-626239262e01.JPG" width=200>
 
+# Face Manipulation
+
+### LivePortrait
+
+Portrait Animation (Kuaishou, 2024). Animate any portrait photo with expression transfer from a driving video. Multi-model pipeline.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [LivePortrait_MotionExtractor (TBD)] | 54 MB | 256x256 image | keypoints, pose, expression | [KwaiVGI/LivePortrait](https://github.com/KwaiVGI/LivePortrait) | MIT | 2024 | [LivePortraitDemo](creative_apps/LivePortraitDemo) |
+| [LivePortrait_AppearanceExtractor (TBD)] | 1.6 MB | 256x256 image | 3D feature volume | | | | |
+| [LivePortrait_WarpingNetwork (TBD)] | 91 MB | features + keypoints | warped features | | | | |
+| [LivePortrait_SPADEGenerator (TBD)] | 106 MB | warped features | 512x512 output | | | | |
+
+### FOMM
+
+First Order Motion Model. Face reenactment -- transfer facial expressions and head pose from one person to another.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [FOMM_KPDetector (TBD)] | 27 MB | 256x256 image | 10 keypoints + Jacobians | [AliaksandrSiarohin/first-order-model](https://github.com/AliaksandrSiarohin/first-order-model) | MIT | 2019 | [FOMMDemo](creative_apps/FOMMDemo) |
+| [FOMM_Generator (TBD)] | 87 MB | source + keypoint pairs | 256x256 output | | | | |
+
+### Wav2Lip
+
+Audio-Driven Talking Head. Make any portrait speak from audio input.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [Wav2Lip (TBD)] | 69 MB | face(6ch,96x96) + mel(1,1,80,16) | lip-synced face(96x96) | [Rudrabha/Wav2Lip](https://github.com/Rudrabha/Wav2Lip) | See repo | 2020 | [Wav2LipDemo](creative_apps/Wav2LipDemo) |
+
+### SimSwap
+
+Face Swap. Transfer face identity between photos using ArcFace embeddings + generator.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [SimSwap_ArcFace (TBD)] | 100 MB | 112x112 face | 512-d identity embedding | [neuralchen/SimSwap](https://github.com/neuralchen/SimSwap) | See repo | 2020 | [SimSwapDemo](creative_apps/SimSwapDemo) |
+| [SimSwap_Generator (TBD)] | 105 MB | 224x224 target + 512-d id | 224x224 swapped face | | | | |
+
+### 3DDFA_V2
+
+3D Dense Face Alignment. Reconstruct 3D face mesh from single photo using MobileNet backbone (only 6.3 MB).
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [3DDFA_V2 (TBD)] | 6.3 MB | 120x120 face | 62 3DMM params (pose+shape+expression) | [cleardusk/3DDFA_V2](https://github.com/cleardusk/3DDFA_V2) | MIT | 2020 | [Face3DDemo](creative_apps/Face3DDemo) |
+
+### DPR Portrait Relighting
+
+Deep Portrait Relighting. Change lighting direction in portraits using Spherical Harmonics.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [DPR_Relighting (TBD)] | 1.4 MB | 512x512 luminance + 9 SH coefficients | relit portrait | [zhhoper/DPR](https://github.com/zhhoper/DPR) | See repo | 2019 | [RelightDemo](creative_apps/RelightDemo) |
+
+# Image Harmonization
+
+### CDTNet
+
+Color-Dual-Transformer Network. Make composited foreground objects blend naturally with the background.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [CDTNet_Harmonization (TBD)] | 5.4 MB | 256x256 composite + mask | harmonized image | [bcmi/CDTNet](https://github.com/bcmi/CDTNet-High-Resolution-Image-Harmonization) | See repo | 2022 | [CDTNetDemo](creative_apps/CDTNetDemo) |
+
+# Audio Source Separation
+
+### HTDemucs
+
+Hybrid Transformer Demucs by Meta. Separate music into 4 stems: vocals, drums, bass, other.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [HTDemucs (TBD)] | 100 MB | STFT freq(1,8,2049,336) + waveform(1,2,343980) | 4 separated stems | [facebookresearch/demucs](https://github.com/facebookresearch/demucs) | MIT | 2023 | [DemucsDemo](creative_apps/DemucsDemo) |
+
+Note: STFT/iSTFT must be performed app-side using Accelerate/vDSP. See sample app for integration details.
+
+# Video Motion Magnification
+
+### STB-VMM
+
+Swin Transformer Based Video Motion Magnification. Amplify invisible micro-motions in video (e.g., visualize heartbeat, structural vibrations).
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [STB_VMM (TBD)] | 65 MB | 2 frames(384x384) + magnification factor | magnified frame(384x384) | [RLado/STB-VMM](https://github.com/RLado/STB-VMM) | GPL-3.0 | 2023 | [MotionMagDemo](creative_apps/MotionMagDemo) |
+
+# Image Deblurring
+
+### NAFNet
+
+Nonlinear Activation Free Network. State-of-the-art image deblurring without nonlinear activation functions.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [NAFNet_Deblur (TBD)] | 130 MB | 256x256 blurry image | 256x256 deblurred image | [megvii-research/NAFNet](https://github.com/megvii-research/NAFNet) | MIT | 2022 | [NAFNetDemo](creative_apps/NAFNetDemo) |
 
 
 # Thanks
-Cover image was taken from Ghibli free images. 
+Cover image was taken from Ghibli free images.
 
 On YOLOv5 convertion, [dbsystel/yolov5-coreml-tools](https://github.com/dbsystel/yolov5-coreml-tools) give me the super inteligent convert script. 
 
