@@ -1,3 +1,8 @@
+# macOS / Xcode
+.DS_Store
+xcuserdata/
+*.xcworkspace/
+
 # CoreML model files (download from Google Drive)
 *.mlpackage
 *.mlmodel
