@@ -7,17 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A10001 /* CDTNetDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10002; };
-		A10003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10004; };
-		A10005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10006; };
-		A1CD02 /* CDTNet_Harmonization.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = A1CD01; };
+		A10001 /* CDTNetDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10002 /* CDTNetDemoApp.swift */; };
+		A10003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10004 /* ContentView.swift */; };
+		A10005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10006 /* Assets.xcassets */; };
+		A1CD02 /* CDTNet_Harmonization.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = A1CD01 /* CDTNet_Harmonization.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A10007 /* CDTNetDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CDTNetDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10002 /* CDTNetDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CDTNetDemoApp.swift; sourceTree = "<group>"; };
 		A10004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A10006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A10007 /* CDTNetDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CDTNetDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A1CD01 /* CDTNet_Harmonization.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = CDTNet_Harmonization.mlpackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -66,7 +66,7 @@
 /* Begin PBXNativeTarget section */
 		A10013 /* CDTNetDemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A10014;
+			buildConfigurationList = A10014 /* Build configuration list for PBXNativeTarget "CDTNetDemo" */;
 			buildPhases = (
 				A10015 /* Sources */,
 				A10009 /* Frameworks */,
@@ -78,7 +78,7 @@
 			);
 			name = CDTNetDemo;
 			productName = CDTNetDemo;
-			productReference = A10007;
+			productReference = A10007 /* CDTNetDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -96,7 +96,7 @@
 					};
 				};
 			};
-			buildConfigurationList = A10018;
+			buildConfigurationList = A10018 /* Build configuration list for PBXProject "CDTNetDemo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -105,11 +105,11 @@
 				Base,
 			);
 			mainGroup = A10010;
-			productRefGroup = A10012;
+			productRefGroup = A10012 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A10013,
+				A10013 /* CDTNetDemo */,
 			);
 		};
 /* End PBXProject section */
@@ -199,6 +199,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CDTNetDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -226,6 +227,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CDTNetDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -249,26 +251,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A10018 /* Build configuration list for PBXProject */ = {
+		A10014 /* Build configuration list for PBXNativeTarget "CDTNetDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A10019,
-				A10020,
+				A10021 /* Debug */,
+				A10022 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A10014 /* Build configuration list for PBXNativeTarget */ = {
+		A10018 /* Build configuration list for PBXProject "CDTNetDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A10021,
-				A10022,
+				A10019 /* Debug */,
+				A10020 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
-	rootObject = A10017;
+	rootObject = A10017 /* Project object */;
 }
