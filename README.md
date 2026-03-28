@@ -136,6 +136,34 @@ You are free to do or not.
 - [**Image Deblurring**](#image-deblurring) **:NEW**
   - [NAFNet](#nafnet)
 
+- [**Monocular Depth Estimation (Next-Gen)**](#monocular-depth-estimation-next-gen) **:NEW**
+  - [Depth Anything V2 Small](#depth-anything-v2-small)
+  - [Depth Pro](#depth-pro)
+
+- [**Object Detection (Next-Gen)**](#object-detection-next-gen) **:NEW**
+  - [YOLOv10-N](#yolov10-n)
+
+- [**Background Removal (SOTA)**](#background-removal-sota) **:NEW**
+  - [BiRefNet](#birefnet)
+
+- [**Speech Recognition**](#speech-recognition) **:NEW**
+  - [Whisper Tiny](#whisper-tiny)
+
+- [**Text-to-Speech**](#text-to-speech) **:NEW**
+  - [Kokoro-82M](#kokoro-82m)
+
+- [**Vision-Language Model**](#vision-language-model) **:NEW**
+  - [SmolVLM2-500M](#smolvlm2-500m)
+
+- [**Open-Vocabulary Detection**](#open-vocabulary-detection) **:NEW**
+  - [YOLOE-S](#yoloe-s)
+
+- [**Pose Estimation**](#pose-estimation) **:NEW**
+  - [DWPose / RTMPose](#dwpose--rtmpose)
+
+- [**Multilingual OCR**](#multilingual-ocr) **:NEW**
+  - [PP-OCRv5](#pp-ocrv5)
+
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
 See the section below for how to use it in Xcode.
@@ -1056,6 +1084,112 @@ Nonlinear Activation Free Network. State-of-the-art image deblurring without non
 | Model | Size | Input | Output | Original Project | License | Year | Sample Project |
 | ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
 | [NAFNet_Deblur (TBD)] | 130 MB | 256x256 blurry image | 256x256 deblurred image | [megvii-research/NAFNet](https://github.com/megvii-research/NAFNet) | MIT | 2022 | [NAFNetDemo](creative_apps/NAFNetDemo) |
+
+
+# Monocular Depth Estimation (Next-Gen)
+
+### Depth Anything V2 Small
+
+Depth Anything V2 (TsingHua, 2024). State-of-the-art monocular depth estimation. Massively improved over MiDaS with synthetic data training. The Small variant is extremely lightweight (~25 MB).
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [DepthAnythingV2Small (TBD)] | 25 MB | 518x518 image | 518x518 relative depth map | [DepthAnything/Depth-Anything-V2](https://github.com/DepthAnything/Depth-Anything-V2) | [Apache 2.0](https://github.com/DepthAnything/Depth-Anything-V2/blob/main/LICENSE) | 2024 | [DepthAnythingV2Demo](sample_apps/DepthAnythingV2Demo) |
+
+### Depth Pro
+
+Apple Depth Pro (Apple, 2024). Metric depth estimation from a single image. Predicts absolute distance in meters with estimated focal length. Ideal for AR applications.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [DepthPro (TBD)] | 150 MB | 1536x1536 image | metric depth map (meters) + focal length | [apple/ml-depth-pro](https://github.com/apple/ml-depth-pro) | [Apple Sample Code License](https://github.com/apple/ml-depth-pro/blob/main/LICENSE) | 2024 | [DepthProDemo](creative_apps/DepthProDemo) |
+
+# Object Detection (Next-Gen)
+
+### YOLOv10-N
+
+YOLOv10 Nano (Tsinghua, 2024). NMS-free real-time object detection. Consistent dual assignments for training eliminates the need for Non-Maximum Suppression, reducing latency. Nano variant is only ~8 MB.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [YOLOv10N (TBD)] | 8 MB | 640x640 image | bounding boxes + class scores (80 COCO classes) | [THU-MIG/yolov10](https://github.com/THU-MIG/yolov10) | [AGPL-3.0](https://github.com/THU-MIG/yolov10/blob/main/LICENSE) | 2024 | [YOLOv10Demo](sample_apps/YOLOv10Demo) |
+
+# Background Removal (SOTA)
+
+### BiRefNet
+
+Bilateral Reference Network (2024). State-of-the-art dichotomous image segmentation for high-quality background removal. Excels at fine details like hair, fur, and transparent objects.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [BiRefNet (TBD)] | 80 MB | 1024x1024 image | 1024x1024 alpha mask | [ZhengPeng7/BiRefNet](https://github.com/ZhengPeng7/BiRefNet) | [MIT](https://github.com/ZhengPeng7/BiRefNet/blob/main/LICENSE) | 2024 | [BiRefNetDemo](creative_apps/BiRefNetDemo) |
+
+# Speech Recognition
+
+### Whisper Tiny
+
+OpenAI Whisper Tiny (OpenAI, 2023). Multilingual speech-to-text model supporting 99+ languages. The Tiny variant (~75 MB) is ideal for on-device transcription. Apple provides official CoreML conversion via WhisperKit.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [WhisperTinyEncoder (TBD)] | 75 MB | mel spectrogram (1,80,3000) | encoder hidden states | [openai/whisper](https://github.com/openai/whisper) | [MIT](https://github.com/openai/whisper/blob/main/LICENSE) | 2023 | [WhisperDemo](creative_apps/WhisperDemo) |
+
+Note: For production use, consider [WhisperKit](https://github.com/argmaxinc/WhisperKit) which provides optimized CoreML models with full encoder+decoder pipeline.
+
+# Text-to-Speech
+
+### Kokoro-82M
+
+Kokoro-82M (2025). #1 on TTS Arena. Ultra-lightweight text-to-speech model with only 82M parameters, supporting 54 voices across 8 languages (EN, JP, FR, ES, IT, PT, HI, ZH). Runs 3.3x real-time on iPhone 13 Pro. CoreML conversion and iOS Swift package already available.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [Kokoro82M (TBD)] | 80 MB (quantized) | phoneme tokens + voice style | 24kHz audio waveform | [hexgrad/Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) | [Apache 2.0](https://huggingface.co/hexgrad/Kokoro-82M) | 2025 | [KokoroDemo](creative_apps/KokoroDemo) |
+
+Note: Pre-converted CoreML model available at [FluidInference/kokoro-82m-coreml](https://huggingface.co/FluidInference/kokoro-82m-coreml). iOS Swift package at [mlalma/kokoro-ios](https://github.com/mlalma/kokoro-ios).
+
+# Vision-Language Model
+
+### SmolVLM2-500M
+
+SmolVLM2-500M (HuggingFace, 2025). The world's smallest video-language model. Describe images, answer visual questions, read text (OCR), and understand video — all on-device. Only 500M parameters, runs on iPhone via MLX Swift.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [SmolVLM2_VisionEncoder (TBD)] | 245 MB (Q8) | 384x384 image + text tokens | text response | [HuggingFaceTB/SmolVLM2-500M-Video-Instruct](https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct) | [Apache 2.0](https://huggingface.co/HuggingFaceTB/SmolVLM2-500M-Video-Instruct) | 2025 | [SmolVLMDemo](creative_apps/SmolVLMDemo) |
+
+Note: GGUF models for llama.cpp available at [ggml-org/SmolVLM2-500M-Video-Instruct-GGUF](https://huggingface.co/ggml-org/SmolVLM2-500M-Video-Instruct-GGUF).
+
+# Open-Vocabulary Detection
+
+### YOLOE-S
+
+YOLOE-S (Tsinghua, ICCV 2025). Real-time open-vocabulary object detection and segmentation. Detect any object by text description, visual reference, or in prompt-free mode. +3.5 AP over YOLO-World with 1.4x faster inference. Zero overhead compared to closed-set YOLOs.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [YOLOE_S (TBD)] | 50 MB | 640x640 image + text prompt | bounding boxes + segmentation masks | [THU-MIG/yoloe](https://github.com/THU-MIG/yoloe) | [AGPL-3.0](https://github.com/THU-MIG/yoloe/blob/main/LICENSE) | 2025 | [YOLOEDemo](creative_apps/YOLOEDemo) |
+
+# Pose Estimation
+
+### DWPose / RTMPose
+
+DWPose + RTMPose (2023-2025). Real-time whole-body pose estimation with 133 keypoints (body, hands, face, feet). DWPose uses distillation from larger models for excellent accuracy in a compact package. 70+ FPS on mobile.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [DWPose (TBD)] | 15-54 MB | 256x192 image | 17-133 keypoint heatmaps (SimCC) | [IDEA-Research/DWPose](https://github.com/IDEA-Research/DWPose) | [Apache 2.0](https://github.com/open-mmlab/mmpose/blob/main/LICENSE) | 2023 | [DWPoseDemo](sample_apps/DWPoseDemo) |
+
+# Multilingual OCR
+
+### PP-OCRv5
+
+PP-OCRv5 (Baidu, 2025). Ultra-lightweight multilingual OCR supporting 100+ languages. Two-stage pipeline: text detection + text recognition. Total model size under 20 MB. Handles scene text, handwriting, documents, and more.
+
+| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
+| [PPOCRv5_Det (TBD)] | 10 MB | 640x640 image | text region heatmap | [PaddlePaddle/PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) | [Apache 2.0](https://github.com/PaddlePaddle/PaddleOCR/blob/main/LICENSE) | 2025 | [PPOCRv5Demo](creative_apps/PPOCRv5Demo) |
+| [PPOCRv5_Rec (TBD)] | 10 MB | 48x320 text crop | character sequence | | | | |
 
 
 # Thanks
