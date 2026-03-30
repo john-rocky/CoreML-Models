@@ -686,8 +686,8 @@ class DepthProViewModel: ObservableObject {
         }
 
         let config = MLModelConfiguration()
-        // Use CPU + Neural Engine to minimize GPU memory pressure
-        config.computeUnits = .cpuAndNeuralEngine
+        // ANE compilation fails on this large model. Use CPU+GPU instead.
+        config.computeUnits = .cpuAndGPU
 
         await updateStatus("Loading model (requires 6GB+ RAM)...", progress: 0.2)
         let model = try MLModel(contentsOf: modelURL, configuration: config)
