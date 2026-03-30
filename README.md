@@ -138,7 +138,6 @@ You are free to do or not.
 
 - [**Monocular Depth Estimation (Next-Gen)**](#monocular-depth-estimation-next-gen) **:NEW**
   - [Depth Anything V2 Small](#depth-anything-v2-small)
-  - [Depth Pro](#depth-pro)
 
 - [**Object Detection (Next-Gen)**](#object-detection-next-gen) **:NEW**
   - [YOLOv10-N](#yolov10-n)
@@ -1095,14 +1094,6 @@ Depth Anything V2 (TsingHua, 2024). State-of-the-art monocular depth estimation.
 | Model | Size | Input | Output | Original Project | License | Year | Sample Project |
 | ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
 | [DepthAnythingV2Small (TBD)] | 25 MB | 518x518 image | 518x518 relative depth map | [DepthAnything/Depth-Anything-V2](https://github.com/DepthAnything/Depth-Anything-V2) | [Apache 2.0](https://github.com/DepthAnything/Depth-Anything-V2/blob/main/LICENSE) | 2024 | [DepthAnythingV2Demo](sample_apps/DepthAnythingV2Demo) |
-
-### Depth Pro
-
-Apple Depth Pro (Apple, 2024). Metric depth estimation from a single image. Predicts absolute distance in meters with estimated focal length. Ideal for AR applications.
-
-| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
-| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
-| [DepthPro (TBD)] | 150 MB | 1536x1536 image | metric depth map (meters) + focal length | [apple/ml-depth-pro](https://github.com/apple/ml-depth-pro) | [Apple Sample Code License](https://github.com/apple/ml-depth-pro/blob/main/LICENSE) | 2024 | [DepthProDemo](creative_apps/DepthProDemo) |
 
 # Object Detection (Next-Gen)
 

@@ -392,7 +392,8 @@ class BackgroundRemovalViewModel: ObservableObject {
         }
 
         let config = MLModelConfiguration()
-        config.computeUnits = .cpuAndNeuralEngine
+        // ANE compilation fails on this model. Use CPU+GPU.
+        config.computeUnits = .cpuAndGPU
         let model = try MLModel(contentsOf: modelURL, configuration: config)
 
         await MainActor.run {
@@ -400,14 +401,14 @@ class BackgroundRemovalViewModel: ObservableObject {
             self.progressMessage = "Preparing image..."
         }
 
-        // Prepare input image (1, 3, 1024, 1024)
-        let targetSize = CGSize(width: 1024, height: 1024)
+        // Prepare input image (1, 3, 512, 512)
+        let targetSize = CGSize(width: 512, height: 512)
         guard let resizedCG = image.resized(to: targetSize)?.cgImage else {
             throw SegmentationError.imageProcessingFailed("Failed to resize input image")
         }
 
-        let inputArray = try MLMultiArray(shape: [1, 3, 1024, 1024], dataType: .float32)
-        fillMultiArrayFromImage(resizedCG, into: inputArray, size: 1024)
+        let inputArray = try MLMultiArray(shape: [1, 3, 512, 512], dataType: .float32)
+        fillMultiArrayFromImage(resizedCG, into: inputArray, size: 512)
 
         await MainActor.run {
             self.progress = 0.5
@@ -425,13 +426,13 @@ class BackgroundRemovalViewModel: ObservableObject {
             self.progressMessage = "Generating mask..."
         }
 
-        // Extract mask output (1, 1, 1024, 1024), apply sigmoid
+        // Extract mask output (1, 1, 512, 512), apply sigmoid
         guard let outputArray = prediction.featureValue(for: "mask")?.multiArrayValue else {
             throw SegmentationError.imageProcessingFailed("Failed to extract mask output from model")
         }
 
-        let width = 1024
-        let height = 1024
+        let width = 512
+        let height = 512
         var maskData = [Float](repeating: 0, count: width * height)
 
         let outputPointer = outputArray.dataPointer.bindMemory(to: Float.self, capacity: width * height)

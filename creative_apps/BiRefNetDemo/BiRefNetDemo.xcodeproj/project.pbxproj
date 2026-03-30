@@ -7,17 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BR0001 /* BiRefNetDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BR0002; };
-		BR0003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BR0004; };
-		BR0005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BR0006; };
+		BR0001 /* BiRefNetDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BR0002 /* BiRefNetDemoApp.swift */; };
+		BR0003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BR0004 /* ContentView.swift */; };
+		BR0005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BR0006 /* Assets.xcassets */; };
 		BRML02 /* BiRefNet.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = BRML01 /* BiRefNet.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		BR0007 /* BiRefNetDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BiRefNetDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BR0002 /* BiRefNetDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiRefNetDemoApp.swift; sourceTree = "<group>"; };
 		BR0004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BR0006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BR0007 /* BiRefNetDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BiRefNetDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BR0008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BRML01 /* BiRefNet.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = BiRefNet.mlpackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -48,7 +48,7 @@
 				BR0004 /* ContentView.swift */,
 				BR0006 /* Assets.xcassets */,
 				BR0008 /* Info.plist */,
-					BRML01 /* BiRefNet.mlpackage */,
+				BRML01 /* BiRefNet.mlpackage */,
 			);
 			path = BiRefNetDemo;
 			sourceTree = "<group>";
@@ -66,7 +66,7 @@
 /* Begin PBXNativeTarget section */
 		BR0013 /* BiRefNetDemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BR0014;
+			buildConfigurationList = BR0014 /* Build configuration list for PBXNativeTarget "BiRefNetDemo" */;
 			buildPhases = (
 				BR0015 /* Sources */,
 				BR0009 /* Frameworks */,
@@ -78,7 +78,7 @@
 			);
 			name = BiRefNetDemo;
 			productName = BiRefNetDemo;
-			productReference = BR0007;
+			productReference = BR0007 /* BiRefNetDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -96,7 +96,7 @@
 					};
 				};
 			};
-			buildConfigurationList = BR0018;
+			buildConfigurationList = BR0018 /* Build configuration list for PBXProject "BiRefNetDemo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -105,11 +105,11 @@
 				Base,
 			);
 			mainGroup = BR0010;
-			productRefGroup = BR0012;
+			productRefGroup = BR0012 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BR0013,
+				BR0013 /* BiRefNetDemo */,
 			);
 		};
 /* End PBXProject section */
@@ -132,7 +132,7 @@
 			files = (
 				BR0001 /* BiRefNetDemoApp.swift in Sources */,
 				BR0003 /* ContentView.swift in Sources */,
-					BRML02 /* BiRefNet.mlpackage in Sources */,
+				BRML02 /* BiRefNet.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -199,6 +199,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BiRefNetDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -226,6 +227,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BiRefNetDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -249,26 +251,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BR0018 /* Build configuration list for PBXProject */ = {
+		BR0014 /* Build configuration list for PBXNativeTarget "BiRefNetDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BR0019,
-				BR0020,
+				BR0021 /* Debug */,
+				BR0022 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BR0014 /* Build configuration list for PBXNativeTarget */ = {
+		BR0018 /* Build configuration list for PBXProject "BiRefNetDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				BR0021,
-				BR0022,
+				BR0019 /* Debug */,
+				BR0020 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
-	rootObject = BR0017;
+	rootObject = BR0017 /* Project object */;
 }
