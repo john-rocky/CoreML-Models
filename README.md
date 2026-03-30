@@ -29,6 +29,8 @@ You are free to do or not.
 
   
 - [**Object Detection**](#object-detection)
+  - [D-FINE](#d-fine)
+  - [RF-DETR](#rf-detr)
   - [YOLOv5s](#yolov5s)
   - [YOLOv7](#yolov7)
   - [YOLOv8](#yolov8)
@@ -194,6 +196,22 @@ CVNets: A library for training computer vision networks
 | [MobileViTv2](https://drive.google.com/file/d/1__aG67p6o5-NIchkHpfFJBszCpIhI0uf/view?usp=share_link) | 18.8 MB | ImageNet | [apple/ml-cvnets](https://github.com/apple/ml-cvnets)  | [apple](https://github.com/apple/ml-cvnets/blob/main/LICENSE)|2022|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]([https://colab.research.google.com/drive/1QiTlFsN948Xt2e4WgqUB8DnGgwWwtVZS?usp=sharing](https://colab.research.google.com/drive/1UQwhFpVP_4Q9I6LXPdBSS0VDhIRdUBQA?usp=sharing)) |
 
 # Object Detection
+
+### D-FINE
+
+<img width="400" alt="D-FINE iOS Demo" src="https://github.com/user-attachments/assets/a9af3b06-dc8b-4384-88f3-765b85414b0f">
+
+| Download Link | Size | Output | Original Project | License | Note | Sample Project |
+| ------------- | ------------- | ------------- | ------------- |------------- |------------- |------------- |
+|[dfine-n-coco](https://github.com/john-rocky/peaceofcake/releases/download/v0.2.0/dfine_n_coco.mlpackage.zip)|13MB| Confidence(MultiArray (Float32 300 × 80)), Coordinates (MultiArray (Float32 300 × 4)) |[Peterande/D-FINE](https://github.com/Peterande/D-FINE)|[Apache 2.0](https://github.com/Peterande/D-FINE/blob/master/LICENSE)|Input 640×640. Coordinates are normalized cxcywh. No NMS — filter by confidence threshold.| [peaceofcake DFINEDemo](https://github.com/john-rocky/peaceofcake/tree/main/DFINEDemo) |
+
+### RF-DETR
+
+<img width="400" alt="RF-DETR iOS Demo" src="https://github.com/user-attachments/assets/bde0438e-5c56-4528-a083-2952106e8073">
+
+| Download Link | Size | Output | Original Project | License | Note | Sample Project |
+| ------------- | ------------- | ------------- | ------------- |------------- |------------- |------------- |
+|[rfdetr-n-coco](https://github.com/john-rocky/peaceofcake/releases/download/v0.2.0/rfdetr_n_coco.mlpackage.zip)|95MB| Confidence(MultiArray (Float32 300 × 91)), Coordinates (MultiArray (Float32 300 × 4)) |[roboflow/rf-detr](https://github.com/roboflow/rf-detr)|[Apache 2.0](https://github.com/roboflow/rf-detr/blob/main/LICENSE)|Input 384×384. 91 classes (index 0 = background, 1-90 = COCO category IDs). Coordinates are normalized cxcywh. No NMS.| [peaceofcake DFINEDemo](https://github.com/john-rocky/peaceofcake/tree/main/DFINEDemo) |
 
 ### YOLOv5s
 
