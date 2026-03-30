@@ -561,10 +561,12 @@ class BackgroundRemovalViewModel: ObservableObject {
     private func applyMask(to image: UIImage, maskData: [Float],
                            maskWidth: Int, maskHeight: Int,
                            background: UIColor?) -> UIImage? {
-        let origWidth = Int(image.size.width)
-        let origHeight = Int(image.size.height)
+        // Normalize orientation first to avoid rotation mismatch
+        let normalizedImage = normalizeOrientation(image)
+        let origWidth = Int(normalizedImage.size.width)
+        let origHeight = Int(normalizedImage.size.height)
 
-        guard let cgImage = image.cgImage else { return nil }
+        guard let cgImage = normalizedImage.cgImage else { return nil }
 
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * origWidth
@@ -633,6 +635,16 @@ class BackgroundRemovalViewModel: ObservableObject {
         ), let outputCG = outputContext.makeImage() else { return nil }
 
         return UIImage(cgImage: outputCG)
+    }
+
+    /// Redraw UIImage with .up orientation to strip rotation metadata
+    private func normalizeOrientation(_ image: UIImage) -> UIImage {
+        guard image.imageOrientation != .up else { return image }
+        UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale)
+        image.draw(in: CGRect(origin: .zero, size: image.size))
+        let normalized = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return normalized ?? image
     }
 }
 
