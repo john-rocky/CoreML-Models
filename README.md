@@ -229,7 +229,7 @@ YOLOv9: Learning What You Want to Learn Using Programmable Gradient Information.
 
 | Download Link | Size | Output | Original Project | License | Year | Note | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| [yolov9s.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yolov9s.mlpackage.zip) | 14 MB | MultiArray (1 × 84 × 8400) | [WongKinYiu/yolov9](https://github.com/WongKinYiu/yolov9) | [GPL-3.0](https://github.com/WongKinYiu/yolov9/blob/main/LICENSE.md) | 2024 | NMS post-processing required on-device. | [YOLOv9Demo](sample_apps/YOLOv9Demo) |
+| [yolov9s.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yolov9s.mlpackage.zip) | 14 MB | Confidence (MultiArray (Double 0 × 80)), Coordinates (MultiArray (Double 0 × 4)) | [WongKinYiu/yolov9](https://github.com/WongKinYiu/yolov9) | [GPL-3.0](https://github.com/WongKinYiu/yolov9/blob/main/LICENSE.md) | 2024 | Non Maximum Suppression has been added. | [YOLOv9Demo](sample_apps/YOLOv9Demo) |
 
 ### YOLOv10
 
@@ -245,7 +245,7 @@ YOLO11: Ultralytics latest YOLO with improved backbone and neck architecture. 22
 
 | Download Link | Size | Output | Original Project | License | Year | Note | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| [yolo11s.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yolo11s.mlpackage.zip) | 18 MB | MultiArray (1 × 84 × 8400) | [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics) | [AGPL-3.0](https://github.com/ultralytics/ultralytics/blob/main/LICENSE) | 2024 | NMS post-processing required on-device. | [YOLOv9Demo](sample_apps/YOLOv9Demo) |
+| [yolo11s.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yolo11s.mlpackage.zip) | 18 MB | Confidence (MultiArray (Double 0 × 80)), Coordinates (MultiArray (Double 0 × 4)) | [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics) | [AGPL-3.0](https://github.com/ultralytics/ultralytics/blob/main/LICENSE) | 2024 | Non Maximum Suppression has been added. | [YOLOv9Demo](sample_apps/YOLOv9Demo) |
 
 ### YOLO26
 
