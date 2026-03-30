@@ -7,17 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		DP0001 /* DepthProDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DP0002; };
-		DP0003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DP0004; };
-		DP0005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DP0006; };
+		DP0001 /* DepthProDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DP0002 /* DepthProDemoApp.swift */; };
+		DP0003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DP0004 /* ContentView.swift */; };
+		DP0005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DP0006 /* Assets.xcassets */; };
+		DPML02 /* DepthPro.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = DPML01 /* DepthPro.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		DP0007 /* DepthProDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DepthProDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DP0002 /* DepthProDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DepthProDemoApp.swift; sourceTree = "<group>"; };
 		DP0004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DP0006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DP0007 /* DepthProDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DepthProDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DP0008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DPML01 /* DepthPro.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = DepthPro.mlpackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +48,7 @@
 				DP0004 /* ContentView.swift */,
 				DP0006 /* Assets.xcassets */,
 				DP0008 /* Info.plist */,
+				DPML01 /* DepthPro.mlpackage */,
 			);
 			path = DepthProDemo;
 			sourceTree = "<group>";
@@ -63,7 +66,7 @@
 /* Begin PBXNativeTarget section */
 		DP0013 /* DepthProDemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = DP0014;
+			buildConfigurationList = DP0014 /* Build configuration list for PBXNativeTarget "DepthProDemo" */;
 			buildPhases = (
 				DP0015 /* Sources */,
 				DP0009 /* Frameworks */,
@@ -75,7 +78,7 @@
 			);
 			name = DepthProDemo;
 			productName = DepthProDemo;
-			productReference = DP0007;
+			productReference = DP0007 /* DepthProDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -93,7 +96,7 @@
 					};
 				};
 			};
-			buildConfigurationList = DP0018;
+			buildConfigurationList = DP0018 /* Build configuration list for PBXProject "DepthProDemo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -102,11 +105,11 @@
 				Base,
 			);
 			mainGroup = DP0010;
-			productRefGroup = DP0012;
+			productRefGroup = DP0012 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				DP0013,
+				DP0013 /* DepthProDemo */,
 			);
 		};
 /* End PBXProject section */
@@ -129,6 +132,7 @@
 			files = (
 				DP0001 /* DepthProDemoApp.swift in Sources */,
 				DP0003 /* ContentView.swift in Sources */,
+				DPML02 /* DepthPro.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,6 +199,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DepthProDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -222,6 +227,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DepthProDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -245,26 +251,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		DP0018 /* Build configuration list for PBXProject */ = {
+		DP0014 /* Build configuration list for PBXNativeTarget "DepthProDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				DP0019,
-				DP0020,
+				DP0021 /* Debug */,
+				DP0022 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		DP0014 /* Build configuration list for PBXNativeTarget */ = {
+		DP0018 /* Build configuration list for PBXProject "DepthProDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				DP0021,
-				DP0022,
+				DP0019 /* Debug */,
+				DP0020 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
-	rootObject = DP0017;
+	rootObject = DP0017 /* Project object */;
 }

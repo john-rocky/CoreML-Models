@@ -10,6 +10,7 @@
 		KK0001 /* KokoroDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = KK0002; };
 		KK0003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KK0004; };
 		KK0005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = KK0006; };
+		KKML02 /* Kokoro82M.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = KKML01 /* Kokoro82M.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +19,7 @@
 		KK0004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		KK0006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		KK0008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		KKML01 /* Kokoro82M.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = Kokoro82M.mlpackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +48,7 @@
 				KK0004 /* ContentView.swift */,
 				KK0006 /* Assets.xcassets */,
 				KK0008 /* Info.plist */,
+					KKML01 /* Kokoro82M.mlpackage */,
 			);
 			path = KokoroDemo;
 			sourceTree = "<group>";
@@ -129,6 +132,7 @@
 			files = (
 				KK0001 /* KokoroDemoApp.swift in Sources */,
 				KK0003 /* ContentView.swift in Sources */,
+					KKML02 /* Kokoro82M.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

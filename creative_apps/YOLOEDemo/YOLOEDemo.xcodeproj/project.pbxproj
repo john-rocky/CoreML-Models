@@ -10,6 +10,7 @@
 		YE0001 /* YOLOEDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = YE0002; };
 		YE0003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = YE0004; };
 		YE0005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = YE0006; };
+		YEML02 /* YOLOE_S.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = YEML01 /* YOLOE_S.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +19,7 @@
 		YE0004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		YE0006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		YE0008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		YEML01 /* YOLOE_S.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = YOLOE_S.mlpackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +48,7 @@
 				YE0004 /* ContentView.swift */,
 				YE0006 /* Assets.xcassets */,
 				YE0008 /* Info.plist */,
+					YEML01 /* YOLOE_S.mlpackage */,
 			);
 			path = YOLOEDemo;
 			sourceTree = "<group>";
@@ -129,6 +132,7 @@
 			files = (
 				YE0001 /* YOLOEDemoApp.swift in Sources */,
 				YE0003 /* ContentView.swift in Sources */,
+					YEML02 /* YOLOE_S.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

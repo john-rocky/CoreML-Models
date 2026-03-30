@@ -10,6 +10,7 @@
 		WH0001 /* WhisperDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = WH0002; };
 		WH0003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = WH0004; };
 		WH0005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = WH0006; };
+		WHML02 /* WhisperTinyEncoder.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = WHML01 /* WhisperTinyEncoder.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +19,7 @@
 		WH0004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		WH0006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		WH0008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		WHML01 /* WhisperTinyEncoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = WhisperTinyEncoder.mlpackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +48,7 @@
 				WH0004 /* ContentView.swift */,
 				WH0006 /* Assets.xcassets */,
 				WH0008 /* Info.plist */,
+					WHML01 /* WhisperTinyEncoder.mlpackage */,
 			);
 			path = WhisperDemo;
 			sourceTree = "<group>";
@@ -129,6 +132,7 @@
 			files = (
 				WH0001 /* WhisperDemoApp.swift in Sources */,
 				WH0003 /* ContentView.swift in Sources */,
+					WHML02 /* WhisperTinyEncoder.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

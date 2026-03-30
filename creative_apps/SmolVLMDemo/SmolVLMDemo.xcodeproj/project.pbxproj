@@ -10,6 +10,7 @@
 		SV0001 /* SmolVLMDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = SV0002; };
 		SV0003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SV0004; };
 		SV0005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = SV0006; };
+		SVML02 /* SmolVLM2_VisionEncoder.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = SVML01 /* SmolVLM2_VisionEncoder.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -18,6 +19,7 @@
 		SV0004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		SV0006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		SV0008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		SVML01 /* SmolVLM2_VisionEncoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = SmolVLM2_VisionEncoder.mlpackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +48,7 @@
 				SV0004 /* ContentView.swift */,
 				SV0006 /* Assets.xcassets */,
 				SV0008 /* Info.plist */,
+					SVML01 /* SmolVLM2_VisionEncoder.mlpackage */,
 			);
 			path = SmolVLMDemo;
 			sourceTree = "<group>";
@@ -129,6 +132,7 @@
 			files = (
 				SV0001 /* SmolVLMDemoApp.swift in Sources */,
 				SV0003 /* ContentView.swift in Sources */,
+					SVML02 /* SmolVLM2_VisionEncoder.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
