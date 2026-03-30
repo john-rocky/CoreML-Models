@@ -7,8 +7,11 @@ import CoreMotion
 // MARK: - Apple Depth Pro - Metric Depth Estimation Demo
 //
 // Depth Pro produces metric (absolute) depth maps from a single image,
-// along with an estimated focal length. Input: 1536x1536 RGB image.
+// along with an estimated focal length. Input: 1536x1536 (fixed).
 // Outputs: depth map (meters) + focal length (pixels).
+//
+// NOTE: Requires iPhone 15 Pro or later (6GB+ RAM).
+// The model is ~1.2GB and processes 1536x1536 input.
 //
 // Features:
 // - PhotosPicker for image selection
@@ -102,6 +105,18 @@ struct ContentView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
+                    // Device compatibility warning
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(.orange)
+                        Text("Requires iPhone 15 Pro+ (6GB RAM). May crash on older devices.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(10)
+                    .background(Color.orange.opacity(0.1))
+                    .cornerRadius(8)
+
                     imageSelectionSection
                     processSection
                     progressSection
@@ -671,7 +686,10 @@ class DepthProViewModel: ObservableObject {
         }
 
         let config = MLModelConfiguration()
+        // Use CPU + Neural Engine to minimize GPU memory pressure
         config.computeUnits = .cpuAndNeuralEngine
+
+        await updateStatus("Loading model (requires 6GB+ RAM)...", progress: 0.2)
         let model = try MLModel(contentsOf: modelURL, configuration: config)
 
         await updateStatus("Preprocessing image...", progress: 0.3)
@@ -680,7 +698,8 @@ class DepthProViewModel: ObservableObject {
             throw DepthProError.processingFailed("No image selected.")
         }
 
-        // Resize to 1536x1536 for model input
+        // Depth Pro requires exactly 1536x1536 input (ViT patch architecture constraint).
+        // Requires iPhone 15 Pro or later (6GB+ RAM).
         let targetSize = CGSize(width: 1536, height: 1536)
         guard let resizedImage = resizeImage(inputImage, to: targetSize),
               let pixelBuffer = pixelBufferFromImage(resizedImage, size: targetSize) else {
