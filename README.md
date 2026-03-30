@@ -359,7 +359,7 @@ EasyPortrait - Face Parsing and Portrait Segmentation Dataset.
 ### MobileSAM
 
 Faster Segment Anything: Towards Lightweight SAM for Mobile Applications. MobileSAM replaces the heavy ViT-H image encoder with a lightweight ViT-Tiny encoder via decoupled knowledge distillation, making it ~60x smaller and ~40x faster than the original SAM.
-
+<img src="https://github.com/user-attachments/assets/d25ff3c2-91e1-4c86-8959-ff7b7dc3829f" width=200>
 | Download Link | Size | Output | Original Project | License | Year | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [MobileSAM.zip](https://github.com/john-rocky/SamKit/releases/download/v1.0.0/MobileSAM.zip) | 23 MB (Encoder 13 MB + Decoder 9.8 MB) | Segmentation Mask | [ChaoningZhang/MobileSAM](https://github.com/ChaoningZhang/MobileSAM) | [Apache 2.0](https://github.com/ChaoningZhang/MobileSAM/blob/master/LICENSE) | 2023 | [SamKit](https://github.com/john-rocky/SamKit) |
