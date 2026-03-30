@@ -1,0 +1,374 @@
+import SwiftUI
+import UIKit
+import AVFoundation
+import CoreML
+import Vision
+
+// MARK: - Camera Manager
+
+class CameraManager: NSObject, ObservableObject {
+    let session = AVCaptureSession()
+    var onFrame: ((CMSampleBuffer) -> Void)?
+
+    private let sessionQueue = DispatchQueue(label: "camera.session")
+
+    func configure() {
+        sessionQueue.async { [weak self] in
+            self?.setupSession()
+        }
+    }
+
+    private func setupSession() {
+        session.beginConfiguration()
+        session.sessionPreset = .high
+
+        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+              let input = try? AVCaptureDeviceInput(device: device) else {
+            session.commitConfiguration()
+            return
+        }
+
+        if session.canAddInput(input) {
+            session.addInput(input)
+        }
+
+        let output = AVCaptureVideoDataOutput()
+        output.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera.frame"))
+        output.alwaysDiscardsLateVideoFrames = true
+
+        if session.canAddOutput(output) {
+            session.addOutput(output)
+        }
+
+        session.commitConfiguration()
+        session.startRunning()
+    }
+
+    func stop() {
+        sessionQueue.async { [weak self] in
+            self?.session.stopRunning()
+        }
+    }
+}
+
+extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        onFrame?(sampleBuffer)
+    }
+}
+
+// MARK: - Camera Preview
+
+struct CameraPreview: UIViewRepresentable {
+    let session: AVCaptureSession
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        previewLayer.videoGravity = .resizeAspectFill
+        view.layer.addSublayer(previewLayer)
+        context.coordinator.previewLayer = previewLayer
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.previewLayer?.frame = uiView.bounds
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
+    class Coordinator {
+        var previewLayer: AVCaptureVideoPreviewLayer?
+    }
+}
+
+// MARK: - Detection Result
+
+struct Detection: Identifiable {
+    let id = UUID()
+    let label: String
+    let confidence: Float
+    let boundingBox: CGRect // Normalized [0,1], origin at top-left
+}
+
+// MARK: - NMS-Free Object Detector (YOLO26 / YOLOv10)
+
+class NMSFreeDetector: ObservableObject {
+    @Published var detections: [Detection] = []
+    @Published var errorMessage: String?
+
+    private var mlModel: MLModel?
+    private var vnModel: VNCoreMLModel?
+    private var isProcessing = false
+    private let confidenceThreshold: Float = 0.25
+    private let inputSize: CGFloat = 640
+
+    // COCO class labels
+    private let labels = [
+        "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
+        "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
+        "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack",
+        "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball",
+        "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket",
+        "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
+        "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair",
+        "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse",
+        "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink",
+        "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"
+    ]
+
+    init() {
+        loadModel()
+    }
+
+    private func loadModel() {
+        // NMS-free models: yolo26s, yolov10s (end-to-end, no NMS required)
+        let modelNames = ["yolo26s", "yolov10s", "YOLO26s", "YOLOv10s"]
+        var modelURL: URL?
+
+        for name in modelNames {
+            if let url = Bundle.main.url(forResource: name, withExtension: "mlmodelc") {
+                modelURL = url
+                break
+            }
+        }
+
+        guard let url = modelURL else {
+            DispatchQueue.main.async {
+                self.errorMessage = "Model not found. Add yolo26s.mlpackage or yolov10s.mlpackage to the Xcode project."
+            }
+            return
+        }
+
+        do {
+            let config = MLModelConfiguration()
+            config.computeUnits = .all
+            mlModel = try MLModel(contentsOf: url, configuration: config)
+            vnModel = try VNCoreMLModel(for: mlModel!)
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = "Failed to load model: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    func detect(sampleBuffer: CMSampleBuffer) {
+        guard !isProcessing, let vnModel = vnModel else { return }
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        isProcessing = true
+
+        let request = VNCoreMLRequest(model: vnModel) { [weak self] request, _ in
+            defer { self?.isProcessing = false }
+            guard let self = self else { return }
+
+            // End-to-end models may output VNRecognizedObjectObservation directly
+            if let results = request.results as? [VNRecognizedObjectObservation], !results.isEmpty {
+                let dets = results.compactMap { obs -> Detection? in
+                    guard let topLabel = obs.labels.first, topLabel.confidence >= self.confidenceThreshold else { return nil }
+                    return Detection(
+                        label: topLabel.identifier,
+                        confidence: topLabel.confidence,
+                        boundingBox: obs.boundingBox
+                    )
+                }
+                DispatchQueue.main.async { self.detections = dets }
+                return
+            }
+
+            // Raw tensor output: decode end-to-end predictions
+            guard let results = request.results as? [VNCoreMLFeatureValueObservation] else { return }
+            var dets: [Detection] = []
+
+            for obs in results {
+                guard let multiArray = obs.featureValue.multiArrayValue else { continue }
+                let shape = multiArray.shape.map { $0.intValue }
+
+                // End-to-end output: [1, num_dets, 6] where 6 = [x1, y1, x2, y2, conf, class_id]
+                if shape.count == 3 && shape[2] == 6 {
+                    let numDets = shape[1]
+                    for i in 0..<numDets {
+                        let conf = multiArray[[0, i, 4] as [NSNumber]].floatValue
+                        guard conf >= self.confidenceThreshold else { continue }
+
+                        let x1 = multiArray[[0, i, 0] as [NSNumber]].floatValue / Float(self.inputSize)
+                        let y1 = multiArray[[0, i, 1] as [NSNumber]].floatValue / Float(self.inputSize)
+                        let x2 = multiArray[[0, i, 2] as [NSNumber]].floatValue / Float(self.inputSize)
+                        let y2 = multiArray[[0, i, 3] as [NSNumber]].floatValue / Float(self.inputSize)
+                        let classId = Int(multiArray[[0, i, 5] as [NSNumber]].floatValue)
+
+                        let label = classId < self.labels.count ? self.labels[classId] : "class_\(classId)"
+                        // Vision coordinates: origin at bottom-left
+                        dets.append(Detection(
+                            label: label,
+                            confidence: conf,
+                            boundingBox: CGRect(x: CGFloat(x1), y: CGFloat(1 - y2), width: CGFloat(x2 - x1), height: CGFloat(y2 - y1))
+                        ))
+                    }
+                }
+
+                // Alternative format: [1, 6, num_dets] (transposed)
+                if shape.count == 3 && shape[1] == 6 {
+                    let numDets = shape[2]
+                    for i in 0..<numDets {
+                        let conf = multiArray[[0, 4, i] as [NSNumber]].floatValue
+                        guard conf >= self.confidenceThreshold else { continue }
+
+                        let x1 = multiArray[[0, 0, i] as [NSNumber]].floatValue / Float(self.inputSize)
+                        let y1 = multiArray[[0, 1, i] as [NSNumber]].floatValue / Float(self.inputSize)
+                        let x2 = multiArray[[0, 2, i] as [NSNumber]].floatValue / Float(self.inputSize)
+                        let y2 = multiArray[[0, 3, i] as [NSNumber]].floatValue / Float(self.inputSize)
+                        let classId = Int(multiArray[[0, 5, i] as [NSNumber]].floatValue)
+
+                        let label = classId < self.labels.count ? self.labels[classId] : "class_\(classId)"
+                        dets.append(Detection(
+                            label: label,
+                            confidence: conf,
+                            boundingBox: CGRect(x: CGFloat(x1), y: CGFloat(1 - y2), width: CGFloat(x2 - x1), height: CGFloat(y2 - y1))
+                        ))
+                    }
+                }
+
+                // Alternative: [1, num_dets, 4+num_classes] — no NMS but needs argmax
+                if shape.count == 3 && shape[2] > 6 {
+                    let numDets = shape[1]
+                    let numClasses = shape[2] - 4
+                    for i in 0..<numDets {
+                        var maxConf: Float = 0
+                        var maxClass = 0
+                        for c in 0..<numClasses {
+                            let val = multiArray[[0, i, c + 4] as [NSNumber]].floatValue
+                            if val > maxConf {
+                                maxConf = val
+                                maxClass = c
+                            }
+                        }
+                        guard maxConf >= self.confidenceThreshold else { continue }
+
+                        let cx = multiArray[[0, i, 0] as [NSNumber]].floatValue / Float(self.inputSize)
+                        let cy = multiArray[[0, i, 1] as [NSNumber]].floatValue / Float(self.inputSize)
+                        let w = multiArray[[0, i, 2] as [NSNumber]].floatValue / Float(self.inputSize)
+                        let h = multiArray[[0, i, 3] as [NSNumber]].floatValue / Float(self.inputSize)
+
+                        let label = maxClass < self.labels.count ? self.labels[maxClass] : "class_\(maxClass)"
+                        dets.append(Detection(
+                            label: label,
+                            confidence: maxConf,
+                            boundingBox: CGRect(x: CGFloat(cx - w/2), y: CGFloat(1 - cy - h/2), width: CGFloat(w), height: CGFloat(h))
+                        ))
+                    }
+                }
+            }
+
+            DispatchQueue.main.async { self.detections = dets }
+        }
+        request.imageCropAndScaleOption = .scaleFill
+
+        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .right, options: [:])
+        try? handler.perform([request])
+    }
+}
+
+// MARK: - Bounding Box Overlay
+
+struct BoundingBoxOverlay: View {
+    let detections: [Detection]
+    let viewSize: CGSize
+
+    private let colors: [Color] = [.red, .green, .blue, .orange, .purple, .yellow, .pink, .cyan]
+
+    var body: some View {
+        ForEach(detections) { det in
+            let rect = convertBoundingBox(det.boundingBox)
+            let color = colors[abs(det.label.hashValue) % colors.count]
+
+            Rectangle()
+                .stroke(color, lineWidth: 2)
+                .frame(width: rect.width, height: rect.height)
+                .position(x: rect.midX, y: rect.midY)
+
+            Text("\(det.label) \(String(format: "%.0f%%", det.confidence * 100))")
+                .font(.caption2)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+                .padding(.horizontal, 4)
+                .padding(.vertical, 2)
+                .background(color.opacity(0.8))
+                .cornerRadius(4)
+                .position(x: rect.midX, y: rect.minY - 10)
+        }
+    }
+
+    private func convertBoundingBox(_ box: CGRect) -> CGRect {
+        // Vision bounding box: origin at bottom-left, normalized [0,1]
+        let x = box.origin.x * viewSize.width
+        let y = (1 - box.origin.y - box.height) * viewSize.height
+        let w = box.width * viewSize.width
+        let h = box.height * viewSize.height
+        return CGRect(x: x, y: y, width: w, height: h)
+    }
+}
+
+// MARK: - Content View
+
+struct ContentView: View {
+    @StateObject private var camera = CameraManager()
+    @StateObject private var detector = NMSFreeDetector()
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack {
+                CameraPreview(session: camera.session)
+                    .ignoresSafeArea()
+
+                BoundingBoxOverlay(detections: detector.detections, viewSize: geo.size)
+
+                VStack {
+                    Spacer()
+
+                    if let error = detector.errorMessage {
+                        VStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.largeTitle)
+                                .foregroundColor(.yellow)
+                            Text(error)
+                                .font(.caption)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+                        .padding()
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+                        .padding()
+                    }
+
+                    HStack {
+                        Text("YOLO (NMS-free)")
+                            .font(.headline)
+                        Spacer()
+                        Text("\(detector.detections.count) objects")
+                            .font(.subheadline)
+                    }
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(.black.opacity(0.7), in: RoundedRectangle(cornerRadius: 12))
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                }
+            }
+        }
+        .onAppear {
+            camera.onFrame = { [weak detector] buffer in
+                detector?.detect(sampleBuffer: buffer)
+            }
+            camera.configure()
+        }
+        .onDisappear {
+            camera.stop()
+        }
+    }
+}
+
+#Preview {
+    ContentView()
+}
