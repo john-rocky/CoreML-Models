@@ -3,6 +3,7 @@ import UIKit
 import CoreML
 import PhotosUI
 import CoreMotion
+import Accelerate
 
 // MARK: - Apple Depth Pro - Metric Depth Estimation Demo
 //
@@ -708,17 +709,45 @@ class DepthProViewModel: ObservableObject {
 
         await updateStatus("Running depth estimation...", progress: 0.5)
 
+        // Model expects MLMultiArray input (1,3,1536,1536), not CVPixelBuffer
+        let inputArray = try MLMultiArray(shape: [1, 3, 1536, 1536], dataType: .float16)
+        fillMultiArrayFromPixelBuffer(pixelBuffer, into: inputArray, width: 1536, height: 1536)
+
         let inputFeatures = try MLDictionaryFeatureProvider(dictionary: [
-            "image": MLFeatureValue(pixelBuffer: pixelBuffer)
+            "image": MLFeatureValue(multiArray: inputArray)
         ])
 
         let result = try model.prediction(from: inputFeatures)
 
         await updateStatus("Processing depth output...", progress: 0.8)
 
-        // Extract depth map
-        guard let depthMultiArray = result.featureValue(for: "depth")?.multiArrayValue else {
-            throw DepthProError.processingFailed("Model did not produce a depth output.")
+        // Output name is "var_4563" (auto-generated during conversion)
+        guard let depthMultiArray = result.featureValue(for: "var_4563")?.multiArrayValue else {
+            // Fallback: try first available output
+            let names = result.featureNames
+            guard let firstName = names.first,
+                  let depthArray = result.featureValue(for: firstName)?.multiArrayValue else {
+                throw DepthProError.processingFailed("Model did not produce a depth output.")
+            }
+            // Use this fallback path
+            let shape2 = depthArray.shape.map { $0.intValue }
+            let dH2 = shape2.count >= 3 ? shape2[shape2.count - 2] : 1536
+            let dW2 = shape2.count >= 2 ? shape2[shape2.count - 1] : 1536
+            let totalPixels2 = dH2 * dW2
+            let ptr2 = depthArray.dataPointer.bindMemory(to: Float.self, capacity: totalPixels2)
+            var depths2 = [Float](repeating: 0, count: totalPixels2)
+            for i in 0..<totalPixels2 { depths2[i] = ptr2[i] }
+            var minD2: Float = .greatestFiniteMagnitude, maxD2: Float = -.greatestFiniteMagnitude, sumD2: Float = 0
+            for d in depths2 { if d < minD2 { minD2 = d }; if d > maxD2 { maxD2 = d }; sumD2 += d }
+            let meanD2 = sumD2 / Float(totalPixels2)
+            let depthImage2 = TurboColormap.depthMapImage(from: depths2, width: dW2, height: dH2, minDepth: minD2, maxDepth: maxD2)
+            await MainActor.run {
+                self.depthMapImage = depthImage2
+                self.minDepth = minD2; self.maxDepth = maxD2; self.meanDepth = meanD2
+                self.depthWidth = dW2; self.depthHeight = dH2; self.depthValues = depths2
+                self.isProcessed = true; self.isProcessing = false
+            }
+            return
         }
 
         // Extract focal length if available
@@ -745,12 +774,20 @@ class DepthProViewModel: ObservableObject {
             dW = 1536
         }
 
-        // Copy depth values
+        // Copy depth values (handle both Float32 and Float16 output)
         let totalPixels = dH * dW
-        let pointer = depthMultiArray.dataPointer.bindMemory(to: Float.self, capacity: totalPixels)
         var depths = [Float](repeating: 0, count: totalPixels)
-        for i in 0..<totalPixels {
-            depths[i] = pointer[i]
+        if depthMultiArray.dataType == .float32 {
+            let pointer = depthMultiArray.dataPointer.bindMemory(to: Float.self, capacity: totalPixels)
+            for i in 0..<totalPixels { depths[i] = pointer[i] }
+        } else {
+            // Float16 output
+            let fp16Ptr = depthMultiArray.dataPointer.bindMemory(to: UInt16.self, capacity: totalPixels)
+            var srcBuffer = vImage_Buffer(data: UnsafeMutableRawPointer(mutating: fp16Ptr), height: 1, width: vImagePixelCount(totalPixels), rowBytes: totalPixels * 2)
+            depths.withUnsafeMutableBufferPointer { dstBuf in
+                var dstBuffer = vImage_Buffer(data: dstBuf.baseAddress!, height: 1, width: vImagePixelCount(totalPixels), rowBytes: totalPixels * 4)
+                vImageConvert_Planar16FtoPlanarF(&srcBuffer, &dstBuffer, 0)
+            }
         }
 
         // Compute statistics
@@ -851,6 +888,46 @@ class DepthProViewModel: ObservableObject {
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
 
         return buffer
+    }
+
+    // MARK: - PixelBuffer to MLMultiArray
+
+    private func fillMultiArrayFromPixelBuffer(_ buffer: CVPixelBuffer, into array: MLMultiArray, width: Int, height: Int) {
+        CVPixelBufferLockBaseAddress(buffer, .readOnly)
+        defer { CVPixelBufferUnlockBaseAddress(buffer, .readOnly) }
+
+        guard let baseAddress = CVPixelBufferGetBaseAddress(buffer) else { return }
+        let bytesPerRow = CVPixelBufferGetBytesPerRow(buffer)
+        let ptr = baseAddress.assumingMemoryBound(to: UInt8.self)
+
+        // BGRA → RGB normalized to [0,1], stored as Float16
+        let fp16Ptr = array.dataPointer.bindMemory(to: UInt16.self, capacity: 3 * width * height)
+        for y in 0..<height {
+            for x in 0..<width {
+                let offset = y * bytesPerRow + x * 4
+                let b = Float(ptr[offset]) / 255.0
+                let g = Float(ptr[offset + 1]) / 255.0
+                let r = Float(ptr[offset + 2]) / 255.0
+                // Channel-first layout: [1, 3, H, W]
+                let idx = y * width + x
+                fp16Ptr[0 * height * width + idx] = float32ToFloat16(r)
+                fp16Ptr[1 * height * width + idx] = float32ToFloat16(g)
+                fp16Ptr[2 * height * width + idx] = float32ToFloat16(b)
+            }
+        }
+    }
+
+    private func float32ToFloat16(_ value: Float) -> UInt16 {
+        var f = value
+        var h: UInt16 = 0
+        withUnsafePointer(to: &f) { src in
+            withUnsafeMutablePointer(to: &h) { dst in
+                var bufferFloat32 = vImage_Buffer(data: UnsafeMutableRawPointer(mutating: src), height: 1, width: 1, rowBytes: 4)
+                var bufferFloat16 = vImage_Buffer(data: UnsafeMutableRawPointer(dst), height: 1, width: 1, rowBytes: 2)
+                vImageConvert_PlanarFtoPlanar16F(&bufferFloat32, &bufferFloat16, 0)
+            }
+        }
+        return h
     }
 
     // MARK: - Status Updates
