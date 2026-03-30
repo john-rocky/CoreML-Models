@@ -4,6 +4,7 @@ import CoreML
 import Vision
 import PhotosUI
 import Photos
+import Accelerate
 
 // MARK: - Background Removal using BiRefNet
 // BiRefNet is a bilateral reference network for high-resolution dichotomous image segmentation.
@@ -407,7 +408,7 @@ class BackgroundRemovalViewModel: ObservableObject {
             throw SegmentationError.imageProcessingFailed("Failed to resize input image")
         }
 
-        let inputArray = try MLMultiArray(shape: [1, 3, 512, 512], dataType: .float32)
+        let inputArray = try MLMultiArray(shape: [1, 3, 512, 512], dataType: .float16)
         fillMultiArrayFromImage(resizedCG, into: inputArray, size: 512)
 
         await MainActor.run {
@@ -433,12 +434,20 @@ class BackgroundRemovalViewModel: ObservableObject {
 
         let width = 512
         let height = 512
-        var maskData = [Float](repeating: 0, count: width * height)
+        let totalPixels = width * height
+        var maskData = [Float](repeating: 0, count: totalPixels)
 
-        let outputPointer = outputArray.dataPointer.bindMemory(to: Float.self, capacity: width * height)
-        for i in 0..<(width * height) {
-            let raw = outputPointer[i]
-            maskData[i] = 1.0 / (1.0 + exp(-raw)) // sigmoid
+        // Output is Float16 - read as UInt16 and convert to Float32
+        let fp16Ptr = outputArray.dataPointer.bindMemory(to: UInt16.self, capacity: totalPixels)
+        var rawFloats = [Float](repeating: 0, count: totalPixels)
+        var srcBuf = vImage_Buffer(data: UnsafeMutableRawPointer(mutating: fp16Ptr), height: 1, width: vImagePixelCount(totalPixels), rowBytes: totalPixels * 2)
+        rawFloats.withUnsafeMutableBufferPointer { dstBufPtr in
+            var dstBuf = vImage_Buffer(data: dstBufPtr.baseAddress!, height: 1, width: vImagePixelCount(totalPixels), rowBytes: totalPixels * 4)
+            vImageConvert_Planar16FtoPlanarF(&srcBuf, &dstBuf, 0)
+        }
+        for i in 0..<totalPixels {
+            let raw = rawFloats[i]
+            maskData[i] = raw.isNaN ? 0 : 1.0 / (1.0 + exp(-raw)) // sigmoid
         }
 
         // Store raw mask for background option changes
@@ -489,16 +498,36 @@ class BackgroundRemovalViewModel: ObservableObject {
 
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: size, height: size))
 
-        let ptr = array.dataPointer.bindMemory(to: Float.self, capacity: 3 * size * size)
+        // Write as Float16 (model expects Float16 input)
+        let fp16Ptr = array.dataPointer.bindMemory(to: UInt16.self, capacity: 3 * size * size)
         let channelStride = size * size
 
         for y in 0..<size {
             for x in 0..<size {
                 let offset = (y * size + x) * bytesPerPixel
                 let idx = y * size + x
-                ptr[0 * channelStride + idx] = Float(pixelData[offset]) / 255.0     // R
-                ptr[1 * channelStride + idx] = Float(pixelData[offset + 1]) / 255.0 // G
-                ptr[2 * channelStride + idx] = Float(pixelData[offset + 2]) / 255.0 // B
+                var r = Float(pixelData[offset]) / 255.0
+                var g = Float(pixelData[offset + 1]) / 255.0
+                var b = Float(pixelData[offset + 2]) / 255.0
+                var rh: UInt16 = 0, gh: UInt16 = 0, bh: UInt16 = 0
+                withUnsafePointer(to: &r) { src in
+                    var srcBuf = vImage_Buffer(data: UnsafeMutableRawPointer(mutating: src), height: 1, width: 1, rowBytes: 4)
+                    var dstBuf = vImage_Buffer(data: &rh, height: 1, width: 1, rowBytes: 2)
+                    vImageConvert_PlanarFtoPlanar16F(&srcBuf, &dstBuf, 0)
+                }
+                withUnsafePointer(to: &g) { src in
+                    var srcBuf = vImage_Buffer(data: UnsafeMutableRawPointer(mutating: src), height: 1, width: 1, rowBytes: 4)
+                    var dstBuf = vImage_Buffer(data: &gh, height: 1, width: 1, rowBytes: 2)
+                    vImageConvert_PlanarFtoPlanar16F(&srcBuf, &dstBuf, 0)
+                }
+                withUnsafePointer(to: &b) { src in
+                    var srcBuf = vImage_Buffer(data: UnsafeMutableRawPointer(mutating: src), height: 1, width: 1, rowBytes: 4)
+                    var dstBuf = vImage_Buffer(data: &bh, height: 1, width: 1, rowBytes: 2)
+                    vImageConvert_PlanarFtoPlanar16F(&srcBuf, &dstBuf, 0)
+                }
+                fp16Ptr[0 * channelStride + idx] = rh
+                fp16Ptr[1 * channelStride + idx] = gh
+                fp16Ptr[2 * channelStride + idx] = bh
             }
         }
     }
@@ -508,7 +537,8 @@ class BackgroundRemovalViewModel: ObservableObject {
         var pixelData = [UInt8](repeating: 0, count: width * height * 4)
 
         for i in 0..<(width * height) {
-            let val = UInt8(min(max(maskData[i], 0), 1) * 255)
+            let v = maskData[i]
+            let val = UInt8(v.isNaN ? 0 : min(max(v, 0), 1) * 255)
             pixelData[i * 4] = val
             pixelData[i * 4 + 1] = val
             pixelData[i * 4 + 2] = val
