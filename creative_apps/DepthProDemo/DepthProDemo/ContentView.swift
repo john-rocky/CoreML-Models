@@ -734,16 +734,25 @@ class DepthProViewModel: ObservableObject {
             let dH2 = shape2.count >= 3 ? shape2[shape2.count - 2] : 1536
             let dW2 = shape2.count >= 2 ? shape2[shape2.count - 1] : 1536
             let totalPixels2 = dH2 * dW2
-            let ptr2 = depthArray.dataPointer.bindMemory(to: Float.self, capacity: totalPixels2)
             var depths2 = [Float](repeating: 0, count: totalPixels2)
-            for i in 0..<totalPixels2 { depths2[i] = ptr2[i] }
+            if depthArray.dataType == .float32 {
+                let ptr2 = depthArray.dataPointer.bindMemory(to: Float.self, capacity: totalPixels2)
+                for i in 0..<totalPixels2 { depths2[i] = ptr2[i] }
+            } else {
+                let fp16 = depthArray.dataPointer.bindMemory(to: UInt16.self, capacity: totalPixels2)
+                var src = vImage_Buffer(data: UnsafeMutableRawPointer(mutating: fp16), height: 1, width: vImagePixelCount(totalPixels2), rowBytes: totalPixels2 * 2)
+                depths2.withUnsafeMutableBufferPointer { buf in
+                    var dst = vImage_Buffer(data: buf.baseAddress!, height: 1, width: vImagePixelCount(totalPixels2), rowBytes: totalPixels2 * 4)
+                    vImageConvert_Planar16FtoPlanarF(&src, &dst, 0)
+                }
+            }
             var minD2: Float = .greatestFiniteMagnitude, maxD2: Float = -.greatestFiniteMagnitude, sumD2: Float = 0
             for d in depths2 { if d < minD2 { minD2 = d }; if d > maxD2 { maxD2 = d }; sumD2 += d }
             let meanD2 = sumD2 / Float(totalPixels2)
             let depthImage2 = TurboColormap.depthMapImage(from: depths2, width: dW2, height: dH2, minDepth: minD2, maxDepth: maxD2)
             await MainActor.run {
                 self.depthMapImage = depthImage2
-                self.minDepth = minD2; self.maxDepth = maxD2; self.meanDepth = meanD2
+                self.depthStats = DepthStats(min: minD2, max: maxD2, mean: meanD2)
                 self.depthWidth = dW2; self.depthHeight = dH2; self.depthValues = depths2
                 self.isProcessed = true; self.isProcessing = false
             }
