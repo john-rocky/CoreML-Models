@@ -48,6 +48,8 @@ You are free to do or not.
   - [Semantic FPN](#semantic-fpn)
   - [cloths_segmentation](#cloths_segmentation)
   - [easyportrait](#easyportrait)
+  - [MobileSAM](#mobilesam)
+  - [SAM2-Tiny](#sam2-tiny)
 
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#real-esrgan)
@@ -353,6 +355,22 @@ EasyPortrait - Face Parsing and Portrait Segmentation Dataset.
 | Google Drive Link | Size | Output |Original Project | License | year | Swift sample |Conversion Script |
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |------------- |
 | [easyportrait-segformer512-fp](https://drive.google.com/drive/folders/13BUhNpQHodAgcj6eJaPbzuSUaFn3JuU-?usp=sharing) | 7.6 MB | Image(GrayScale 512x512) * 9 |[hukenovs/easyportrait](https://github.com/hukenovs/easyportrait) | [Creative Commons](https://github.com/hukenovs/easyportrait/tree/main/license) |2023|[easyportrait-coreml](https://github.com/john-rocky/easyportrait-coreml)|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/11a3XWFA8fa8V0a2zgWFqOMUaZgF4O1qt?usp=sharing)|
+
+### MobileSAM
+
+Faster Segment Anything: Towards Lightweight SAM for Mobile Applications. MobileSAM replaces the heavy ViT-H image encoder with a lightweight ViT-Tiny encoder via decoupled knowledge distillation, making it ~60x smaller and ~40x faster than the original SAM.
+
+| Download Link | Size | Output | Original Project | License | Year | Sample Project |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [MobileSAM.zip](https://github.com/john-rocky/SamKit/releases/download/v1.0.0/MobileSAM.zip) | 23 MB (Encoder 13 MB + Decoder 9.8 MB) | Segmentation Mask | [ChaoningZhang/MobileSAM](https://github.com/ChaoningZhang/MobileSAM) | [Apache 2.0](https://github.com/ChaoningZhang/MobileSAM/blob/master/LICENSE) | 2023 | [SamKit](https://github.com/john-rocky/SamKit) |
+
+### SAM2-Tiny
+
+SAM 2: Segment Anything in Images and Videos. SAM 2 extends promptable segmentation from images to videos using a streaming architecture with memory. The Tiny variant uses a Hiera-T backbone for efficient on-device inference.
+
+| Download Link | Size | Output | Original Project | License | Year | Sample Project |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [SAM2Tiny.zip](https://github.com/john-rocky/SamKit/releases/download/v1.0.0/SAM2Tiny.zip) | 76 MB (ImageEncoder 64 MB + PromptEncoder 2 MB + MaskDecoder 9.8 MB) | Segmentation Mask | [facebookresearch/sam2](https://github.com/facebookresearch/sam2) | [Apache 2.0](https://github.com/facebookresearch/sam2/blob/main/LICENSE) | 2024 | [SamKit](https://github.com/john-rocky/SamKit) |
 
 # Super Resolution
 
