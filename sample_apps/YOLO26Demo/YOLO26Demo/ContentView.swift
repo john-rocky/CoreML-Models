@@ -405,7 +405,7 @@ class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
         statsLabel.masksToBounds = true
         statsLabel.contentsScale = UIScreen.main.scale
         statsLabel.alignmentMode = .center
-        statsLabel.frame = CGRect(x: 0, y: 0, width: 160, height: 28)
+        statsLabel.frame = CGRect(x: 0, y: 0, width: 220, height: 28)
         view.layer.addSublayer(statsLabel)
         AVCaptureDevice.requestAccess(for: .video) { [weak self] ok in
             guard ok else { return }
@@ -418,7 +418,7 @@ class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
         previewLayer.frame = view.bounds
         statsLabel.frame = CGRect(x: (view.bounds.width - 160) / 2,
                                   y: view.safeAreaInsets.top + 8,
-                                  width: 160, height: 28)
+                                  width: 220, height: 28)
     }
 
     override func viewWillAppear(_ animated: Bool) {
