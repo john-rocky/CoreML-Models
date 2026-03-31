@@ -12,16 +12,30 @@ struct ContentView: View {
     @State private var selectedTab = 2
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            PhotoDetectionView(detector: detector)
-                .tabItem { Label("Photo", systemImage: "photo") }
-                .tag(0)
-            VideoDetectionView(detector: detector)
-                .tabItem { Label("Video", systemImage: "video") }
-                .tag(1)
-            CameraDetectionView(detector: detector)
-                .tabItem { Label("Camera", systemImage: "camera") }
-                .tag(2)
+        ZStack {
+            TabView(selection: $selectedTab) {
+                PhotoDetectionView(detector: detector)
+                    .tabItem { Label("Photo", systemImage: "photo") }
+                    .tag(0)
+                VideoDetectionView(detector: detector)
+                    .tabItem { Label("Video", systemImage: "video") }
+                    .tag(1)
+                CameraDetectionView(detector: detector)
+                    .tabItem { Label("Camera", systemImage: "camera") }
+                    .tag(2)
+            }
+
+            if !detector.isReady {
+                Color.black.ignoresSafeArea()
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .tint(.white)
+                        .scaleEffect(1.2)
+                    Text("Loading model...")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
         }
         .tint(.white)
         .preferredColorScheme(.dark)
