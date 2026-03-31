@@ -251,6 +251,8 @@ YOLO11: Ultralytics latest YOLO with improved backbone and neck architecture. 22
 
 YOLO26: Edge-first vision AI with NMS-free end-to-end detection. Up to 43% faster CPU inference vs YOLO11 with DFL removal and ProgLoss.
 
+<img width="300" src="https://github.com/user-attachments/assets/bade5e8b-25fd-4ef8-96d6-7f8dfbb954b2">
+
 | Download Link | Size | Output | Original Project | License | Year | Note | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [yolo26s.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yolo26s.mlpackage.zip) | 18 MB | MultiArray (1 × 300 × 6) | [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics) | [AGPL-3.0](https://github.com/ultralytics/ultralytics/blob/main/LICENSE) | 2026 | NMS-free end-to-end detection. | [YOLO26Demo](sample_apps/YOLO26Demo) |
