@@ -7,20 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C10001 /* LivePortraitDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10002; };
-		C10003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10004; };
-		C10005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C10006; };
-		C1LP02 /* LivePortrait_MotionExtractor.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C1LP01; };
-		C1LP04 /* LivePortrait_AppearanceExtractor.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C1LP03; };
-		C1LP06 /* LivePortrait_WarpingNetwork.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C1LP05; };
-		C1LP08 /* LivePortrait_SPADEGenerator.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C1LP07; };
+		C10001 /* LivePortraitDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10002 /* LivePortraitDemoApp.swift */; };
+		C10003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10004 /* ContentView.swift */; };
+		C10005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C10006 /* Assets.xcassets */; };
+		C1LP02 /* LivePortrait_MotionExtractor.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C1LP01 /* LivePortrait_MotionExtractor.mlpackage */; };
+		C1LP04 /* LivePortrait_AppearanceExtractor.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C1LP03 /* LivePortrait_AppearanceExtractor.mlpackage */; };
+		C1LP06 /* LivePortrait_WarpingNetwork.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C1LP05 /* LivePortrait_WarpingNetwork.mlpackage */; };
+		C1LP08 /* LivePortrait_SPADEGenerator.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C1LP07 /* LivePortrait_SPADEGenerator.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		C10007 /* LivePortraitDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LivePortraitDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C10002 /* LivePortraitDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePortraitDemoApp.swift; sourceTree = "<group>"; };
 		C10004 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		C10006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C10007 /* LivePortraitDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LivePortraitDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C10008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C1LP01 /* LivePortrait_MotionExtractor.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = LivePortrait_MotionExtractor.mlpackage; sourceTree = "<group>"; };
 		C1LP03 /* LivePortrait_AppearanceExtractor.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = LivePortrait_AppearanceExtractor.mlpackage; sourceTree = "<group>"; };
@@ -75,7 +75,7 @@
 /* Begin PBXNativeTarget section */
 		C10013 /* LivePortraitDemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C10014;
+			buildConfigurationList = C10014 /* Build configuration list for PBXNativeTarget "LivePortraitDemo" */;
 			buildPhases = (
 				C10015 /* Sources */,
 				C10009 /* Frameworks */,
@@ -87,7 +87,7 @@
 			);
 			name = LivePortraitDemo;
 			productName = LivePortraitDemo;
-			productReference = C10007;
+			productReference = C10007 /* LivePortraitDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -105,7 +105,7 @@
 					};
 				};
 			};
-			buildConfigurationList = C10018;
+			buildConfigurationList = C10018 /* Build configuration list for PBXProject "LivePortraitDemo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -114,11 +114,11 @@
 				Base,
 			);
 			mainGroup = C10010;
-			productRefGroup = C10012;
+			productRefGroup = C10012 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C10013,
+				C10013 /* LivePortraitDemo */,
 			);
 		};
 /* End PBXProject section */
@@ -211,6 +211,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LivePortraitDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -238,6 +239,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LivePortraitDemo/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -261,26 +263,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C10018 /* Build configuration list for PBXProject */ = {
+		C10014 /* Build configuration list for PBXNativeTarget "LivePortraitDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C10019,
-				C10020,
+				C10021 /* Debug */,
+				C10022 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C10014 /* Build configuration list for PBXNativeTarget */ = {
+		C10018 /* Build configuration list for PBXProject "LivePortraitDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C10021,
-				C10022,
+				C10019 /* Debug */,
+				C10020 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
 	};
-	rootObject = C10017;
+	rootObject = C10017 /* Project object */;
 }

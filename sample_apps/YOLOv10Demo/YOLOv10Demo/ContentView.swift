@@ -200,8 +200,9 @@ class ObjectDetector: ObservableObject {
             defer { self?.isProcessing = false }
             guard let self = self else { return }
 
-            if let results = request.results as? [VNRecognizedObjectObservation] {
-                self.processRecognizedObjects(results)
+            if let results = request.results as? [VNCoreMLFeatureValueObservation],
+               let multiArray = results.first?.featureValue.multiArrayValue {
+                self.processRawOutput(multiArray)
             } else {
                 DispatchQueue.main.async {
                     self.detections = []
@@ -214,21 +215,36 @@ class ObjectDetector: ObservableObject {
         try? handler.perform([request])
     }
 
-    private func processRecognizedObjects(_ observations: [VNRecognizedObjectObservation]) {
-        let filtered = observations.filter { $0.confidence >= confidenceThreshold }
+    /// Parse raw YOLOv10 output [1, 300, 6] where each row is [x1, y1, x2, y2, confidence, class_id].
+    private func processRawOutput(_ multiArray: MLMultiArray) {
+        let numDetections = multiArray.shape[1].intValue  // 300
+        let stride = multiArray.shape[2].intValue         // 6
+        let ptr = multiArray.dataPointer.bindMemory(to: Float.self, capacity: numDetections * stride)
 
-        let results: [Detection] = filtered.compactMap { observation in
-            guard let topLabel = observation.labels.first else { return nil }
+        var results: [Detection] = []
 
-            // Attempt to find COCO class index from label identifier
-            let classIndex = cocoClassLabels.first(where: { $0.value == topLabel.identifier })?.key ?? 0
+        for i in 0..<numDetections {
+            let base = i * stride
+            let confidence = ptr[base + 4]
+            guard confidence >= confidenceThreshold else { continue }
 
-            return Detection(
-                classIndex: classIndex,
-                label: topLabel.identifier,
-                confidence: topLabel.confidence,
-                boundingBox: observation.boundingBox
-            )
+            let x1 = CGFloat(ptr[base])     / 640.0
+            let y1 = CGFloat(ptr[base + 1]) / 640.0
+            let x2 = CGFloat(ptr[base + 2]) / 640.0
+            let y2 = CGFloat(ptr[base + 3]) / 640.0
+            let classId = Int(ptr[base + 5])
+
+            let label = cocoClassLabels[classId] ?? "class_\(classId)"
+
+            // Convert from top-left origin to Vision convention (bottom-left origin)
+            let box = CGRect(x: x1, y: 1 - y2, width: x2 - x1, height: y2 - y1)
+
+            results.append(Detection(
+                classIndex: classId,
+                label: label,
+                confidence: confidence,
+                boundingBox: box
+            ))
         }
 
         DispatchQueue.main.async {

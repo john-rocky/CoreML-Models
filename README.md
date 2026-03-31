@@ -136,8 +136,7 @@ You are free to do or not.
 - [**Image Deblurring**](#image-deblurring) **:NEW**
   - [NAFNet](#nafnet)
 
-- [**Monocular Depth Estimation (Next-Gen)**](#monocular-depth-estimation-next-gen) **:NEW**
-  - [Depth Anything V2 Small](#depth-anything-v2-small)
+- [**Monocular Depth Estimation (Next-Gen)**](#monocular-depth-estimation-next-gen) — [Official CoreML](https://huggingface.co/apple/coreml-depth-anything-v2-small)
 
 - [**Object Detection (Next-Gen)**](#object-detection-next-gen) **:NEW**
   - [YOLOv10-N](#yolov10-n)
@@ -145,8 +144,7 @@ You are free to do or not.
 - [**Background Removal (SOTA)**](#background-removal-sota) **:NEW**
   - [BiRefNet](#birefnet)
 
-- [**Speech Recognition**](#speech-recognition) **:NEW**
-  - [Whisper Tiny](#whisper-tiny)
+- [**Speech Recognition**](#speech-recognition) — [WhisperKit](https://github.com/argmaxinc/WhisperKit)
 
 - [**Text-to-Speech**](#text-to-speech) **:NEW**
   - [Kokoro-82M](#kokoro-82m)
@@ -157,8 +155,7 @@ You are free to do or not.
 - [**Open-Vocabulary Detection**](#open-vocabulary-detection) **:NEW**
   - [YOLOE-S](#yoloe-s)
 
-- [**Pose Estimation**](#pose-estimation) **:NEW**
-  - [DWPose / RTMPose](#dwpose--rtmpose)
+- [**Pose Estimation**](#pose-estimation) — [Apple Vision API](https://developer.apple.com/documentation/vision/vndetecthumanbodyposerequest)
 
 - [**Multilingual OCR**](#multilingual-ocr) **:NEW**
   - [PP-OCRv5](#pp-ocrv5)
@@ -266,19 +263,15 @@ A ConvNet for the 2020s. Pure CNN architecture that competes with Vision Transfo
 
 ### FastViT-T8
 
-Apple's hybrid vision transformer. Ultra-fast inference with structural reparameterization. 76.2% top-1 accuracy.
-
-| Google Drive Link | Size | Dataset |Original Project | License |Year| Sample Project |
-| ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
-| FastViT-T8 (TBD) | 7.8 MB | ImageNet | [apple/ml-fastvit](https://github.com/apple/ml-fastvit)  | [Apple](https://github.com/apple/ml-fastvit/blob/main/LICENSE)|2023| [FastViTDemo](sample_apps/FastViTDemo) |
+> **Official CoreML model and sample app available:**
+> - CoreML Model: [apple/coreml-FastViT-T8](https://huggingface.co/apple/coreml-FastViT-T8)
+> - iOS Sample: [huggingface/coreml-examples/FastViTSample](https://github.com/huggingface/coreml-examples/tree/main/FastViTSample)
+> - Source: [apple/ml-fastvit](https://github.com/apple/ml-fastvit)
 
 ### MobileOne-S0
 
-Apple's sub-millisecond mobile backbone. Optimized for on-device inference with reparameterizable architecture. 71.4% top-1 accuracy.
-
-| Google Drive Link | Size | Dataset |Original Project | License |Year| Sample Project |
-| ------------- | ------------- | ------------- |------------- |------------- |------------- |------------- |
-| MobileOne-S0 (TBD) | 10.4 MB | ImageNet | [apple/ml-mobileone](https://github.com/apple/ml-mobileone)  | [Apple](https://github.com/apple/ml-mobileone/blob/main/LICENSE)|2022| [MobileOneDemo](sample_apps/MobileOneDemo) |
+> **Official CoreML model and benchmark app available:**
+> - CoreML Model + iOS App: [apple/ml-mobileone](https://github.com/apple/ml-mobileone)
 
 ### EfficientFormerV2-S0
 
@@ -1089,11 +1082,11 @@ Nonlinear Activation Free Network. State-of-the-art image deblurring without non
 
 ### Depth Anything V2 Small
 
-Depth Anything V2 (TsingHua, 2024). State-of-the-art monocular depth estimation. Massively improved over MiDaS with synthetic data training. The Small variant is extremely lightweight (~25 MB).
+Depth Anything V2 (TsingHua, 2024). State-of-the-art monocular depth estimation.
 
-| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
-| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
-| [DepthAnythingV2Small (TBD)] | 25 MB | 518x518 image | 518x518 relative depth map | [DepthAnything/Depth-Anything-V2](https://github.com/DepthAnything/Depth-Anything-V2) | [Apache 2.0](https://github.com/DepthAnything/Depth-Anything-V2/blob/main/LICENSE) | 2024 | [DepthAnythingV2Demo](sample_apps/DepthAnythingV2Demo) |
+> **Official CoreML model and iOS sample app available:**
+> - CoreML Model: [apple/coreml-depth-anything-v2-small](https://huggingface.co/apple/coreml-depth-anything-v2-small)
+> - iOS Sample: [huggingface/coreml-examples/depth-anything-example](https://github.com/huggingface/coreml-examples/tree/main/depth-anything-example)
 
 # Object Detection (Next-Gen)
 
@@ -1117,15 +1110,13 @@ Bilateral Reference Network (2024). State-of-the-art dichotomous image segmentat
 
 # Speech Recognition
 
-### Whisper Tiny
+### Whisper
 
-OpenAI Whisper Tiny (OpenAI, 2023). Multilingual speech-to-text model supporting 99+ languages. The Tiny variant (~75 MB) is ideal for on-device transcription. Apple provides official CoreML conversion via WhisperKit.
+OpenAI Whisper (OpenAI, 2023). Multilingual speech-to-text model supporting 99+ languages.
 
-| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
-| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
-| [WhisperTinyEncoder (TBD)] | 75 MB | mel spectrogram (1,80,3000) | encoder hidden states | [openai/whisper](https://github.com/openai/whisper) | [MIT](https://github.com/openai/whisper/blob/main/LICENSE) | 2023 | [WhisperDemo](creative_apps/WhisperDemo) |
-
-Note: For production use, consider [WhisperKit](https://github.com/argmaxinc/WhisperKit) which provides optimized CoreML models with full encoder+decoder pipeline.
+> **Full CoreML implementation available:**
+> - [argmaxinc/WhisperKit](https://github.com/argmaxinc/WhisperKit) — Optimized CoreML models (Tiny to Large) with full encoder+decoder pipeline, Swift Package, MIT license
+> - CoreML Models: [argmaxinc/whisperkit-coreml](https://huggingface.co/argmaxinc/whisperkit-coreml)
 
 # Text-to-Speech
 
@@ -1163,13 +1154,12 @@ YOLOE-S (Tsinghua, ICCV 2025). Real-time open-vocabulary object detection and se
 
 # Pose Estimation
 
-### DWPose / RTMPose
+### Human Body Pose
 
-DWPose + RTMPose (2023-2025). Real-time whole-body pose estimation with 133 keypoints (body, hands, face, feet). DWPose uses distillation from larger models for excellent accuracy in a compact package. 70+ FPS on mobile.
-
-| Model | Size | Input | Output | Original Project | License | Year | Sample Project |
-| ----- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- |
-| [DWPose (TBD)] | 15-54 MB | 256x192 image | 17-133 keypoint heatmaps (SimCC) | [IDEA-Research/DWPose](https://github.com/IDEA-Research/DWPose) | [Apache 2.0](https://github.com/open-mmlab/mmpose/blob/main/LICENSE) | 2023 | [DWPoseDemo](sample_apps/DWPoseDemo) |
+> **Built-in to Apple Vision framework:**
+> - [`VNDetectHumanBodyPoseRequest`](https://developer.apple.com/documentation/vision/vndetecthumanbodyposerequest) — 19 body keypoints, no model download needed
+> - [`VNDetectHumanBodyPose3DRequest`](https://developer.apple.com/documentation/vision/vndetecthumanbodypose3drequest) — 3D pose estimation (iOS 17+)
+> - For more keypoints (hands, face), see also [`VNDetectHumanHandPoseRequest`](https://developer.apple.com/documentation/vision/vndetecthumanhandposerequest)
 
 # Multilingual OCR
 
