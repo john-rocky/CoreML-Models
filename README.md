@@ -34,6 +34,10 @@ You are free to do or not.
   - [YOLOv5s](#yolov5s)
   - [YOLOv7](#yolov7)
   - [YOLOv8](#yolov8)
+  - [YOLOv9](#yolov9)
+  - [YOLOv10](#yolov10)
+  - [YOLO11](#yolo11)
+  - [YOLO26](#yolo26)
 
 - [**Segmentation**](#segmentation)
   - [U2Net](#u2net)
@@ -236,6 +240,40 @@ CVNets: A library for training computer vision networks
 | Google Drive Link | Size | Output | Original Project | License | Note | Sample Project | 
 | ------------- | ------------- | ------------- | ------------- |------------- |------------- |------------- |
 |[YOLOv8s](https://drive.google.com/file/d/1pLRh1Y37KLEMpQn3v8qH-A12swakoHbI/view?usp=share_link)|45.1MB| Confidence(MultiArray (Double 0 × 80)), Coordinates (MultiArray (Double 0 × 4)) |[ultralytics/ultralytics](https://github.com/ultralytics/ultralytics)|[GNU](https://github.com/ultralytics/ultralytics/blob/main/LICENSE)|Non Maximum Suppression has been added.| [CoreML-YOLOv5](https://github.com/john-rocky/CoreML-YOLOv5) |
+
+### YOLOv9
+
+YOLOv9: Learning What You Want to Learn Using Programmable Gradient Information. Uses PGI and GELAN architecture for efficient object detection.
+
+| Download Link | Size | Output | Original Project | License | Year | Note | Sample Project |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [yolov9s.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yolov9s.mlpackage.zip) | 14 MB | Confidence (MultiArray (Double 0 × 80)), Coordinates (MultiArray (Double 0 × 4)) | [WongKinYiu/yolov9](https://github.com/WongKinYiu/yolov9) | [GPL-3.0](https://github.com/WongKinYiu/yolov9/blob/main/LICENSE.md) | 2024 | Non Maximum Suppression has been added. | [YOLOv9Demo](sample_apps/YOLOv9Demo) |
+
+### YOLOv10
+
+YOLOv10: Real-Time End-to-End Object Detection. NMS-free architecture using consistent dual assignments — no post-processing needed.
+
+| Download Link | Size | Output | Original Project | License | Year | Note | Sample Project |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [yolov10s.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yolov10s.mlpackage.zip) | 14 MB | MultiArray (1 × 300 × 6) | [THU-MIG/yolov10](https://github.com/THU-MIG/yolov10) | [AGPL-3.0](https://github.com/THU-MIG/yolov10/blob/main/LICENSE) | 2024 | NMS-free end-to-end detection. | [YOLO26Demo](sample_apps/YOLO26Demo) |
+
+### YOLO11
+
+YOLO11: Ultralytics latest YOLO with improved backbone and neck architecture. 22% fewer parameters than YOLOv8 with higher mAP.
+
+| Download Link | Size | Output | Original Project | License | Year | Note | Sample Project |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [yolo11s.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yolo11s.mlpackage.zip) | 18 MB | Confidence (MultiArray (Double 0 × 80)), Coordinates (MultiArray (Double 0 × 4)) | [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics) | [AGPL-3.0](https://github.com/ultralytics/ultralytics/blob/main/LICENSE) | 2024 | Non Maximum Suppression has been added. | [YOLOv9Demo](sample_apps/YOLOv9Demo) |
+
+### YOLO26
+
+YOLO26: Edge-first vision AI with NMS-free end-to-end detection. Up to 43% faster CPU inference vs YOLO11 with DFL removal and ProgLoss.
+
+<img width="300" src="https://github.com/user-attachments/assets/bade5e8b-25fd-4ef8-96d6-7f8dfbb954b2">
+
+| Download Link | Size | Output | Original Project | License | Year | Note | Sample Project |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [yolo26s.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yolo26s.mlpackage.zip) | 18 MB | MultiArray (1 × 300 × 6) | [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics) | [AGPL-3.0](https://github.com/ultralytics/ultralytics/blob/main/LICENSE) | 2026 | NMS-free end-to-end detection. | [YOLO26Demo](sample_apps/YOLO26Demo) |
 
 # Segmentation
 
