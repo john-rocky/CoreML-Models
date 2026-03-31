@@ -262,6 +262,8 @@ YOLO26: Edge-first vision AI with NMS-free end-to-end detection. Up to 43% faste
 
 YOLO-World: Real-Time Open-Vocabulary Object Detection. Type any text query and detect it — no fixed class list. Uses CLIP text encoder for open-vocabulary matching.
 
+<img width="300" src="https://github.com/user-attachments/assets/999e063a-9ace-49b0-808e-e330516e1896">
+
 | Download Link | Size | Description | Original Project | License | Year | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [yoloworld_detector.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yoloworld_detector.mlpackage.zip) | 25 MB | YOLO-World V2-S visual detector | [AILab-CVC/YOLO-World](https://github.com/AILab-CVC/YOLO-World) | [GPL-3.0](https://github.com/AILab-CVC/YOLO-World/blob/master/LICENSE) | 2024 | [YOLOWorldDemo](sample_apps/YOLOWorldDemo) |
