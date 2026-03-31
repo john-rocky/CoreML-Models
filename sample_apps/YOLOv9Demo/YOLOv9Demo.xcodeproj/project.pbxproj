@@ -9,12 +9,14 @@
 /* Begin PBXBuildFile section */
 		B10000010000000000000001 /* YOLOv9DemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000020000000000000001 /* YOLOv9DemoApp.swift */; };
 		B10000010000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000020000000000000002 /* ContentView.swift */; };
+		B10000010000000000000006 /* Detector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000020000000000000006 /* Detector.swift */; };
 		B10000010000000000000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10000020000000000000004 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		B10000020000000000000001 /* YOLOv9DemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YOLOv9DemoApp.swift; sourceTree = "<group>"; };
 		B10000020000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B10000020000000000000006 /* Detector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Detector.swift; sourceTree = "<group>"; };
 		B10000020000000000000004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B10000020000000000000005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B10000020000000000000010 /* YOLOv9Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YOLOv9Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -44,6 +46,7 @@
 			children = (
 				B10000020000000000000001 /* YOLOv9DemoApp.swift */,
 				B10000020000000000000002 /* ContentView.swift */,
+				B10000020000000000000006 /* Detector.swift */,
 				B10000020000000000000004 /* Assets.xcassets */,
 				B10000020000000000000005 /* Info.plist */,
 			);
@@ -129,6 +132,7 @@
 			files = (
 				B10000010000000000000001 /* YOLOv9DemoApp.swift in Sources */,
 				B10000010000000000000002 /* ContentView.swift in Sources */,
+				B10000010000000000000006 /* Detector.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
