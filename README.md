@@ -38,6 +38,7 @@ You are free to do or not.
   - [YOLOv10](#yolov10)
   - [YOLO11](#yolo11)
   - [YOLO26](#yolo26)
+  - [YOLO-World](#yolo-world)
 
 - [**Segmentation**](#segmentation)
   - [U2Net](#u2net)
@@ -274,6 +275,18 @@ YOLO26: Edge-first vision AI with NMS-free end-to-end detection. Up to 43% faste
 | Download Link | Size | Output | Original Project | License | Year | Note | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [yolo26s.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yolo26s.mlpackage.zip) | 18 MB | MultiArray (1 × 300 × 6) | [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics) | [AGPL-3.0](https://github.com/ultralytics/ultralytics/blob/main/LICENSE) | 2026 | NMS-free end-to-end detection. | [YOLO26Demo](sample_apps/YOLO26Demo) |
+
+### YOLO-World
+
+YOLO-World: Real-Time Open-Vocabulary Object Detection. Type any text query and detect it — no fixed class list. Uses CLIP text encoder for open-vocabulary matching.
+
+<img width="300" src="https://github.com/user-attachments/assets/999e063a-9ace-49b0-808e-e330516e1896">
+
+| Download Link | Size | Description | Original Project | License | Year | Sample Project |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [yoloworld_detector.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yoloworld_detector.mlpackage.zip) | 25 MB | YOLO-World V2-S visual detector | [AILab-CVC/YOLO-World](https://github.com/AILab-CVC/YOLO-World) | [GPL-3.0](https://github.com/AILab-CVC/YOLO-World/blob/master/LICENSE) | 2024 | [YOLOWorldDemo](sample_apps/YOLOWorldDemo) |
+| [clip_text_encoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/clip_text_encoder.mlpackage.zip) | 121 MB | CLIP ViT-B/32 text encoder | [openai/CLIP](https://github.com/openai/CLIP) | [MIT](https://github.com/openai/CLIP/blob/main/LICENSE) | 2021 | — |
+| [clip_vocab.json.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/clip_vocab.json.zip) | 1.6 MB | BPE vocabulary for tokenizer | — | — | — | — |
 
 # Segmentation
 

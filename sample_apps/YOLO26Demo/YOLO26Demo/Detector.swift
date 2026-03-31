@@ -49,17 +49,34 @@ class Detector: ObservableObject {
 
     init() { loadModel() }
 
+    /// Load any bundled CoreML model whose output matches NMS-free format [1, N, 6].
     private func loadModel() {
-        for name in ["yolo26s", "yolov10s"] {
-            guard let url = Bundle.main.url(forResource: name, withExtension: "mlmodelc") else { continue }
+        guard let resourcePath = Bundle.main.resourcePath else { return }
+        let fm = FileManager.default
+        guard let items = try? fm.contentsOfDirectory(atPath: resourcePath) else { return }
+
+        for item in items where item.hasSuffix(".mlmodelc") {
+            let url = URL(fileURLWithPath: resourcePath).appendingPathComponent(item)
             do {
                 let cfg = MLModelConfiguration()
                 cfg.computeUnits = .all
-                mlModel = try MLModel(contentsOf: url, configuration: cfg)
-                vnModel = try VNCoreMLModel(for: mlModel!)
+                let model = try MLModel(contentsOf: url, configuration: cfg)
+
+                // Check output shape: NMS-free models have a single output [1, N, 6]
+                let outputs = model.modelDescription.outputDescriptionsByName
+                let isNMSFree = outputs.values.contains { desc in
+                    guard let constraint = desc.multiArrayConstraint else { return false }
+                    let shape = constraint.shape.map { $0.intValue }
+                    return shape.count == 3 && shape[2] == 6
+                }
+                guard isNMSFree else { continue }
+
+                mlModel = model
+                vnModel = try VNCoreMLModel(for: model)
                 DispatchQueue.main.async { self.isReady = true }
+                print("[Detector] Loaded NMS-free model: \(item)")
                 return
-            } catch { print("model load error: \(error)") }
+            } catch { print("model load error (\(item)): \(error)") }
         }
     }
 
