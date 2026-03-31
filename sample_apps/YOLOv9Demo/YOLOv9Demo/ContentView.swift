@@ -13,8 +13,11 @@ class CameraManager: NSObject, ObservableObject {
     private let sessionQueue = DispatchQueue(label: "camera.session")
 
     func configure() {
-        sessionQueue.async { [weak self] in
-            self?.setupSession()
+        AVCaptureDevice.requestAccess(for: .video) { granted in
+            guard granted else { return }
+            self.sessionQueue.async { [weak self] in
+                self?.setupSession()
+            }
         }
     }
 
@@ -59,29 +62,22 @@ extension CameraManager: AVCaptureVideoDataOutputSampleBufferDelegate {
 
 // MARK: - Camera Preview
 
+class PreviewView: UIView {
+    override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
+    var previewLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
+}
+
 struct CameraPreview: UIViewRepresentable {
     let session: AVCaptureSession
 
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView(frame: .zero)
-        let previewLayer = AVCaptureVideoPreviewLayer(session: session)
-        previewLayer.videoGravity = .resizeAspectFill
-        view.layer.addSublayer(previewLayer)
-        context.coordinator.previewLayer = previewLayer
+    func makeUIView(context: Context) -> PreviewView {
+        let view = PreviewView()
+        view.previewLayer.session = session
+        view.previewLayer.videoGravity = .resizeAspectFill
         return view
     }
 
-    func updateUIView(_ uiView: UIView, context: Context) {
-        context.coordinator.previewLayer?.frame = uiView.bounds
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-
-    class Coordinator {
-        var previewLayer: AVCaptureVideoPreviewLayer?
-    }
+    func updateUIView(_ uiView: PreviewView, context: Context) {}
 }
 
 // MARK: - Detection Result
