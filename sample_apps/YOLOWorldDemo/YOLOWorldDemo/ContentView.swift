@@ -387,7 +387,8 @@ struct VideoTransferable: Transferable {
 struct CameraDetectionView: View {
     let detector: TextGroundingDetector
     var body: some View {
-        CameraVCWrapper(detector: detector).ignoresSafeArea()
+        CameraVCWrapper(detector: detector)
+            .ignoresSafeArea(edges: .bottom)
     }
 }
 
