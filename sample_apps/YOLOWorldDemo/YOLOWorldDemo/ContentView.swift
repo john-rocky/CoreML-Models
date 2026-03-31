@@ -12,17 +12,18 @@ import AVKit
 struct ContentView: View {
     @StateObject private var detector = TextGroundingDetector()
     @State private var selectedTab = 2
+    @State private var threshold: Float = 0.15
 
     var body: some View {
         ZStack {
             TabView(selection: $selectedTab) {
-                PhotoDetectionView(detector: detector)
+                PhotoDetectionView(detector: detector, threshold: $threshold)
                     .tabItem { Label("Photo", systemImage: "photo") }
                     .tag(0)
-                VideoDetectionView(detector: detector)
+                VideoDetectionView(detector: detector, threshold: $threshold)
                     .tabItem { Label("Video", systemImage: "video") }
                     .tag(1)
-                CameraDetectionView(detector: detector)
+                CameraDetectionView(detector: detector, threshold: $threshold)
                     .tabItem { Label("Camera", systemImage: "camera") }
                     .tag(2)
             }
@@ -109,12 +110,17 @@ struct DetectionOverlay: View {
 
 struct PhotoDetectionView: View {
     let detector: TextGroundingDetector
+    @Binding var threshold: Float
     @State private var selectedItem: PhotosPickerItem?
     @State private var image: UIImage?
-    @State private var detections: [Detection] = []
+    @State private var allDetections: [Detection] = []
     @State private var isProcessing = false
     @State private var inferenceTime: Double = 0
     @State private var queryText = "person, dog, car"
+
+    private var filteredDetections: [Detection] {
+        allDetections.filter { $0.confidence >= threshold }
+    }
 
     var body: some View {
         ZStack {
@@ -127,7 +133,7 @@ struct PhotoDetectionView: View {
                         .aspectRatio(contentMode: .fit)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                    DetectionOverlay(detections: detections,
+                    DetectionOverlay(detections: filteredDetections,
                                      imageSize: image.size,
                                      displaySize: geo.size,
                                      colors: detector.colors)
@@ -158,9 +164,15 @@ struct PhotoDetectionView: View {
                                 .background(Color.blue, in: Circle())
                         }
                     }
+                    HStack(spacing: 4) {
+                        Text(String(format: "%.0f%%", threshold * 100))
+                            .font(.caption).monospacedDigit().frame(width: 36)
+                        Slider(value: $threshold, in: 0.05...0.95, step: 0.05)
+                            .onChange(of: threshold) { val in detector.confidenceThreshold = val }
+                    }
                     HStack {
-                        if !detections.isEmpty {
-                            Text("\(detections.count) objects").font(.caption)
+                        if !filteredDetections.isEmpty {
+                            Text("\(filteredDetections.count) objects").font(.caption)
                         }
                         Spacer()
                         if inferenceTime > 0 {
@@ -201,7 +213,7 @@ struct PhotoDetectionView: View {
                 let elapsed = (CFAbsoluteTimeGetCurrent() - start) * 1000
                 await MainActor.run {
                     image = uiImage
-                    detections = dets
+                    allDetections = dets
                     inferenceTime = elapsed
                     isProcessing = false
                 }
@@ -220,7 +232,7 @@ struct PhotoDetectionView: View {
             let dets = detector.detectSync(image: image)
             let elapsed = (CFAbsoluteTimeGetCurrent() - start) * 1000
             await MainActor.run {
-                detections = dets
+                allDetections = dets
                 inferenceTime = elapsed
                 isProcessing = false
             }
@@ -232,6 +244,7 @@ struct PhotoDetectionView: View {
 
 struct VideoDetectionView: View {
     let detector: TextGroundingDetector
+    @Binding var threshold: Float
     @State private var selectedItem: PhotosPickerItem?
     @State private var currentFrame: UIImage?
     @State private var detections: [Detection] = []
@@ -284,6 +297,12 @@ struct VideoDetectionView: View {
                                 .padding(6)
                                 .background(Color.blue, in: Circle())
                         }
+                    }
+                    HStack(spacing: 4) {
+                        Text(String(format: "%.0f%%", threshold * 100))
+                            .font(.caption).monospacedDigit().frame(width: 36)
+                        Slider(value: $threshold, in: 0.05...0.95, step: 0.05)
+                            .onChange(of: threshold) { val in detector.confidenceThreshold = val }
                     }
                     HStack {
                         if !detections.isEmpty {
@@ -387,16 +406,20 @@ struct VideoTransferable: Transferable {
 
 struct CameraDetectionView: View {
     let detector: TextGroundingDetector
+    @Binding var threshold: Float
     var body: some View {
-        CameraVCWrapper(detector: detector)
+        CameraVCWrapper(detector: detector, threshold: $threshold)
             .ignoresSafeArea(edges: .bottom)
     }
 }
 
 struct CameraVCWrapper: UIViewControllerRepresentable {
     let detector: TextGroundingDetector
+    @Binding var threshold: Float
     func makeUIViewController(context: Context) -> CameraVC { CameraVC(detector: detector) }
-    func updateUIViewController(_ vc: CameraVC, context: Context) {}
+    func updateUIViewController(_ vc: CameraVC, context: Context) {
+        detector.confidenceThreshold = threshold
+    }
 }
 
 class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
@@ -672,7 +695,7 @@ class TextGroundingDetector: ObservableObject {
 
     private let maxClasses = 80
     private let inputSize = 640
-    private let confidenceThreshold: Float = 0.001
+    var confidenceThreshold: Float = 0.15
     private let nmsThreshold: Float = 0.5
     private let ciContext = CIContext(options: [.useSoftwareRenderer: false])
 
