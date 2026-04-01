@@ -11,6 +11,7 @@
 		B10003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10004 /* ContentView.swift */; };
 		B10005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10006 /* Assets.xcassets */; };
 		B1DM02 /* HTDemucs_SourceSeparation.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = B1DM01 /* HTDemucs_SourceSeparation.mlpackage */; };
+		B1DM04 /* HTDemucs_SourceSeparation_F32.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = B1DM03 /* HTDemucs_SourceSeparation_F32.mlpackage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +21,7 @@
 		B10007 /* DemucsDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemucsDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1DM01 /* HTDemucs_SourceSeparation.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = HTDemucs_SourceSeparation.mlpackage; sourceTree = "<group>"; };
+		B1DM03 /* HTDemucs_SourceSeparation_F32.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = HTDemucs_SourceSeparation_F32.mlpackage; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,6 +51,7 @@
 				B10006 /* Assets.xcassets */,
 				B10008 /* Info.plist */,
 				B1DM01 /* HTDemucs_SourceSeparation.mlpackage */,
+				B1DM03 /* HTDemucs_SourceSeparation_F32.mlpackage */,
 			);
 			path = DemucsDemo;
 			sourceTree = "<group>";
@@ -133,6 +136,7 @@
 				B10001 /* DemucsDemoApp.swift in Sources */,
 				B10003 /* ContentView.swift in Sources */,
 				B1DM02 /* HTDemucs_SourceSeparation.mlpackage in Sources */,
+				B1DM04 /* HTDemucs_SourceSeparation_F32.mlpackage in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

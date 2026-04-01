@@ -314,7 +314,7 @@ private enum DSP {
     static let numBins = 2048   // fftSize / 2
     static let numFrames = 336
     static let segmentLength = 343980
-    static let segmentOffset = 0  // Set > 0 to skip intro (e.g., 343980 = skip first ~7.8s)
+    static let segmentOffset = 343980  // Skip first ~7.8s to reach section with all instruments
     static let sampleRate: Double = 44100
 
     // Periodic Hann window (matches PyTorch's hann_window with periodic=True)
@@ -757,7 +757,7 @@ class DemucsViewModel: ObservableObject {
 
         // Load model
         await updateStatus("Loading model...", progress: 0.1)
-        guard let modelURL = Bundle.main.url(forResource: "HTDemucs_SourceSeparation", withExtension: "mlmodelc") else {
+        guard let modelURL = Bundle.main.url(forResource: "HTDemucs_SourceSeparation_F32", withExtension: "mlmodelc") else {
             throw DemucsError.modelNotFound(
                 "HTDemucs_SourceSeparation.mlmodelc not found in bundle. " +
                 "Please compile and add the HTDemucs_SourceSeparation.mlpackage to the project."
@@ -770,7 +770,7 @@ class DemucsViewModel: ObservableObject {
         // Prepare model inputs
         await updateStatus("Preparing input...", progress: 0.2)
 
-        // spectral_magnitude [1, 4, 2048, 336] - zeros (freq branch overflows Float16)
+        // spectral_magnitude [1, 4, 2048, 336] - zeros (freq output is Float16, overflows for real STFT data)
         let spectral = try MLMultiArray(shape: [1, 4, 2048, 336], dataType: .float32)
 
         // audio_waveform [1, 2, 343980]
@@ -787,7 +787,7 @@ class DemucsViewModel: ObservableObject {
         ])
         let output = try model.prediction(from: inputFeatures)
 
-        // Extract time-domain output
+        // Extract time-domain output (freq_output overflows Float16 for real STFT data)
         guard let timeOut = output.featureValue(for: "time_output")?.multiArrayValue else {
             throw DemucsError.processingFailed("Missing model output")
         }
@@ -801,7 +801,7 @@ class DemucsViewModel: ObservableObject {
             let i = stem.modelIndex
             await updateStatus("Reconstructing \(stem.rawValue)...", progress: 0.65 + Double(i) * 0.08)
 
-            // Time domain output only (freq_output overflows Float16 → ±inf)
+            // Time domain output only (freq_output overflows Float16 range for real STFT data)
             let stemLeft = DSP.extractChannel1D(from: timeOut, batch: 0, channel: 2 * i, width: DSP.segmentLength)
             let stemRight = DSP.extractChannel1D(from: timeOut, batch: 0, channel: 2 * i + 1, width: DSP.segmentLength)
 
