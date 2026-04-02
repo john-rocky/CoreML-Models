@@ -99,6 +99,9 @@ You are free to do or not.
   - [White_box_Cartoonization](#white_box_cartoonization)
   - [FacialCartoonization](#facialcartoonization)
 
+- [**Audio Source Separation**](#audio-source-separation)
+  - [HTDemucs](#htdemucs)
+
 - [**Inpainting**](#inpainting)
   - [AOT-GAN-for-Inpainting](#aot-gan-for-inpainting)
   - [Lama](#lama)
@@ -867,6 +870,16 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 | Google Drive Link  | Original Model | License | Run on mac |Conversion Script |Year|
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
 | [dreamlike-photoreal-2.0](https://drive.google.com/file/d/1D5RXYE52wyXPq6TdCHM8DIkP4dxHafwt/view?usp=share_link) |[dreamlike-art/dreamlike-photoreal-2.0](https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0)|[CreativeML OpenRAIL-M](https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
+
+# Audio Source Separation
+
+### HTDemucs
+
+Hybrid Transformer Demucs — separates music into 4 stems: drums, bass, vocals, and other instruments.
+
+| Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| 80 MB | Audio Waveform [1, 2, 343980] at 44.1kHz | 4 stems (drums, bass, other, vocals) stereo | [facebookresearch/demucs](https://github.com/facebookresearch/demucs) | [MIT](https://github.com/facebookresearch/demucs/blob/main/LICENSE) | 2022 | [DemucsDemo](creative_apps/DemucsDemo) | [convert_htdemucs.py](conversion_scripts/convert_htdemucs.py) |
 
 ## Models converted by someone other than me.
 
