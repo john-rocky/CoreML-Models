@@ -15,13 +15,13 @@ enum Stem: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    // Index in model output (freq_output: 4 channels per stem, time_output: 2 channels per stem)
+    // Index in model output — matches Python's model.sources: [drums, bass, other, vocals]
     var modelIndex: Int {
         switch self {
         case .drums: return 0
         case .bass: return 1
-        case .vocals: return 2
-        case .other: return 3
+        case .other: return 2
+        case .vocals: return 3
         }
     }
 
@@ -322,23 +322,20 @@ private enum DSP {
         Float(0.5 * (1.0 - cos(2.0 * .pi * Double($0) / Double(fftSize))))
     }
 
-    /// Reflect-pad a signal (matches PyTorch's F.pad with mode='reflect')
-    static func reflectPad(signal: [Float], padSize: Int) -> [Float] {
+    /// Reflect-pad a signal with asymmetric left/right amounts (matches PyTorch's F.pad with mode='reflect')
+    static func reflectPad(signal: [Float], left: Int, right: Int) -> [Float] {
         let n = signal.count
-        var padded = [Float](repeating: 0, count: n + 2 * padSize)
-        // Left: signal[padSize], signal[padSize-1], ..., signal[1]
-        for i in 0..<padSize {
-            padded[i] = signal[padSize - i]
+        var padded = [Float](repeating: 0, count: n + left + right)
+        for i in 0..<left {
+            padded[i] = signal[left - i]
         }
-        // Center
         signal.withUnsafeBufferPointer { src in
             padded.withUnsafeMutableBufferPointer { dst in
-                memcpy(dst.baseAddress! + padSize, src.baseAddress!, n * MemoryLayout<Float>.size)
+                memcpy(dst.baseAddress! + left, src.baseAddress!, n * MemoryLayout<Float>.size)
             }
         }
-        // Right: signal[n-2], signal[n-3], ..., signal[n-1-padSize]
-        for i in 0..<padSize {
-            padded[padSize + n + i] = signal[n - 2 - i]
+        for i in 0..<right {
+            padded[left + n + i] = signal[n - 2 - i]
         }
         return padded
     }
@@ -401,22 +398,22 @@ private enum DSP {
         return (left, right)
     }
 
-    /// Forward STFT using vDSP.
-    /// Returns (real, imag) arrays of size [numBins * numFrames], bin-major order.
-    /// Values are true (unscaled) DFT coefficients matching PyTorch's torch.stft output.
-    static func forwardSTFT(signal: [Float]) -> (real: [Float], imag: [Float]) {
+    /// Forward STFT using vDSP. Frame count derived from signal length.
+    /// Returns (real, imag) arrays in bin-major order [numBins * frames], and the frame count.
+    static func forwardSTFT(signal: [Float]) -> (real: [Float], imag: [Float], frames: Int) {
         let log2n = vDSP_Length(log2(Float(fftSize)))
-        guard let fftSetup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else { return ([], []) }
+        guard let fftSetup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else { return ([], [], 0) }
         defer { vDSP_destroy_fftsetup(fftSetup) }
 
         let halfN = fftSize / 2
-        var allReal = [Float](repeating: 0, count: numBins * numFrames)
-        var allImag = [Float](repeating: 0, count: numBins * numFrames)
+        let totalFrames = max(1, (signal.count - fftSize) / hopSize + 1)
+        var allReal = [Float](repeating: 0, count: numBins * totalFrames)
+        var allImag = [Float](repeating: 0, count: numBins * totalFrames)
         var frame = [Float](repeating: 0, count: fftSize)
         var rp = [Float](repeating: 0, count: halfN)
         var ip = [Float](repeating: 0, count: halfN)
 
-        for f in 0..<numFrames {
+        for f in 0..<totalFrames {
             let start = f * hopSize
 
             // Extract frame with zero-padding
@@ -454,42 +451,73 @@ private enum DSP {
             }
 
             // Store true DFT values (divide by 2)
-            // Bin 0 (DC): rp[0]/2, imag = 0
             allReal[f] = rp[0] * 0.5
             allImag[f] = 0
 
-            // Bins 1..numBins-1
             for k in 1..<numBins {
-                let idx = k * numFrames + f
+                let idx = k * totalFrames + f
                 allReal[idx] = rp[k] * 0.5
                 allImag[idx] = ip[k] * 0.5
             }
         }
 
-        return (allReal, allImag)
+        return (allReal, allImag, totalFrames)
     }
 
-    /// Inverse STFT with overlap-add.
-    /// Input: (real, imag) arrays of size [numBins * numFrames], bin-major order (true DFT values).
-    /// outputLength: length of output signal (use padded length if center padding was applied).
+    /// Compute spectral input matching Python's _spec + _magnitude with cac=True.
+    /// Returns flat array [4 * numBins * numFrames] for the spectral_magnitude MLMultiArray.
+    /// Channel order: [L_real, L_imag, R_real, R_imag], each [numBins x numFrames] bin-major.
+    static func computeSpectralInput(left: [Float], right: [Float]) -> [Float] {
+        let le = numFrames  // 336
+        // _spec padding: pad = hop_length//2 * 3, right = pad + le*hop - length
+        let specPadLeft = hopSize / 2 * 3  // 1536
+        let specPadRight = specPadLeft + le * hopSize - segmentLength  // 1620
+
+        let channelSize = numBins * le
+        var result = [Float](repeating: 0, count: 4 * channelSize)
+
+        for (ch, signal) in [left, right].enumerated() {
+            // Reflect-pad matching _spec (no center padding needed — selected frames are identical)
+            let padded = reflectPad(signal: signal, left: specPadLeft, right: specPadRight)
+            let (real, imag, frames) = forwardSTFT(signal: padded)
+            assert(frames == le, "Expected \(le) frames, got \(frames)")
+
+            // CaC channel layout: [L_real, L_imag, R_real, R_imag]
+            let realCh = ch * 2       // L_real=0, R_real=2
+            let imagCh = ch * 2 + 1   // L_imag=1, R_imag=3
+            result.withUnsafeMutableBufferPointer { dst in
+                real.withUnsafeBufferPointer { src in
+                    memcpy(dst.baseAddress! + realCh * channelSize, src.baseAddress!, channelSize * MemoryLayout<Float>.size)
+                }
+                imag.withUnsafeBufferPointer { src in
+                    memcpy(dst.baseAddress! + imagCh * channelSize, src.baseAddress!, channelSize * MemoryLayout<Float>.size)
+                }
+            }
+        }
+        return result
+    }
+
+    /// Inverse STFT with overlap-add. Frame count derived from input array size.
+    /// Input: (real, imag) arrays in bin-major order [numBins * frames].
     static func inverseSTFT(real: [Float], imag: [Float], outputLength: Int) -> [Float] {
         let log2n = vDSP_Length(log2(Float(fftSize)))
         guard let fftSetup = vDSP_create_fftsetup(log2n, FFTRadix(kFFTRadix2)) else { return [] }
         defer { vDSP_destroy_fftsetup(fftSetup) }
 
         let halfN = fftSize / 2
+        let totalFrames = real.count / numBins
         var output = [Float](repeating: 0, count: outputLength)
         var windowSum = [Float](repeating: 0, count: outputLength)
         var rp = [Float](repeating: 0, count: halfN)
         var ip = [Float](repeating: 0, count: halfN)
         var frame = [Float](repeating: 0, count: fftSize)
 
-        for f in 0..<numFrames {
+        for f in 0..<totalFrames {
             // Pack into vDSP format (2x true DFT values)
             rp[0] = real[f] * 2.0           // DC
             ip[0] = 0                        // Nyquist (not available, set to 0)
             for k in 1..<numBins {
-                let idx = k * numFrames + f
+                let idx = k * totalFrames + f
                 rp[k] = real[idx] * 2.0
                 ip[k] = imag[idx] * 2.0
             }
@@ -543,6 +571,42 @@ private enum DSP {
         }
 
         return output
+    }
+
+    /// Inverse STFT matching Python's _ispec for a single mono channel.
+    /// Input: real/imag [numBins * numFrames] bin-major (336 data frames).
+    /// Output: [segmentLength] audio samples.
+    static func inverseSpec(real: [Float], imag: [Float]) -> [Float] {
+        let le = numFrames  // 336
+        let totalFrames = le + 4  // 340: 2 zero frames on each side (matches _ispec F.pad(z, (2, 2)))
+        let specPad = hopSize / 2 * 3  // 1536
+        let centerPad = fftSize / 2  // 2048
+
+        // Pad time axis: insert 2 zero frames at start and end
+        var paddedReal = [Float](repeating: 0, count: numBins * totalFrames)
+        var paddedImag = [Float](repeating: 0, count: numBins * totalFrames)
+        for bin in 0..<numBins {
+            let srcOffset = bin * le
+            let dstOffset = bin * totalFrames + 2
+            real.withUnsafeBufferPointer { src in
+                paddedReal.withUnsafeMutableBufferPointer { dst in
+                    memcpy(dst.baseAddress! + dstOffset, src.baseAddress! + srcOffset, le * MemoryLayout<Float>.size)
+                }
+            }
+            imag.withUnsafeBufferPointer { src in
+                paddedImag.withUnsafeMutableBufferPointer { dst in
+                    memcpy(dst.baseAddress! + dstOffset, src.baseAddress! + srcOffset, le * MemoryLayout<Float>.size)
+                }
+            }
+        }
+
+        // iSTFT: 340 frames → (339 * 1024 + 4096) = 351232 samples
+        let rawLen = (totalFrames - 1) * hopSize + fftSize
+        let rawOutput = inverseSTFT(real: paddedReal, imag: paddedImag, outputLength: rawLen)
+
+        // Trim: skip centerPad + specPad, take segmentLength samples
+        let trimStart = centerPad + specPad  // 3584
+        return Array(rawOutput[trimStart..<trimStart + segmentLength])
     }
 
     /// Convert MLMultiArray to [Float], handling Float16/Float32 output types
@@ -755,23 +819,52 @@ class DemucsViewModel: ObservableObject {
         await updateStatus("Loading audio...", progress: 0.05)
         let (rawLeft, rawRight) = try DSP.loadAudio(url: url)
 
-        // Load model
+        // 2. Load model
         await updateStatus("Loading model...", progress: 0.1)
         guard let modelURL = Bundle.main.url(forResource: "HTDemucs_SourceSeparation_F32", withExtension: "mlmodelc") else {
             throw DemucsError.modelNotFound(
-                "HTDemucs_SourceSeparation.mlmodelc not found in bundle. " +
-                "Please compile and add the HTDemucs_SourceSeparation.mlpackage to the project."
+                "HTDemucs_SourceSeparation_F32.mlmodelc not found in bundle. " +
+                "Please compile and add the HTDemucs_SourceSeparation_F32.mlpackage to the project."
             )
         }
         let config = MLModelConfiguration()
         config.computeUnits = .cpuOnly
         let model = try MLModel(contentsOf: modelURL, configuration: config)
 
-        // Prepare model inputs
+        // 3. Compute spectral magnitude from audio (matching Python _spec + _magnitude)
+        await updateStatus("Computing STFT...", progress: 0.15)
+        var spectralData = DSP.computeSpectralInput(left: rawLeft, right: rawRight)
+
+        // Normalize to match Python's torch.stft(normalized=True): divide by sqrt(nfft)
+        var normScale = Float(1.0 / sqrt(Double(DSP.fftSize)))  // 1/64
+        vDSP_vsmul(spectralData, 1, &normScale, &spectralData, 1, vDSP_Length(spectralData.count))
+
+        // 4. Prepare model inputs
         await updateStatus("Preparing input...", progress: 0.2)
 
-        // spectral_magnitude [1, 4, 2048, 336] - zeros (freq output is Float16, overflows for real STFT data)
+        // spectral_magnitude [1, 4, 2048, 336] — normalized STFT data in CaC format
         let spectral = try MLMultiArray(shape: [1, 4, 2048, 336], dataType: .float32)
+        let spectralCount = 4 * DSP.numBins * DSP.numFrames
+        let spectralPtr = spectral.dataPointer.bindMemory(to: Float.self, capacity: spectralCount)
+
+        // Verify strides are C-contiguous before memcpy
+        let spectralStrides = spectral.strides.map { $0.intValue }
+        if spectralStrides.last == 1 && spectralStrides[2] == DSP.numFrames {
+            spectralData.withUnsafeBufferPointer { src in
+                memcpy(spectralPtr, src.baseAddress!, spectralCount * MemoryLayout<Float>.size)
+            }
+        } else {
+            // Stride-aware fallback
+            for c in 0..<4 {
+                for h in 0..<DSP.numBins {
+                    for w in 0..<DSP.numFrames {
+                        let srcIdx = c * DSP.numBins * DSP.numFrames + h * DSP.numFrames + w
+                        let dstIdx = c * spectralStrides[1] + h * spectralStrides[2] + w * spectralStrides[3]
+                        spectralPtr[dstIdx] = spectralData[srcIdx]
+                    }
+                }
+            }
+        }
 
         // audio_waveform [1, 2, 343980]
         let waveform = try MLMultiArray(shape: [1, 2, 343980], dataType: .float32)
@@ -779,7 +872,7 @@ class DemucsViewModel: ObservableObject {
         rawLeft.withUnsafeBufferPointer { src in memcpy(wavePtr, src.baseAddress!, DSP.segmentLength * 4) }
         rawRight.withUnsafeBufferPointer { src in memcpy(wavePtr + DSP.segmentLength, src.baseAddress!, DSP.segmentLength * 4) }
 
-        // 6. Run inference
+        // 5. Run inference
         await updateStatus("Running inference...", progress: 0.5)
         let inputFeatures = try MLDictionaryFeatureProvider(dictionary: [
             "spectral_magnitude": MLFeatureValue(multiArray: spectral),
@@ -787,25 +880,47 @@ class DemucsViewModel: ObservableObject {
         ])
         let output = try model.prediction(from: inputFeatures)
 
-        // Extract time-domain output (freq_output overflows Float16 for real STFT data)
-        guard let timeOut = output.featureValue(for: "time_output")?.multiArrayValue else {
+        guard let freqOut = output.featureValue(for: "freq_output")?.multiArrayValue,
+              let timeOut = output.featureValue(for: "time_output")?.multiArrayValue else {
             throw DemucsError.processingFailed("Missing model output")
         }
 
-        // Reconstruct each stem using time-domain output only
-        // (freq_output overflows Float16 → ±inf, needs Float32 model reconversion)
+        // 6. Reconstruct each stem: iSTFT(freq_output) + time_output
         let tempDir = FileManager.default.temporaryDirectory
         var newStemURLs: [Stem: URL] = [:]
 
+        // Scale factor to compensate for normalized input in iSTFT
+        let ispecScale = Float(sqrt(Double(DSP.fftSize)))  // 64
+
         for stem in Stem.allCases {
             let i = stem.modelIndex
-            await updateStatus("Reconstructing \(stem.rawValue)...", progress: 0.65 + Double(i) * 0.08)
+            await updateStatus("Reconstructing \(stem.rawValue)...", progress: 0.6 + Double(i) * 0.09)
 
-            // Time domain output only (freq_output overflows Float16 range for real STFT data)
-            let stemLeft = DSP.extractChannel1D(from: timeOut, batch: 0, channel: 2 * i, width: DSP.segmentLength)
-            let stemRight = DSP.extractChannel1D(from: timeOut, batch: 0, channel: 2 * i + 1, width: DSP.segmentLength)
+            // Frequency domain: 4 channels per source [L_real, L_imag, R_real, R_imag]
+            let freqLR = DSP.extractChannel(from: freqOut, batch: 0, channel: 4 * i,     height: DSP.numBins, width: DSP.numFrames)
+            let freqLI = DSP.extractChannel(from: freqOut, batch: 0, channel: 4 * i + 1, height: DSP.numBins, width: DSP.numFrames)
+            let freqRR = DSP.extractChannel(from: freqOut, batch: 0, channel: 4 * i + 2, height: DSP.numBins, width: DSP.numFrames)
+            let freqRI = DSP.extractChannel(from: freqOut, batch: 0, channel: 4 * i + 3, height: DSP.numBins, width: DSP.numFrames)
 
-            // Write WAV file
+            // iSTFT for each stereo channel (matching Python _ispec)
+            var freqLeft = DSP.inverseSpec(real: freqLR, imag: freqLI)
+            var freqRight = DSP.inverseSpec(real: freqRR, imag: freqRI)
+
+            // Compensate: model output is in normalized scale, iSTFT needs sqrt(N) factor
+            var scale = ispecScale
+            vDSP_vsmul(freqLeft, 1, &scale, &freqLeft, 1, vDSP_Length(freqLeft.count))
+            vDSP_vsmul(freqRight, 1, &scale, &freqRight, 1, vDSP_Length(freqRight.count))
+
+            // Time domain output
+            let timeLeft = DSP.extractChannel1D(from: timeOut, batch: 0, channel: 2 * i, width: DSP.segmentLength)
+            let timeRight = DSP.extractChannel1D(from: timeOut, batch: 0, channel: 2 * i + 1, width: DSP.segmentLength)
+
+            // Final = freq + time (matching Python: x = xt + x)
+            var stemLeft = [Float](repeating: 0, count: DSP.segmentLength)
+            var stemRight = [Float](repeating: 0, count: DSP.segmentLength)
+            vDSP_vadd(freqLeft, 1, timeLeft, 1, &stemLeft, 1, vDSP_Length(DSP.segmentLength))
+            vDSP_vadd(freqRight, 1, timeRight, 1, &stemRight, 1, vDSP_Length(DSP.segmentLength))
+
             let stemURL = tempDir.appendingPathComponent("demucs_\(stem.rawValue).wav")
             try DSP.writeWAV(left: stemLeft, right: stemRight, to: stemURL)
             newStemURLs[stem] = stemURL
