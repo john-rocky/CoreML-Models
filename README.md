@@ -877,6 +877,8 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 
 Hybrid Transformer Demucs — separates music into 4 stems: drums, bass, vocals, and other instruments.
 
+<video src="https://github.com/user-attachments/assets/98dea359-e557-4e46-af1d-2010503c86ba" width="400"></video>
+
 | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | 80 MB | Audio Waveform [1, 2, 343980] at 44.1kHz | 4 stems (drums, bass, other, vocals) stereo | [facebookresearch/demucs](https://github.com/facebookresearch/demucs) | [MIT](https://github.com/facebookresearch/demucs/blob/main/LICENSE) | 2022 | [DemucsDemo](creative_apps/DemucsDemo) | [convert_htdemucs.py](conversion_scripts/convert_htdemucs.py) |
