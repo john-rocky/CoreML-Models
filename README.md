@@ -115,6 +115,9 @@ You are free to do or not.
   - [Openjourney](#openjourney)
   - [dreamlike-photoreal-2.0](#dreamlike-photoreal-2)
 
+- [**3D Face Pose Estimation**](#3d-face-pose-estimation)
+  - [3DDFA_V2](#3ddfa_v2)
+
 - [**Audio Source Separation**](#audio-source-separation)
   - [HTDemucs](#htdemucs)
 
@@ -870,6 +873,18 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 | Google Drive Link  | Original Model | License | Run on mac |Conversion Script |Year|
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
 | [dreamlike-photoreal-2.0](https://drive.google.com/file/d/1D5RXYE52wyXPq6TdCHM8DIkP4dxHafwt/view?usp=share_link) |[dreamlike-art/dreamlike-photoreal-2.0](https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0)|[CreativeML OpenRAIL-M](https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
+
+# 3D Face Pose Estimation
+
+### 3DDFA_V2
+
+3DDFA_V2 — 3D face reconstruction and head pose estimation (yaw, pitch, roll) from a single face image.
+
+<img width="300" src="https://github.com/user-attachments/assets/43e4c2a6-c30b-4a31-b759-fb5468c843a7">
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [3DDFA_V2.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/face3d-v1/3DDFA_V2.mlpackage.zip) | 6.3 MB | Image (120×120 RGB) | 62 params (12 pose + 40 shape + 10 expression) | [cleardusk/3DDFA_V2](https://github.com/cleardusk/3DDFA_V2) | [MIT](https://github.com/cleardusk/3DDFA_V2/blob/master/LICENSE) | 2020 | [Face3DDemo](creative_apps/Face3DDemo) |
 
 # Audio Source Separation
 
