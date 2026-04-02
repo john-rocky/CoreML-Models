@@ -118,6 +118,9 @@ You are free to do or not.
   - [Openjourney](#openjourney)
   - [dreamlike-photoreal-2.0](#dreamlike-photoreal-2)
 
+- [**Audio Source Separation**](#audio-source-separation)
+  - [HTDemucs](#htdemucs)
+
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
 See the section below for how to use it in Xcode.
@@ -882,6 +885,7 @@ Hybrid Transformer Demucs — separates music into 4 stems: drums, bass, vocals,
 | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | 80 MB | Audio Waveform [1, 2, 343980] at 44.1kHz | 4 stems (drums, bass, other, vocals) stereo | [facebookresearch/demucs](https://github.com/facebookresearch/demucs) | [MIT](https://github.com/facebookresearch/demucs/blob/main/LICENSE) | 2022 | [DemucsDemo](creative_apps/DemucsDemo) | [convert_htdemucs.py](conversion_scripts/convert_htdemucs.py) |
+
 
 ## Models converted by someone other than me.
 

@@ -1,1 +1,8 @@
 *.mlpackage
+*.mlpackage.zip
+*.pt
+*.venv/
+.venv/
+__pycache__/
+*.xcuserstate
+.DS_Store
