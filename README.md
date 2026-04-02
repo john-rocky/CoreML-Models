@@ -99,9 +99,6 @@ You are free to do or not.
   - [White_box_Cartoonization](#white_box_cartoonization)
   - [FacialCartoonization](#facialcartoonization)
 
-- [**Audio Source Separation**](#audio-source-separation)
-  - [HTDemucs](#htdemucs)
-
 - [**Inpainting**](#inpainting)
   - [AOT-GAN-for-Inpainting](#aot-gan-for-inpainting)
   - [Lama](#lama)
@@ -117,6 +114,9 @@ You are free to do or not.
   - [anything-v4.5](#anything-v4)
   - [Openjourney](#openjourney)
   - [dreamlike-photoreal-2.0](#dreamlike-photoreal-2)
+
+- [**Audio Source Separation**](#audio-source-separation)
+  - [HTDemucs](#htdemucs)
 
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
