@@ -115,6 +115,9 @@ You are free to do or not.
   - [Openjourney](#openjourney)
   - [dreamlike-photoreal-2.0](#dreamlike-photoreal-2)
 
+- [**Image Colorization**](#image-colorization)
+  - [DDColor Tiny](#ddcolor-tiny)
+
 - [**Face Recognition**](#face-recognition)
   - [AdaFace IR-18](#adaface-ir-18)
 
@@ -879,6 +882,20 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 | Google Drive Link  | Original Model | License | Run on mac |Conversion Script |Year|
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
 | [dreamlike-photoreal-2.0](https://drive.google.com/file/d/1D5RXYE52wyXPq6TdCHM8DIkP4dxHafwt/view?usp=share_link) |[dreamlike-art/dreamlike-photoreal-2.0](https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0)|[CreativeML OpenRAIL-M](https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
+
+# Image Colorization
+
+### DDColor Tiny
+
+DDColor — AI image colorization for grayscale/B&W photos using dual decoders (ICCV 2023).
+
+| Input | Output |
+|---|---|
+| <img width="300" src="https://github.com/user-attachments/assets/051491a3-14c2-42af-9992-41c4238bcfd1"> | <img width="300" src="https://github.com/user-attachments/assets/ab1a8e3a-7b6c-4150-945b-6f94e4858ed7"> |
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [DDColor_Tiny.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/ddcolor-v1/DDColor_Tiny.mlpackage.zip) | 242 MB | 512×512 RGB | AB channels (LAB) | [piddnad/DDColor](https://github.com/piddnad/DDColor) | [Apache-2.0](https://github.com/piddnad/DDColor/blob/master/LICENSE) | 2023 | [DDColorDemo](sample_apps/DDColorDemo) | [convert_ddcolor.py](conversion_scripts/convert_ddcolor.py) |
 
 # Face Recognition
 
