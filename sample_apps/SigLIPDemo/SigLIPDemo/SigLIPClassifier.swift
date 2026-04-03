@@ -130,7 +130,7 @@ class SigLIPClassifier: ObservableObject {
 
         // 2. Text embeddings (load once, run for each label, release)
         let te = try loadModel(containing: "TextEncoder")
-        var results: [ClassificationResult] = []
+        var logits: [(String, Float)] = []
 
         for label in labels {
             let tokenIDs = tokenize(label)
@@ -145,14 +145,20 @@ class SigLIPClassifier: ObservableObject {
             }
             let textEmbedding = extractFloats(emb)
 
-            // Cosine similarity (embeddings are already L2-normalized)
             var dot: Float = 0
             for i in 0..<imageEmbedding.count {
                 dot += imageEmbedding[i] * textEmbedding[i]
             }
-            let logit = dot * logitScale + logitBias
-            let prob = 1.0 / (1.0 + exp(-logit))
-            results.append(ClassificationResult(label: label, score: prob))
+            logits.append((label, dot * logitScale))
+        }
+
+        // Softmax over labels for relative comparison
+        let maxLogit = logits.map(\.1).max() ?? 0
+        let exps = logits.map { exp($0.1 - maxLogit) }
+        let sumExp = exps.reduce(0, +)
+        var results: [ClassificationResult] = []
+        for (i, (label, _)) in logits.enumerated() {
+            results.append(ClassificationResult(label: label, score: exps[i] / sumExp))
         }
 
         return results.sorted { $0.score > $1.score }
