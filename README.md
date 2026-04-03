@@ -910,6 +910,8 @@ AdaFace — Quality-adaptive face recognition. Outputs 512-dim embedding for fac
 
 OpenVoice — Zero-shot voice conversion. Record source and target voice, convert on-device.
 
+<video src="https://github.com/user-attachments/assets/70078691-14df-4350-846c-9ba1682433ce" width="300"></video>
+
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [OpenVoice_SpeakerEncoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/openvoice-v1/OpenVoice_SpeakerEncoder.mlpackage.zip) | 1.7 MB | Spectrogram [1, T, 513] | 256-dim speaker embedding | [myshell-ai/OpenVoice](https://github.com/myshell-ai/OpenVoice) | [MIT](https://github.com/myshell-ai/OpenVoice/blob/main/LICENSE) | 2024 | [OpenVoiceDemo](sample_apps/OpenVoiceDemo) | [convert_openvoice.py](conversion_scripts/convert_openvoice.py) |
