@@ -123,13 +123,22 @@ enum BackgroundRemover {
 
     private static func extractFloats(_ array: MLMultiArray) -> [Float] {
         let count = array.count
+        var raw: [Float]
         if array.dataType == .float16 {
             let ptr = array.dataPointer.assumingMemoryBound(to: Float16.self)
-            return (0..<count).map { Float(ptr[$0]) }
+            raw = (0..<count).map { Float(ptr[$0]) }
         } else {
             let ptr = array.dataPointer.assumingMemoryBound(to: Float32.self)
-            return (0..<count).map { ptr[$0] }
+            raw = (0..<count).map { ptr[$0] }
         }
+        // Min-max normalize to [0, 1] (required by RMBG-1.4)
+        let mi = raw.min() ?? 0
+        let ma = raw.max() ?? 1
+        let range = ma - mi
+        if range > 1e-6 {
+            for i in raw.indices { raw[i] = (raw[i] - mi) / range }
+        }
+        return raw
     }
 
     private static func createPixelBuffer(from cgImage: CGImage, width: Int, height: Int) -> CVPixelBuffer? {
