@@ -136,6 +136,9 @@ You are free to do or not.
 - [**Vision-Language**](#vision-language)
   - [Florence-2-base](#florence-2-base)
 
+- [**Zero-Shot Image Classification**](#zero-shot-image-classification)
+  - [SigLIP ViT-B/16](#siglip-vit-b16)
+
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
 See the section below for how to use it in Xcode.
@@ -971,6 +974,16 @@ Microsoft Florence-2 — a unified vision-language model supporting image captio
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [Florence2VisionEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2VisionEncoder.mlpackage.zip) / [TextEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2TextEncoder.mlpackage.zip) / [Decoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2Decoder.mlpackage.zip) | 260 MB (INT8, 3 models total) | 768x768 RGB image + task prompt | Generated text (caption, OCR, etc.) | [microsoft/Florence-2-base](https://huggingface.co/microsoft/Florence-2-base) | [MIT](https://huggingface.co/microsoft/Florence-2-base/blob/main/LICENSE) | 2024 | [Florence2Demo](sample_apps/Florence2Demo) | [convert_florence2.py](conversion_scripts/convert_florence2.py) |
+
+# Zero-Shot Image Classification
+
+### SigLIP ViT-B/16
+
+Google SigLIP — sigmoid-based contrastive image-text model for zero-shot classification. Type any labels (e.g. "cat, dog, car") and get per-label probabilities. Converted as 2 CoreML models (INT8): Image Encoder and Text Encoder.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [SigLIP_ImageEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/siglip-v1/SigLIP_ImageEncoder.mlpackage.zip) / [TextEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/siglip-v1/SigLIP_TextEncoder.mlpackage.zip) | 194 MB (INT8, 2 models total) | 224x224 RGB image + text labels | Per-label similarity scores (sigmoid) | [google/siglip-base-patch16-224](https://huggingface.co/google/siglip-base-patch16-224) | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | 2024 | [SigLIPDemo](sample_apps/SigLIPDemo) | [convert_siglip.py](conversion_scripts/convert_siglip.py) |
 
 ## Models converted by someone other than me.
 
