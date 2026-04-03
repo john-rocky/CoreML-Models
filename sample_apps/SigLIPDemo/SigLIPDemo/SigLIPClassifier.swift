@@ -133,7 +133,8 @@ class SigLIPClassifier: ObservableObject {
         var logits: [(String, Float)] = []
 
         for label in labels {
-            let tokenIDs = tokenize(label)
+            let prompt = "a photo of a " + label
+            let tokenIDs = tokenize(prompt)
             let idsArray = try MLMultiArray(shape: [1, NSNumber(value: tokenIDs.count)], dataType: .int32)
             for (i, id) in tokenIDs.enumerated() {
                 idsArray[[0, NSNumber(value: i)] as [NSNumber]] = NSNumber(value: id)
