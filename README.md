@@ -121,6 +121,9 @@ You are free to do or not.
 - [**3D Face Pose Estimation**](#3d-face-pose-estimation)
   - [3DDFA_V2](#3ddfa_v2)
 
+- [**Voice Conversion**](#voice-conversion)
+  - [OpenVoice V2](#openvoice-v2)
+
 - [**Audio Source Separation**](#audio-source-separation)
   - [HTDemucs](#htdemucs)
 
@@ -900,6 +903,19 @@ AdaFace — Quality-adaptive face recognition. Outputs 512-dim embedding for fac
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [3DDFA_V2.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/face3d-v1/3DDFA_V2.mlpackage.zip) | 6.3 MB | Image (120×120 RGB) | 62 params (12 pose + 40 shape + 10 expression) | [cleardusk/3DDFA_V2](https://github.com/cleardusk/3DDFA_V2) | [MIT](https://github.com/cleardusk/3DDFA_V2/blob/master/LICENSE) | 2020 | [Face3DDemo](sample_apps/Face3DDemo) |
+
+# Voice Conversion
+
+### OpenVoice V2
+
+OpenVoice — Zero-shot voice conversion. Record source and target voice, convert on-device.
+
+<video src="https://github.com/user-attachments/assets/70078691-14df-4350-846c-9ba1682433ce" width="300"></video>
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [OpenVoice_SpeakerEncoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/openvoice-v1/OpenVoice_SpeakerEncoder.mlpackage.zip) | 1.7 MB | Spectrogram [1, T, 513] | 256-dim speaker embedding | [myshell-ai/OpenVoice](https://github.com/myshell-ai/OpenVoice) | [MIT](https://github.com/myshell-ai/OpenVoice/blob/main/LICENSE) | 2024 | [OpenVoiceDemo](sample_apps/OpenVoiceDemo) | [convert_openvoice.py](conversion_scripts/convert_openvoice.py) |
+| [OpenVoice_VoiceConverter.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/openvoice-v1/OpenVoice_VoiceConverter.mlpackage.zip) | 64 MB | Spectrogram + speaker embeddings | Waveform audio (22050 Hz) | | | | | |
 
 # Audio Source Separation
 
