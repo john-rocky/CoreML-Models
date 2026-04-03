@@ -29,13 +29,15 @@ from transformers import AutoModel, AutoProcessor
 
 
 class ImageEncoder(nn.Module):
-    """224x224 RGB → L2-normalized 768-dim embedding."""
+    """224x224 RGB (0-1 range) → L2-normalized 768-dim embedding."""
 
     def __init__(self, model):
         super().__init__()
         self.vision = model.vision_model
 
     def forward(self, pixel_values):
+        # SigLIP expects [-1, 1] range: (pixel/255 - 0.5) / 0.5 = pixel/255 * 2 - 1
+        pixel_values = pixel_values * 2.0 - 1.0
         return F.normalize(self.vision(pixel_values).pooler_output, dim=-1)
 
 
@@ -70,15 +72,16 @@ def main():
     with torch.no_grad():
         traced_ie = torch.jit.trace(ie, dummy_img)
 
-    # SigLIP preprocessing: mean=0.5, std=0.5 → scale=1/(255*0.5), bias=-1
+    # Normalization baked into model; ImageType just scales to 0-1
+    # NOTE: INT8 quantization destroys SigLIP embedding quality (cosine sim 0.86).
+    # Use FP16 for the image encoder (cosine sim 0.999).
     ml_ie = ct.convert(
         traced_ie,
         inputs=[
             ct.ImageType(
                 name="image",
                 shape=(1, 3, 224, 224),
-                scale=1.0 / (255.0 * 0.5),
-                bias=[-1, -1, -1],
+                scale=1.0 / 255.0,
                 color_layout=ct.colorlayout.RGB,
             )
         ],
@@ -86,7 +89,7 @@ def main():
         minimum_deployment_target=ct.target.iOS17,
         compute_precision=ct.precision.FLOAT16,
     )
-    ml_ie = linear_quantize_weights(ml_ie, quant_config)
+    # No INT8 for image encoder — contrastive embeddings need FP16 precision
     ml_ie.author = "CoreML-Models"
     ml_ie.short_description = (
         "SigLIP ViT-B/16 Image Encoder. "
