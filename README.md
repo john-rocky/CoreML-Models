@@ -337,9 +337,9 @@ RMBG1.4 - The IS-Net enhanced with our unique training scheme and proprietary da
 
 <img src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/2a91ec10-fe94-43be-aedc-283e71fa9a1e" width=400> <img src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/04af501d-996d-48f4-b008-f0076dcbc117" width=400>
 
-| Google Drive Link | Size | Output |Original Project | License | year  |Conversion Script |
-| ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |
-| [RMBG.mlpackage](https://drive.google.com/drive/folders/1-33OTxUoO6en8sVsFEvt3Vt_FQ-hwJ3m?usp=sharing)/[RMBG.mlmodel](https://drive.google.com/file/d/1-_O7uLioAvi9q0wbJOiis0dqa8ho4A4o/view?usp=drive_link) | 176 MB | Image(GrayScale 1024x1024) |[briaai/RMBG-1.4](https://huggingface.co/briaai/RMBG-1.4) | [Creative Commons](https://huggingface.co/briaai/RMBG-1.4) |2024|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1KUTREfLbDklnKhaaJU2Q444TLxjmIXwN?usp=sharing)|
+| Download Link | Size | Output |Original Project | License | year  | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |------------- |
+| [RMBG_1_4.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/rmbg-v1/RMBG_1_4.mlpackage.zip) | 42 MB (INT8) | Alpha mask 1024x1024 |[briaai/RMBG-1.4](https://huggingface.co/briaai/RMBG-1.4) | [Creative Commons](https://huggingface.co/briaai/RMBG-1.4) |2024| [RMBGDemo](sample_apps/RMBGDemo) | [convert_rmbg.py](conversion_scripts/convert_rmbg.py) |
 
 ### face-Parsing
 
