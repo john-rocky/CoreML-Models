@@ -150,6 +150,40 @@ Then use `ImageType(scale=1/255)` which feeds 0-1 range into the model's built-i
 
 ---
 
+## Model-Specific Preprocessing Gotchas
+
+**Always check the original model's exact preprocessing — don't assume ImageNet.**
+
+| Model | Normalization | Common Mistake |
+|-------|--------------|----------------|
+| Florence-2 (DaViT) | ImageNet mean/std | Forgetting to bake it in (ImageType can't do per-channel std) |
+| SigLIP | mean=0.5, std=0.5 | Using ImageNet instead |
+| RMBG-1.4 | mean=0.5, std=1.0 | Using ImageNet instead |
+
+**RMBG-1.4 also requires min-max normalization after sigmoid.** The raw sigmoid output is in a narrow range like [0.5, 0.73]. The official post-processing stretches it:
+```
+mi, ma = output.min(), output.max()
+output = (output - mi) / (ma - mi)
+```
+Without this, the mask has almost no contrast and everything looks like foreground.
+
+---
+
+## Unsupported Operations in coremltools
+
+Some PyTorch operations are not supported by coremltools and cause conversion failures:
+
+| Op | Example | Workaround |
+|----|---------|------------|
+| `\|` / `\|=` (bool OR) | GroundingDINO mask generation | Use float arithmetic: `(a.float() + b.float()).clamp(0,1)` |
+| `~` (bitwise NOT) | Attention mask inversion | Pre-invert masks, pass as float input |
+| `torch.eye` (dynamic size) | Attention mask init | Pre-compute outside model |
+| In-place tensor assign | `tensor[..., :n] = val` | Rewrite with `torch.where` or scatter |
+| `torch.nonzero` | Data-dependent indexing | Pre-compute outside model |
+| `torchvision::deform_conv2d` | BiRefNet, deformable attention | No workaround — use model variant without it |
+
+---
+
 ## General Conversion Workflow
 
 1. **Load model, inspect architecture** — understand which forward methods are actually used
