@@ -115,6 +115,9 @@ You are free to do or not.
   - [Openjourney](#openjourney)
   - [dreamlike-photoreal-2.0](#dreamlike-photoreal-2)
 
+- [**Face Recognition**](#face-recognition)
+  - [AdaFace IR-18](#adaface-ir-18)
+
 - [**3D Face Pose Estimation**](#3d-face-pose-estimation)
   - [3DDFA_V2](#3ddfa_v2)
 
@@ -873,6 +876,18 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 | Google Drive Link  | Original Model | License | Run on mac |Conversion Script |Year|
 | ------------- | ------------- | ------------- |  ------------- | ------------- | ------------- | 
 | [dreamlike-photoreal-2.0](https://drive.google.com/file/d/1D5RXYE52wyXPq6TdCHM8DIkP4dxHafwt/view?usp=share_link) |[dreamlike-art/dreamlike-photoreal-2.0](https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0)|[CreativeML OpenRAIL-M](https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion)|[godly-devotion/MochiDiffusion](https://github.com/godly-devotion/MochiDiffusion/wiki/How-to-convert-Stable-Diffusion-models-to-Core-ML#requirements) |2023|
+
+# Face Recognition
+
+### AdaFace IR-18
+
+AdaFace — Quality-adaptive face recognition. Outputs 512-dim embedding for face verification and identification.
+
+<img width="300" src="https://github.com/user-attachments/assets/e5938858-9560-4aaf-9d21-f0059daa255e">
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [AdaFace_IR18.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/adaface-v1/AdaFace_IR18.mlpackage.zip) | 48 MB | Image (112×112 face) | 512-dim L2-normalized embedding | [mk-minchul/AdaFace](https://github.com/mk-minchul/AdaFace) | [MIT](https://github.com/mk-minchul/AdaFace/blob/master/LICENSE) | 2022 | [AdaFaceDemo](creative_apps/AdaFaceDemo) | [convert_adaface.py](conversion_scripts/convert_adaface.py) |
 
 # 3D Face Pose Estimation
 
