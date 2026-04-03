@@ -83,7 +83,7 @@ Model size reduction: ~1/4 of FP32 (e.g. 360MB → 88MB).
 
 The divergence is inherent to autoregressive generation — a single different logit cascades into a completely different continuation. The initial context is always preserved, so semantic meaning is maintained.
 
-**Recommendation:** INT8 for all on-device models. FP16 only if exact token-level reproducibility matters.
+**Recommendation:** INT8 for generative models (Florence-2, RMBG). **FP16 required for contrastive/embedding models** (SigLIP, CLIP, AdaFace) — INT8 drops cosine similarity from 0.999 to 0.86, making similarity-based scoring unreliable.
 
 ---
 
