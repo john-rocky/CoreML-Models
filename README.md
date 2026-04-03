@@ -887,7 +887,7 @@ AdaFace — Quality-adaptive face recognition. Outputs 512-dim embedding for fac
 
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| [AdaFace_IR18.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/adaface-v1/AdaFace_IR18.mlpackage.zip) | 48 MB | Image (112×112 face) | 512-dim L2-normalized embedding | [mk-minchul/AdaFace](https://github.com/mk-minchul/AdaFace) | [MIT](https://github.com/mk-minchul/AdaFace/blob/master/LICENSE) | 2022 | [AdaFaceDemo](creative_apps/AdaFaceDemo) | [convert_adaface.py](conversion_scripts/convert_adaface.py) |
+| [AdaFace_IR18.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/adaface-v1/AdaFace_IR18.mlpackage.zip) | 48 MB | Image (112×112 face) | 512-dim L2-normalized embedding | [mk-minchul/AdaFace](https://github.com/mk-minchul/AdaFace) | [MIT](https://github.com/mk-minchul/AdaFace/blob/master/LICENSE) | 2022 | [AdaFaceDemo](sample_apps/AdaFaceDemo) | [convert_adaface.py](conversion_scripts/convert_adaface.py) |
 
 # 3D Face Pose Estimation
 
@@ -899,7 +899,7 @@ AdaFace — Quality-adaptive face recognition. Outputs 512-dim embedding for fac
 
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| [3DDFA_V2.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/face3d-v1/3DDFA_V2.mlpackage.zip) | 6.3 MB | Image (120×120 RGB) | 62 params (12 pose + 40 shape + 10 expression) | [cleardusk/3DDFA_V2](https://github.com/cleardusk/3DDFA_V2) | [MIT](https://github.com/cleardusk/3DDFA_V2/blob/master/LICENSE) | 2020 | [Face3DDemo](creative_apps/Face3DDemo) |
+| [3DDFA_V2.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/face3d-v1/3DDFA_V2.mlpackage.zip) | 6.3 MB | Image (120×120 RGB) | 62 params (12 pose + 40 shape + 10 expression) | [cleardusk/3DDFA_V2](https://github.com/cleardusk/3DDFA_V2) | [MIT](https://github.com/cleardusk/3DDFA_V2/blob/master/LICENSE) | 2020 | [Face3DDemo](sample_apps/Face3DDemo) |
 
 # Audio Source Separation
 
