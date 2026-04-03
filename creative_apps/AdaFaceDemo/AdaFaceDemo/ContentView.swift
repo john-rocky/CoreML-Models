@@ -236,28 +236,32 @@ struct CompareTab: View {
                     GeometryReader { geo in
                         let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
                         let maxRadius = min(geo.size.width, geo.size.height) / 2 - 40
+                        let positions = resolvedPositions(center: center, maxRadius: maxRadius)
+
+                        let sameZoneR = maxRadius * 0.6  // green circle at 60% of radius
 
                         ZStack {
-                            // Threshold circles
-                            ForEach([0.6, 0.4, 0.2], id: \.self) { threshold in
-                                let r = maxRadius * CGFloat(1.0 - threshold)
-                                Circle()
-                                    .stroke(threshold == 0.6 ? Color.green.opacity(0.3) : Color.gray.opacity(0.15), lineWidth: 1)
-                                    .frame(width: r * 2, height: r * 2)
-                                    .position(center)
-                            }
+                            // Same Person zone circle
+                            Circle()
+                                .stroke(Color.green.opacity(0.3), lineWidth: 2)
+                                .frame(width: sameZoneR * 2, height: sameZoneR * 2)
+                                .position(center)
 
-                            // "Same person" zone label
+                            // Outer guide circles
+                            Circle()
+                                .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                                .frame(width: maxRadius * 1.5, height: maxRadius * 1.5)
+                                .position(center)
+
                             Text("Same Person")
                                 .font(.caption2)
                                 .foregroundColor(.green.opacity(0.5))
-                                .position(x: center.x, y: center.y - maxRadius * 0.4 + 14)
+                                .position(x: center.x, y: center.y - sameZoneR + 14)
 
-                            // 60% label
                             Text("60%")
                                 .font(.caption2)
                                 .foregroundColor(.green.opacity(0.4))
-                                .position(x: center.x + maxRadius * 0.4 + 16, y: center.y)
+                                .position(x: center.x + sameZoneR + 16, y: center.y)
 
                             // Reference face at center
                             if let ref = reference, let thumb = ref.thumbnail {
@@ -274,12 +278,9 @@ struct CompareTab: View {
                                     .position(center)
                             }
 
-                            // Comparison entries
-                            ForEach(Array(entries.enumerated()), id: \.element.id) { i, entry in
-                                let angle = entryAngle(index: i, total: entries.count)
-                                let dist = maxRadius * CGFloat(1.0 - max(0, entry.similarity))
-                                let x = center.x + dist * cos(angle)
-                                let y = center.y + dist * sin(angle)
+                            // Comparison entries at resolved positions
+                            ForEach(Array(positions.enumerated()), id: \.offset) { i, pos in
+                                let entry = entries[i]
                                 let isMatch = entry.similarity >= 0.6
 
                                 VStack(spacing: 2) {
@@ -297,7 +298,7 @@ struct CompareTab: View {
                                         .font(.system(size: 10, weight: .bold, design: .monospaced))
                                         .foregroundColor(isMatch ? .green : .red)
                                 }
-                                .position(x: x, y: y)
+                                .position(x: pos.x, y: pos.y)
                             }
                         }
                     }
@@ -331,10 +332,105 @@ struct CompareTab: View {
         }
     }
 
-    private func entryAngle(index: Int, total: Int) -> CGFloat {
-        guard total > 0 else { return 0 }
-        let start: CGFloat = -.pi / 2
-        return start + CGFloat(index) * (2 * .pi / CGFloat(max(total, 1)))
+    // Place entries on radial layout with two zones:
+    //   Same Person zone (>=60%): close to center, distance by similarity within zone
+    //   Others (<60%): outside the 60% circle, distance by similarity
+    // Then push apart to resolve overlaps without crossing zone boundaries.
+    private func resolvedPositions(center: CGPoint, maxRadius: CGFloat) -> [CGPoint] {
+        guard !entries.isEmpty else { return [] }
+
+        let itemR: CGFloat = 26
+        let refR: CGFloat = 34
+        let gap: CGFloat = 6
+
+        // Must match the green circle drawn in the view: maxRadius * 0.6
+        let sameZoneR = maxRadius * 0.6
+        let innerMin = refR + itemR + gap         // ~66pt from center
+        let innerMax = sameZoneR - gap            // stay inside green circle
+        let outerMin = sameZoneR + gap            // stay outside green circle
+
+        var pts: [CGPoint] = entries.enumerated().map { i, entry in
+            let angle = -.pi / 2 + CGFloat(i) * (2 * .pi / CGFloat(entries.count))
+            let sim = CGFloat(max(0, entry.similarity))
+            let dist: CGFloat
+
+            if sim >= 0.6 {
+                // Inside zone: higher sim = closer to center
+                // Map sim [0.6..1] → dist [innerMax..innerMin]
+                let t = (sim - 0.6) / 0.4
+                dist = innerMax - t * (innerMax - innerMin)
+            } else {
+                // Outside zone: lower sim = farther from center
+                // Map sim [0..0.6) → dist [maxRadius..outerMin]
+                let t = sim / 0.6
+                dist = maxRadius - t * (maxRadius - outerMin)
+            }
+
+            return CGPoint(x: center.x + dist * cos(angle),
+                           y: center.y + dist * sin(angle))
+        }
+
+        // Push-apart iterations
+        let minDist = itemR * 2 + gap
+        for _ in 0..<50 {
+            var moved = false
+
+            // 1. Push entries away from each other
+            for i in 0..<pts.count {
+                for j in (i + 1)..<pts.count {
+                    let dx = pts[j].x - pts[i].x
+                    let dy = pts[j].y - pts[i].y
+                    let d = hypot(dx, dy)
+                    if d < minDist && d > 0.1 {
+                        let push = (minDist - d) / 2 + 1
+                        let nx = dx / d
+                        let ny = dy / d
+                        pts[i].x -= nx * push
+                        pts[i].y -= ny * push
+                        pts[j].x += nx * push
+                        pts[j].y += ny * push
+                        moved = true
+                    }
+                }
+            }
+
+            // 2. Enforce constraints (after push, clamp back to valid zones)
+            for i in 0..<pts.count {
+                let sim = CGFloat(entries[i].similarity)
+                let isInner = sim >= 0.6
+                var dc = hypot(pts[i].x - center.x, pts[i].y - center.y)
+
+                // Always keep away from center ref
+                if dc < innerMin {
+                    if dc < 0.1 { dc = 0.1 }
+                    let s = innerMin / dc
+                    pts[i].x = center.x + (pts[i].x - center.x) * s
+                    pts[i].y = center.y + (pts[i].y - center.y) * s
+                    moved = true
+                    dc = innerMin
+                }
+
+                // Inner zone: keep inside threshold circle
+                if isInner && dc > innerMax {
+                    let s = innerMax / dc
+                    pts[i].x = center.x + (pts[i].x - center.x) * s
+                    pts[i].y = center.y + (pts[i].y - center.y) * s
+                    moved = true
+                }
+
+                // Outer zone: keep outside threshold circle
+                if !isInner && dc < outerMin {
+                    let s = outerMin / dc
+                    pts[i].x = center.x + (pts[i].x - center.x) * s
+                    pts[i].y = center.y + (pts[i].y - center.y) * s
+                    moved = true
+                }
+            }
+
+            if !moved { break }
+        }
+
+        return pts
     }
 
     private func addCompareImage() {

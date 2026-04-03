@@ -883,6 +883,8 @@ Pastel Mix - a stylized latent diffusion model.This model is intended to produce
 
 AdaFace — Quality-adaptive face recognition. Outputs 512-dim embedding for face verification and identification.
 
+<img width="300" src="https://github.com/user-attachments/assets/e5938858-9560-4aaf-9d21-f0059daa255e">
+
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [AdaFace_IR18.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/adaface-v1/AdaFace_IR18.mlpackage.zip) | 48 MB | Image (112×112 face) | 512-dim L2-normalized embedding | [mk-minchul/AdaFace](https://github.com/mk-minchul/AdaFace) | [MIT](https://github.com/mk-minchul/AdaFace/blob/master/LICENSE) | 2022 | [AdaFaceDemo](creative_apps/AdaFaceDemo) | [convert_adaface.py](conversion_scripts/convert_adaface.py) |
