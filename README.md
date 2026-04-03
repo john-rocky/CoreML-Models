@@ -124,6 +124,9 @@ You are free to do or not.
 - [**3D Face Pose Estimation**](#3d-face-pose-estimation)
   - [3DDFA_V2](#3ddfa_v2)
 
+- [**Speaker Diarization**](#speaker-diarization)
+  - [pyannote segmentation-3.0](#pyannote-segmentation-30)
+
 - [**Voice Conversion**](#voice-conversion)
   - [OpenVoice V2](#openvoice-v2)
 
@@ -920,6 +923,16 @@ AdaFace — Quality-adaptive face recognition. Outputs 512-dim embedding for fac
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [3DDFA_V2.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/face3d-v1/3DDFA_V2.mlpackage.zip) | 6.3 MB | Image (120×120 RGB) | 62 params (12 pose + 40 shape + 10 expression) | [cleardusk/3DDFA_V2](https://github.com/cleardusk/3DDFA_V2) | [MIT](https://github.com/cleardusk/3DDFA_V2/blob/master/LICENSE) | 2020 | [Face3DDemo](sample_apps/Face3DDemo) |
+
+# Speaker Diarization
+
+### pyannote segmentation-3.0
+
+pyannote segmentation — Speaker diarization with up to 3 simultaneous speakers. Identifies who speaks when, with overlap detection and per-speaker transcription.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [SpeakerSegmentation.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/diarization-v1/SpeakerSegmentation.mlpackage.zip) | 5.8 MB | 10s mono 16kHz [1,1,160000] | [1, 589, 7] speaker logits | [pyannote/segmentation-3.0](https://huggingface.co/pyannote/segmentation-3.0) | [MIT](https://huggingface.co/pyannote/segmentation-3.0) | 2023 | [DiarizationDemo](sample_apps/DiarizationDemo) | [convert_diarization.py](conversion_scripts/convert_diarization.py) |
 
 # Voice Conversion
 
