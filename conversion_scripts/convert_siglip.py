@@ -59,10 +59,9 @@ def main():
     processor = AutoProcessor.from_pretrained(model_id)
     model.eval()
 
-    quant_config = OptimizationConfig(
-        global_config=OpLinearQuantizerConfig(mode="linear_symmetric", dtype="int8")
-    )
     out_dir = "."
+    # NOTE: INT8 quantization destroys contrastive embedding quality.
+    # Both encoders must stay FP16.
 
     # --- 1. ImageEncoder ---
     print("\n[1/2] Converting ImageEncoder ...")
@@ -93,7 +92,7 @@ def main():
     ml_ie.author = "CoreML-Models"
     ml_ie.short_description = (
         "SigLIP ViT-B/16 Image Encoder. "
-        "224x224 RGB → L2-normalized 768-dim embedding. INT8."
+        "224x224 RGB → L2-normalized 768-dim embedding. FP16."
     )
     ml_ie.license = "Apache-2.0"
     ml_ie.save(f"{out_dir}/SigLIP_ImageEncoder.mlpackage")
@@ -119,11 +118,11 @@ def main():
         minimum_deployment_target=ct.target.iOS17,
         compute_precision=ct.precision.FLOAT16,
     )
-    ml_te = linear_quantize_weights(ml_te, quant_config)
+    # No INT8 for text encoder either — contrastive embeddings need FP16 precision
     ml_te.author = "CoreML-Models"
     ml_te.short_description = (
         "SigLIP ViT-B/16 Text Encoder. "
-        "Token IDs → L2-normalized 768-dim embedding. INT8."
+        "Token IDs → L2-normalized 768-dim embedding. FP16."
     )
     ml_te.license = "Apache-2.0"
     ml_te.save(f"{out_dir}/SigLIP_TextEncoder.mlpackage")
@@ -135,7 +134,7 @@ def main():
     print(f"\n=== Constants for Swift ===")
     print(f"logit_scale = {scale:.6f}")
     print(f"logit_bias = {bias:.6f}")
-    print(f"similarity = sigmoid(image_emb · text_emb * scale + bias)")
+    print(f"similarity = softmax(image_emb · text_emb * scale) across labels")
 
     print("\nDone! 2 models converted.")
 
