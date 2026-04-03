@@ -970,7 +970,7 @@ Microsoft Florence-2 — a unified vision-language model supporting image captio
 
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| Florence2VisionEncoder / TextEncoder / Decoder | 260 MB (INT8, 3 models total) | 768x768 RGB image + task prompt | Generated text (caption, OCR, etc.) | [microsoft/Florence-2-base](https://huggingface.co/microsoft/Florence-2-base) | [MIT](https://huggingface.co/microsoft/Florence-2-base/blob/main/LICENSE) | 2024 | [Florence2Demo](sample_apps/Florence2Demo) | [convert_florence2.py](conversion_scripts/convert_florence2.py) |
+| [Florence2VisionEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2VisionEncoder.mlpackage.zip) / [TextEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2TextEncoder.mlpackage.zip) / [Decoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2Decoder.mlpackage.zip) | 260 MB (INT8, 3 models total) | 768x768 RGB image + task prompt | Generated text (caption, OCR, etc.) | [microsoft/Florence-2-base](https://huggingface.co/microsoft/Florence-2-base) | [MIT](https://huggingface.co/microsoft/Florence-2-base/blob/main/LICENSE) | 2024 | [Florence2Demo](sample_apps/Florence2Demo) | [convert_florence2.py](conversion_scripts/convert_florence2.py) |
 
 ## Models converted by someone other than me.
 
