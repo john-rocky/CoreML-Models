@@ -145,6 +145,9 @@ You are free to do or not.
 - [**Anomaly Detection**](#anomaly-detection)
   - [EfficientAD](#efficientad)
 
+- [**Makeup Transfer**](#makeup-transfer)
+  - [BeautyREC](#beautyrec)
+
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
 See the section below for how to use it in Xcode.
@@ -1000,6 +1003,17 @@ EfficientAD (PDN-Small) — lightweight unsupervised anomaly detection for indus
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [EfficientAD_Bottle.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/efficientad-v1/EfficientAD_Bottle.mlpackage.zip) | 15 MB (FP16) | 256x256 RGB image | anomaly_map [1,1,256,256] + anomaly_score [0-1] | [nelson1425/EfficientAD](https://github.com/nelson1425/EfficientAD) | [MIT](https://opensource.org/licenses/MIT) | 2023 | [EfficientADDemo](sample_apps/EfficientADDemo) | [convert_efficientad.py](conversion_scripts/convert_efficientad.py) |
+
+# Makeup Transfer
+
+### BeautyREC
+
+BeautyREC — component-specific makeup transfer (lip, skin, eye). Transfers makeup from a reference face to a source face using face parsing masks. Two CoreML models: BiSeNet face parser and BeautyREC transfer network (0.99M params, ultra-lightweight).
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [BeautyREC_FaceParser.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/beautyrec-v1/BeautyREC_FaceParser.mlpackage.zip) | 25 MB (FP16) | 256x256 RGB face | 3-channel mask [lip, skin, eye] | [learningyan/BeautyREC](https://github.com/learningyan/BeautyREC) | [BSD-3-Clause (NC)](https://github.com/learningyan/BeautyREC/blob/main/License) | 2023 | [BeautyRECDemo](sample_apps/BeautyRECDemo) | [convert_beautyrec.py](conversion_scripts/convert_beautyrec.py) |
+| [BeautyREC_MakeupTransfer.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/beautyrec-v1/BeautyREC_MakeupTransfer.mlpackage.zip) | 2.4 MB (FP16) | source + reference + 2 masks | 256x256 makeup-transferred face | | | | | |
 
 # Text-to-Music Generation
 

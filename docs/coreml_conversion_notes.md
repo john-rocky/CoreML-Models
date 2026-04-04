@@ -228,3 +228,21 @@ anomaly_map = 0.5 * normalize(map_st) + 0.5 * normalize(map_ae)
 4. **Clamp output to [0, 1]** — raw anomaly maps can go negative (normal regions) or exceed 1 (severe anomalies) after quantile normalization. Clamping gives a clean probability-like output for downstream use.
 
 5. **PatchCore is not suitable for CoreML** — it requires a nearest-neighbor search against a memory bank at inference time, which is not a standard neural network operation. EfficientAD is pure feed-forward CNN, making it directly convertible.
+
+---
+
+## Makeup Transfer (BeautyREC) Conversion
+
+**Academic repos often have broken imports — isolate the model code from the training harness.**
+
+BeautyREC's `network/__init__.py` auto-discovers and imports all model variants, pulling in training-only dependencies (mscv, dlib, faceplusplus). The fix is to patch `__init__.py` to a no-op before importing the model class directly.
+
+**Key lessons:**
+
+1. **Bool OR (`|`) is not supported by coremltools** — `(mask == 9) | (mask == 13)` fails with `'__or__' op not implemented`. Use float arithmetic instead: `(mask == 9).float() + (mask == 13).float()).clamp(0, 1)`. This is already documented in the Unsupported Operations table above, but easy to forget when building mask-construction wrappers.
+
+2. **Multi-input models work fine** — BeautyREC takes 4 inputs (source image, reference image, ref_mask, src_mask). CoreML handles this naturally with `MLDictionaryFeatureProvider`. Two inputs can be `ImageType`, the other two `TensorType`.
+
+3. **Face parsing + transfer = 2 separate models is better than 1** — the parser (BiSeNet) outputs a label map that needs argmax + label remapping, which are non-differentiable. Keeping them separate lets you run parsing once per face and cache the mask for trying multiple reference makeups.
+
+4. **InstanceNorm tracing produces TracerWarnings but works** — `if x.size(0) == 1` in LayerNorm triggers a warning about data-dependent control flow, but since batch size is always 1 at inference, the traced path is correct.
