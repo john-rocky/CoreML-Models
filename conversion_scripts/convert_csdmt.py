@@ -78,8 +78,11 @@ class FaceParserWrapper(nn.Module):
     def forward(self, x):
         # ImageNet normalize
         x = (x - self.mean) / self.std
-        # Parse at input resolution (no resize to 512 — baked into the model)
-        out = self.net(x)[0]  # [1, 19, H, W]
+        # Upsample to 512x512 for BiSeNet (trained at this resolution)
+        x_512 = F.interpolate(x, size=(512, 512), mode="bilinear", align_corners=False)
+        out = self.net(x_512)[0]  # [1, 19, 512, 512]
+        # Downsample back to input resolution
+        out = F.interpolate(out, size=(256, 256), mode="bilinear", align_corners=False)
         labels = out.argmax(dim=1)  # [1, H, W]
         # Remap to 10-channel scheme
         remapped = self.lut[labels]  # [1, H, W]
@@ -95,10 +98,10 @@ class FaceParserWrapper(nn.Module):
 
 
 class MakeupTransferWrapper(nn.Module):
-    """CSD-MT Generator with normalization baked in.
+    """CSD-MT Generator with normalization and RGB-BGR conversion baked in.
 
-    Input: source [0,1], ref [0,1], source_parse, source_mask, ref_parse, ref_mask
-    Output: result [0,1]
+    The original model was trained with cv2 (BGR). CoreML feeds RGB.
+    We swap R/B on input and output to match.
     """
 
     def __init__(self, generator):
@@ -106,15 +109,16 @@ class MakeupTransferWrapper(nn.Module):
         self.gen = generator
 
     def forward(self, source, reference, source_parse, source_mask, ref_parse, ref_mask):
-        # Normalize to [-1, 1]
-        src = source * 2.0 - 1.0
-        ref = reference * 2.0 - 1.0
+        # RGB to BGR (model trained with cv2)
+        src = source[:, [2, 1, 0], :, :] * 2.0 - 1.0
+        ref = reference[:, [2, 1, 0], :, :] * 2.0 - 1.0
         output = self.gen(
             source_img=src, source_parse=source_parse, source_all_mask=source_mask,
             ref_img=ref, ref_parse=ref_parse, ref_all_mask=ref_mask,
         )
-        # Only return transfer_img, normalized to [0, 1]
-        return (output["transfer_img"][:, :3] + 1.0) / 2.0
+        result = (output["transfer_img"][:, :3] + 1.0) / 2.0
+        # BGR to RGB
+        return result[:, [2, 1, 0], :, :]
 
 
 # ── Conversion ────────────────────────────────────────────────────────────────
