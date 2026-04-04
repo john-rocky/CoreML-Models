@@ -124,11 +124,20 @@ You are free to do or not.
 - [**3D Face Pose Estimation**](#3d-face-pose-estimation)
   - [3DDFA_V2](#3ddfa_v2)
 
+- [**Speaker Diarization**](#speaker-diarization)
+  - [pyannote segmentation-3.0](#pyannote-segmentation-30)
+
 - [**Voice Conversion**](#voice-conversion)
   - [OpenVoice V2](#openvoice-v2)
 
 - [**Audio Source Separation**](#audio-source-separation)
   - [HTDemucs](#htdemucs)
+
+- [**Vision-Language**](#vision-language)
+  - [Florence-2-base](#florence-2-base)
+
+- [**Zero-Shot Image Classification**](#zero-shot-image-classification)
+  - [SigLIP ViT-B/16](#siglip-vit-b16)
 
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
@@ -328,9 +337,9 @@ RMBG1.4 - The IS-Net enhanced with our unique training scheme and proprietary da
 
 <img src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/2a91ec10-fe94-43be-aedc-283e71fa9a1e" width=400> <img src="https://github.com/john-rocky/PersonSegmentationSampler/assets/23278992/04af501d-996d-48f4-b008-f0076dcbc117" width=400>
 
-| Google Drive Link | Size | Output |Original Project | License | year  |Conversion Script |
-| ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |
-| [RMBG.mlpackage](https://drive.google.com/drive/folders/1-33OTxUoO6en8sVsFEvt3Vt_FQ-hwJ3m?usp=sharing)/[RMBG.mlmodel](https://drive.google.com/file/d/1-_O7uLioAvi9q0wbJOiis0dqa8ho4A4o/view?usp=drive_link) | 176 MB | Image(GrayScale 1024x1024) |[briaai/RMBG-1.4](https://huggingface.co/briaai/RMBG-1.4) | [Creative Commons](https://huggingface.co/briaai/RMBG-1.4) |2024|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1KUTREfLbDklnKhaaJU2Q444TLxjmIXwN?usp=sharing)|
+| Download Link | Size | Output |Original Project | License | year  | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |------------- |
+| [RMBG_1_4.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/rmbg-v1/RMBG_1_4.mlpackage.zip) | 42 MB (INT8) | Alpha mask 1024x1024 |[briaai/RMBG-1.4](https://huggingface.co/briaai/RMBG-1.4) | [Creative Commons](https://huggingface.co/briaai/RMBG-1.4) |2024| [RMBGDemo](sample_apps/RMBGDemo) | [convert_rmbg.py](conversion_scripts/convert_rmbg.py) |
 
 ### face-Parsing
 
@@ -921,6 +930,16 @@ AdaFace — Quality-adaptive face recognition. Outputs 512-dim embedding for fac
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [3DDFA_V2.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/face3d-v1/3DDFA_V2.mlpackage.zip) | 6.3 MB | Image (120×120 RGB) | 62 params (12 pose + 40 shape + 10 expression) | [cleardusk/3DDFA_V2](https://github.com/cleardusk/3DDFA_V2) | [MIT](https://github.com/cleardusk/3DDFA_V2/blob/master/LICENSE) | 2020 | [Face3DDemo](sample_apps/Face3DDemo) |
 
+# Speaker Diarization
+
+### pyannote segmentation-3.0
+
+pyannote segmentation — Speaker diarization with up to 3 simultaneous speakers. Identifies who speaks when, with overlap detection and per-speaker transcription.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [SpeakerSegmentation.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/diarization-v1/SpeakerSegmentation.mlpackage.zip) | 5.8 MB | 10s mono 16kHz [1,1,160000] | [1, 589, 7] speaker logits | [pyannote/segmentation-3.0](https://huggingface.co/pyannote/segmentation-3.0) | [MIT](https://huggingface.co/pyannote/segmentation-3.0) | 2023 | [DiarizationDemo](sample_apps/DiarizationDemo) | [convert_diarization.py](conversion_scripts/convert_diarization.py) |
+
 # Voice Conversion
 
 ### OpenVoice V2
@@ -945,6 +964,26 @@ Hybrid Transformer Demucs — separates music into 4 stems: drums, bass, vocals,
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [HTDemucs_SourceSeparation_F32.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/demucs-v1/HTDemucs_SourceSeparation_F32.mlpackage.zip) | 80 MB | Audio Waveform [1, 2, 343980] at 44.1kHz | 4 stems (drums, bass, other, vocals) stereo | [facebookresearch/demucs](https://github.com/facebookresearch/demucs) | [MIT](https://github.com/facebookresearch/demucs/blob/main/LICENSE) | 2022 | [DemucsDemo](sample_apps/DemucsDemo) | [convert_htdemucs.py](conversion_scripts/convert_htdemucs.py) |
+
+# Vision-Language
+
+### Florence-2-base
+
+Microsoft Florence-2 — a unified vision-language model supporting image captioning, OCR, and object detection from a single model. Converted as 3 CoreML models (INT8): Vision Encoder (DaViT), Text Encoder (BART), and Decoder with autoregressive generation.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [Florence2VisionEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2VisionEncoder.mlpackage.zip) / [TextEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2TextEncoder.mlpackage.zip) / [Decoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2Decoder.mlpackage.zip) | 260 MB (INT8, 3 models total) | 768x768 RGB image + task prompt | Generated text (caption, OCR, etc.) | [microsoft/Florence-2-base](https://huggingface.co/microsoft/Florence-2-base) | [MIT](https://huggingface.co/microsoft/Florence-2-base/blob/main/LICENSE) | 2024 | [Florence2Demo](sample_apps/Florence2Demo) | [convert_florence2.py](conversion_scripts/convert_florence2.py) |
+
+# Zero-Shot Image Classification
+
+### SigLIP ViT-B/16
+
+Google SigLIP — sigmoid-based contrastive image-text model for zero-shot classification. Type any labels (e.g. "cat, dog, car") and get per-label probabilities. Converted as 2 CoreML models (INT8): Image Encoder and Text Encoder.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [SigLIP_ImageEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/siglip-v2/SigLIP_ImageEncoder.mlpackage.zip) / [TextEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/siglip-v2/SigLIP_TextEncoder.mlpackage.zip) | 386 MB (FP16, 2 models total) | 224x224 RGB image + text labels | Per-label similarity scores (softmax) | [google/siglip-base-patch16-224](https://huggingface.co/google/siglip-base-patch16-224) | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | 2024 | [SigLIPDemo](sample_apps/SigLIPDemo) | [convert_siglip.py](conversion_scripts/convert_siglip.py) |
 
 ## Models converted by someone other than me.
 
