@@ -1012,8 +1012,8 @@ CSD-MT (CVPR 2024) — content-style decoupled makeup transfer. Transfers makeup
 
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| [CSDMT_FaceParser.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/csdmt-v1/CSDMT_FaceParser.mlpackage.zip) | 26 MB (FP16) | 256x256 RGB face | 10-ch parse + 3-ch face mask | [Snowfallingplum/CSD-MT](https://github.com/Snowfallingplum/CSD-MT) | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) | 2024 | [CSDMTDemo](sample_apps/CSDMTDemo) | [convert_csdmt.py](conversion_scripts/convert_csdmt.py) |
-| [CSDMT_MakeupTransfer.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/csdmt-v1/CSDMT_MakeupTransfer.mlpackage.zip) | 13 MB (FP16) | source + ref + parses + masks | 256x256 makeup-transferred face | | | | | |
+| [CSDMT_FaceParser.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/csdmt-v1/CSDMT_FaceParser.mlpackage.zip) | 53 MB (FP32) | 256x256 RGB face | 10-ch parse + 3-ch face mask | [Snowfallingplum/CSD-MT](https://github.com/Snowfallingplum/CSD-MT) | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) | 2024 | [CSDMTDemo](sample_apps/CSDMTDemo) | [convert_csdmt.py](conversion_scripts/convert_csdmt.py) |
+| [CSDMT_MakeupTransfer.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/csdmt-v1/CSDMT_MakeupTransfer.mlpackage.zip) | 25 MB (FP32) | source + ref + parses + masks | 256x256 makeup-transferred face | | | | | |
 
 # Text-to-Music Generation
 

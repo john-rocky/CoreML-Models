@@ -152,7 +152,7 @@ def convert_face_parser():
             ct.TensorType(name="face_mask"),
         ],
         minimum_deployment_target=ct.target.iOS17,
-        compute_precision=ct.precision.FLOAT16,
+        compute_precision=ct.precision.FLOAT32,
     )
 
     ml.author = "CoreML-Models"
@@ -209,7 +209,7 @@ def convert_makeup_transfer():
         ],
         outputs=[ct.TensorType(name="result")],
         minimum_deployment_target=ct.target.iOS17,
-        compute_precision=ct.precision.FLOAT16,
+        compute_precision=ct.precision.FLOAT32,
     )
 
     ml.author = "CoreML-Models"
