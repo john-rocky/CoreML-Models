@@ -40,10 +40,32 @@ class Florence2Captioner: ObservableObject {
     @Published var isReady = false
 
     private var reverseVocab: [Int: String] = [:]
+    private var forwardVocab: [String: Int] = [:]
 
     private let eosTokenID: Int32 = 2
     private let decoderStartTokenID: Int32 = 2
     private let specialTokenIDs: Set<Int32> = [0, 1, 2]
+
+    // GPT-2/RoBERTa byte-to-unicode mapping
+    private static let byteEncoder: [UInt8: Character] = {
+        var directBytes = Set<UInt8>()
+        for b in 0x21...0x7E { directBytes.insert(UInt8(b)) }
+        for b in 0xA1...0xAC { directBytes.insert(UInt8(b)) }
+        for b in 0xAE...0xFF { directBytes.insert(UInt8(b)) }
+
+        var encoder: [UInt8: Character] = [:]
+        for b in directBytes {
+            encoder[b] = Character(UnicodeScalar(b))
+        }
+        var n = 0
+        for b: UInt8 in 0...255 {
+            if !directBytes.contains(b) {
+                encoder[b] = Character(UnicodeScalar(256 + n)!)
+                n += 1
+            }
+        }
+        return encoder
+    }()
 
     init() {
         loadVocab()
@@ -89,11 +111,73 @@ class Florence2Captioner: ObservableObject {
         for (key, value) in dict {
             if let id = Int(key) {
                 reverseVocab[id] = value
+                forwardVocab[value] = id
             }
         }
     }
 
+    // MARK: - Tokenizer
+
+    func tokenize(_ text: String) -> [Int32] {
+        var tokens: [Int32] = [0] // BOS <s>
+
+        let pattern = "'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+"
+        let regex = try! NSRegularExpression(pattern: pattern, options: [])
+        let nsText = text as NSString
+        let matches = regex.matches(in: text, range: NSRange(location: 0, length: nsText.length))
+
+        for match in matches {
+            let piece = nsText.substring(with: match.range)
+            let encoded = byteEncode(piece)
+
+            // Greedy longest match
+            var i = encoded.startIndex
+            while i < encoded.endIndex {
+                var bestEnd = encoded.index(after: i)
+                var bestID: Int?
+                var j = encoded.index(after: i)
+                while j <= encoded.endIndex {
+                    let sub = String(encoded[i..<j])
+                    if let id = forwardVocab[sub] {
+                        bestEnd = j
+                        bestID = id
+                    }
+                    if j == encoded.endIndex { break }
+                    j = encoded.index(after: j)
+                }
+                if let id = bestID {
+                    tokens.append(Int32(id))
+                }
+                i = bestEnd
+            }
+        }
+
+        tokens.append(2) // EOS </s>
+        return tokens
+    }
+
+    private func byteEncode(_ text: String) -> String {
+        var result = ""
+        for byte in Array(text.utf8) {
+            if let ch = Self.byteEncoder[byte] {
+                result.append(ch)
+            }
+        }
+        return result
+    }
+
+    // MARK: - Inference
+
     func caption(image: UIImage, task: Florence2Task, maxTokens: Int = 256) async throws -> String {
+        return try await infer(image: image, inputIDs: task.inputIDs, maxTokens: maxTokens)
+    }
+
+    func answer(image: UIImage, question: String, maxTokens: Int = 256) async throws -> String {
+        let inputIDs = tokenize(question)
+        return try await infer(image: image, inputIDs: inputIDs, maxTokens: maxTokens)
+    }
+
+    private func infer(image: UIImage, inputIDs: [Int32], maxTokens: Int) async throws -> String {
         guard isReady else { throw CaptionerError.modelNotLoaded }
 
         guard let resized = resizeTo768(image),
@@ -101,7 +185,7 @@ class Florence2Captioner: ObservableObject {
             throw CaptionerError.invalidImage
         }
 
-        // Step 1: VisionEncoder — load, run, copy result, release
+        // Step 1: VisionEncoder
         let imageFeatures: MLMultiArray = try await {
             let ve = try loadModel(containing: "VisionEncoder")
             let input = try MLDictionaryFeatureProvider(dictionary: ["image": pixelBuffer])
@@ -112,10 +196,9 @@ class Florence2Captioner: ObservableObject {
             return try copyMultiArray(feat)
         }()
 
-        // Step 2: TextEncoder — load, run, copy result, release
+        // Step 2: TextEncoder
         let encoderHS: MLMultiArray = try await {
             let te = try loadModel(containing: "TextEncoder")
-            let inputIDs = task.inputIDs
             let idsArray = try MLMultiArray(shape: [1, NSNumber(value: inputIDs.count)], dataType: .int32)
             for (i, id) in inputIDs.enumerated() {
                 idsArray[[0, NSNumber(value: i)] as [NSNumber]] = NSNumber(value: id)
@@ -131,7 +214,7 @@ class Florence2Captioner: ObservableObject {
             return try copyMultiArray(hs)
         }()
 
-        // Step 3: Decoder — load, run autoregressive loop, release
+        // Step 3: Decoder autoregressive loop
         let dec = try loadModel(containing: "Decoder")
         var decoderIDs: [Int32] = [decoderStartTokenID]
 
