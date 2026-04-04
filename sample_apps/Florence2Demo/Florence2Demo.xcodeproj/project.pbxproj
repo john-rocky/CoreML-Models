@@ -15,6 +15,7 @@
 		F20000010000000000000007 /* Florence2TextEncoder.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = F20000020000000000000007 /* Florence2TextEncoder.mlpackage */; };
 		F20000010000000000000008 /* Florence2Decoder.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = F20000020000000000000008 /* Florence2Decoder.mlpackage */; };
 		F2000001000000000000000A /* florence2_vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = F2000002000000000000000A /* florence2_vocab.json */; };
+		F2000001000000000000000B /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2000002000000000000000B /* CameraManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +28,7 @@
 		F20000020000000000000007 /* Florence2TextEncoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = Florence2TextEncoder.mlpackage; sourceTree = "<group>"; };
 		F20000020000000000000008 /* Florence2Decoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = Florence2Decoder.mlpackage; sourceTree = "<group>"; };
 		F2000002000000000000000A /* florence2_vocab.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = florence2_vocab.json; sourceTree = "<group>"; };
+		F2000002000000000000000B /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		F20000020000000000000010 /* Florence2Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Florence2Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -36,7 +38,7 @@
 
 /* Begin PBXGroup section */
 		F20000040000000000000001 = { isa = PBXGroup; children = (F20000040000000000000002, F20000040000000000000003); sourceTree = "<group>"; };
-		F20000040000000000000002 /* Florence2Demo */ = { isa = PBXGroup; children = (F20000020000000000000001, F20000020000000000000002, F20000020000000000000003, F20000020000000000000006, F20000020000000000000007, F20000020000000000000008, F2000002000000000000000A, F20000020000000000000004, F20000020000000000000005); path = Florence2Demo; sourceTree = "<group>"; };
+		F20000040000000000000002 /* Florence2Demo */ = { isa = PBXGroup; children = (F20000020000000000000001, F20000020000000000000002, F20000020000000000000003, F2000002000000000000000B, F20000020000000000000006, F20000020000000000000007, F20000020000000000000008, F2000002000000000000000A, F20000020000000000000004, F20000020000000000000005); path = Florence2Demo; sourceTree = "<group>"; };
 		F20000040000000000000003 /* Products */ = { isa = PBXGroup; children = (F20000020000000000000010); name = Products; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
@@ -53,7 +55,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		F20000060000000000000001 /* Sources */ = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (F20000010000000000000006, F20000010000000000000007, F20000010000000000000008, F20000010000000000000001, F20000010000000000000002, F20000010000000000000003); runOnlyForDeploymentPostprocessing = 0; };
+		F20000060000000000000001 /* Sources */ = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (F20000010000000000000006, F20000010000000000000007, F20000010000000000000008, F20000010000000000000001, F20000010000000000000002, F20000010000000000000003, F2000001000000000000000B); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */

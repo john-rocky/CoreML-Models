@@ -159,7 +159,7 @@ struct ContentView: View {
     @ViewBuilder
     private func checkerboardPattern() -> some View {
         Canvas { context, size in
-            let tileSize: CGFloat = 16
+            let tileSize: CGFloat = 20
             let rows = Int(ceil(size.height / tileSize))
             let cols = Int(ceil(size.width / tileSize))
             for row in 0..<rows {
@@ -167,7 +167,7 @@ struct ContentView: View {
                     let rect = CGRect(x: CGFloat(col) * tileSize, y: CGFloat(row) * tileSize,
                                       width: tileSize, height: tileSize)
                     let isLight = (row + col) % 2 == 0
-                    context.fill(Path(rect), with: .color(isLight ? .white : Color(.systemGray5)))
+                    context.fill(Path(rect), with: .color(isLight ? Color(.systemGray6) : Color(.systemGray4)))
                 }
             }
         }
