@@ -145,6 +145,9 @@ You are free to do or not.
 - [**Anomaly Detection**](#anomaly-detection)
   - [EfficientAD](#efficientad)
 
+- [**Makeup Transfer**](#makeup-transfer)
+  - [CSD-MT](#csd-mt)
+
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
 See the section below for how to use it in Xcode.
@@ -1000,6 +1003,17 @@ EfficientAD (PDN-Small) — lightweight unsupervised anomaly detection for indus
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [EfficientAD_Bottle.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/efficientad-v1/EfficientAD_Bottle.mlpackage.zip) | 15 MB (FP16) | 256x256 RGB image | anomaly_map [1,1,256,256] + anomaly_score [0-1] | [nelson1425/EfficientAD](https://github.com/nelson1425/EfficientAD) | [MIT](https://opensource.org/licenses/MIT) | 2023 | [EfficientADDemo](sample_apps/EfficientADDemo) | [convert_efficientad.py](conversion_scripts/convert_efficientad.py) |
+
+# Makeup Transfer
+
+### CSD-MT
+
+CSD-MT (CVPR 2024) — content-style decoupled makeup transfer. Transfers makeup from a reference face to a source face using semantic correspondence. Two CoreML models: BiSeNet face parser (10-channel semantic map) and CSD-MT generator (6.94M params).
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [CSDMT_FaceParser.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/csdmt-v1/CSDMT_FaceParser.mlpackage.zip) | 26 MB (FP16) | 256x256 RGB face | 10-ch parse + 3-ch face mask | [Snowfallingplum/CSD-MT](https://github.com/Snowfallingplum/CSD-MT) | [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) | 2024 | [CSDMTDemo](sample_apps/CSDMTDemo) | [convert_csdmt.py](conversion_scripts/convert_csdmt.py) |
+| [CSDMT_MakeupTransfer.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/csdmt-v1/CSDMT_MakeupTransfer.mlpackage.zip) | 13 MB (FP16) | source + ref + parses + masks | 256x256 makeup-transferred face | | | | | |
 
 # Text-to-Music Generation
 

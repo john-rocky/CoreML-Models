@@ -228,3 +228,19 @@ anomaly_map = 0.5 * normalize(map_st) + 0.5 * normalize(map_ae)
 4. **Clamp output to [0, 1]** — raw anomaly maps can go negative (normal regions) or exceed 1 (severe anomalies) after quantile normalization. Clamping gives a clean probability-like output for downstream use.
 
 5. **PatchCore is not suitable for CoreML** — it requires a nearest-neighbor search against a memory bank at inference time, which is not a standard neural network operation. EfficientAD is pure feed-forward CNN, making it directly convertible.
+
+---
+
+## Makeup Transfer (CSD-MT) Conversion
+
+**Training-time augmentation in forward() breaks tracing — fix before converting.**
+
+CSD-MT's `Content_Style_Separation` module has `content = content * (0.6 + 0.6 * random.random())` in its `forward()` method. This random scaling is a data augmentation trick for training, but causes `torch.jit.trace` to produce different graphs on each invocation (graph diff error). Fix: replace with a fixed scale factor (e.g., `content * 0.9`) for inference.
+
+**Key lessons:**
+
+1. **Dict outputs are not traceable** — CSD-MT's Generator returns a dict. Wrap it in a module that returns only the tensor you need (`output["transfer_img"][:, :3]`).
+
+2. **`strict=False` does not fix graph structure differences** — it only relaxes numerical tolerance checks. If the graph itself differs (e.g. due to `random.random()`), you must fix the source code.
+
+3. **One-hot encoding via loop is CoreML-friendly** — building a 10-channel one-hot parse map with a `for ch in range(10): parse[0, ch] = (remapped == ch).float()` traces correctly and converts to CoreML without issues. No need for `F.one_hot()` or scatter operations.
