@@ -994,6 +994,8 @@ Google SigLIP — sigmoid-based contrastive image-text model for zero-shot class
 
 [stabilityai/stable-audio-open-small](https://huggingface.co/stabilityai/stable-audio-open-small) — text-to-music generation (497M params). Generates up to 11.9 seconds of stereo 44.1kHz audio from text prompts using rectified flow diffusion.
 
+<video src="https://github.com/user-attachments/assets/ea448e41-d5ae-407e-84a6-8312c1108cfd" width="400"></video>
+
 4 CoreML models: T5 text encoder, NumberEmbedder (seconds conditioning), DiT (diffusion transformer), and VAE decoder (Oobleck).
 
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
