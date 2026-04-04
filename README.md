@@ -130,6 +130,9 @@ You are free to do or not.
 - [**Voice Conversion**](#voice-conversion)
   - [OpenVoice V2](#openvoice-v2)
 
+- [**Text-to-Music Generation**](#text-to-music-generation)
+  - [Stable Audio Open Small](#stable-audio-open-small)
+
 - [**Audio Source Separation**](#audio-source-separation)
   - [HTDemucs](#htdemucs)
 
@@ -984,6 +987,28 @@ Google SigLIP — sigmoid-based contrastive image-text model for zero-shot class
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [SigLIP_ImageEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/siglip-v2/SigLIP_ImageEncoder.mlpackage.zip) / [TextEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/siglip-v2/SigLIP_TextEncoder.mlpackage.zip) | 386 MB (FP16, 2 models total) | 224x224 RGB image + text labels | Per-label similarity scores (softmax) | [google/siglip-base-patch16-224](https://huggingface.co/google/siglip-base-patch16-224) | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | 2024 | [SigLIPDemo](sample_apps/SigLIPDemo) | [convert_siglip.py](conversion_scripts/convert_siglip.py) |
+
+# Text-to-Music Generation
+
+### Stable Audio Open Small
+
+[stabilityai/stable-audio-open-small](https://huggingface.co/stabilityai/stable-audio-open-small) — text-to-music generation (497M params). Generates up to 11.9 seconds of stereo 44.1kHz audio from text prompts using rectified flow diffusion.
+
+4 CoreML models: T5 text encoder, NumberEmbedder (seconds conditioning), DiT (diffusion transformer), and VAE decoder (Oobleck).
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [StableAudioT5Encoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/stable-audio-v1/StableAudioT5Encoder.mlpackage.zip) | 105 MB | input_ids [1, 64] | text_embeddings [1, 64, 768] | [stabilityai/stable-audio-open-small](https://huggingface.co/stabilityai/stable-audio-open-small) | [Stability AI Community](https://huggingface.co/stabilityai/stable-audio-open-small/blob/main/LICENSE) | 2024 | [StableAudioDemo](sample_apps/StableAudioDemo) | [convert_stable_audio.py](conversion_scripts/convert_stable_audio.py) |
+| [StableAudioNumberEmbedder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/stable-audio-v1/StableAudioNumberEmbedder.mlpackage.zip) | 396 KB | normalized_seconds [1] | seconds_embedding [1, 768] | | | | | |
+| [StableAudioDiT.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/stable-audio-v1/StableAudioDiT.mlpackage.zip) | 326 MB | latent [1,64,256] + timestep + conditioning | velocity [1,64,256] | | | | | |
+| [StableAudioDiT_FP32.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/stable-audio-v1/StableAudioDiT_FP32.mlpackage.zip) | 1.3 GB | latent [1,64,256] + timestep + conditioning | velocity [1,64,256] | | | | | |
+| [StableAudioVAEDecoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/stable-audio-v1/StableAudioVAEDecoder.mlpackage.zip) | 149 MB | latent [1, 64, 256] | stereo audio [1, 2, 524288] at 44.1kHz | | | | | |
+
+**Conversion notes:**
+- DiT INT8 (`StableAudioDiT`): use with `cpuAndGPU`. Fastest, slight quality loss from quantization.
+- DiT FP32 (`StableAudioDiT_FP32`): use with `cpuOnly`. Best quality, slower (~1.3GB). FP16 weights overflow in attention on iOS GPU, so FP32 compute + CPU is required.
+- T5 INT8: may produce occasional NaN values — the sample app sanitizes these before passing to DiT.
+- VAE Decoder FP16: weight_norm must be removed before tracing (Snake activation).
 
 ## Models converted by someone other than me.
 
