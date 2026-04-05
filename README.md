@@ -618,9 +618,9 @@ Pytorch implementation of "Unsupervised Degradation Representation Learning for 
 
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- | ----------------- |
-| SinSR_Encoder.mlpackage | 43 MB | image [1,3,1024,1024] | latent [1,3,256,256] | [wyf0912/SinSR](https://github.com/wyf0912/SinSR) | [S-Lab](https://github.com/wyf0912/SinSR/blob/main/LICENSE) | 2024 | [SinSRDemo](sample_apps/SinSRDemo) | [convert_sinsr.py](conversion_scripts/convert_sinsr.py) |
-| SinSR_Denoiser.mlpackage | 455 MB | input [1,6,256,256] | predicted_latent [1,3,256,256] | | | | | |
-| SinSR_Decoder.mlpackage | 63 MB | latent [1,3,256,256] | image [1,3,1024,1024] | | | | | |
+| [SinSR_Encoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/sinsr-v1/SinSR_Encoder.mlpackage.zip) | 39 MB | image [1,3,1024,1024] | latent [1,3,256,256] | [wyf0912/SinSR](https://github.com/wyf0912/SinSR) | [S-Lab](https://github.com/wyf0912/SinSR/blob/main/LICENSE) | 2024 | [SinSRDemo](sample_apps/SinSRDemo) | [convert_sinsr.py](conversion_scripts/convert_sinsr.py) |
+| [SinSR_Denoiser.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/sinsr-v1/SinSR_Denoiser.mlpackage.zip) | 420 MB | input [1,6,256,256] | predicted_latent [1,3,256,256] | | | | | |
+| [SinSR_Decoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/sinsr-v1/SinSR_Decoder.mlpackage.zip) | 58 MB | latent [1,3,256,256] | image [1,3,1024,1024] | | | | | |
 
 **Conversion notes:**
 - Swin Transformer requires several patches for CoreML tracing: (1) pre-compute relative position bias as buffers, (2) replace `torch.roll` with slice+concat, (3) rewrite attention mask creation to avoid `__setitem__`, (4) patch coremltools `int` op converter for multi-dim tensor shape casts.
