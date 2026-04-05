@@ -73,6 +73,7 @@ You are free to do or not.
   - [LESRCNN](#lesrcnn)
   - [MMRealSR](#mmrealsr)
   - [DASR](#dasr)
+  - [SinSR](#sinsr)
       
 - [**Low Light Enhancement**](#low-light-enhancement)
   - [StableLLVE](#stablellve)
@@ -603,6 +604,32 @@ Pytorch implementation of "Unsupervised Degradation Representation Learning for 
 | Google Drive Link | Size | Output |Original Project | License |year|
 | ------------- | ------------- | ------------- | ------------- | ------------- |------------- |
 | [DASR](https://drive.google.com/drive/folders/10J2ehHewK2ppS5ToDqmtJ2Ei5k8vcdL0?usp=sharing) | 12.1 MB | Image(RGB 1024x1024)| [The-Learning-And-Vision-Atelier-LAVA/DASR](https://github.com/The-Learning-And-Vision-Atelier-LAVA/DASR)  | [MIT](https://github.com/The-Learning-And-Vision-Atelier-LAVA/DASR/blob/main/LICENSE) |2022|
+
+
+### SinSR
+
+[wyf0912/SinSR](https://github.com/wyf0912/SinSR) — single-step diffusion-based super-resolution (CVPR 2024, ~113M params). Distilled from ResShift for one-step 4x upscaling. Uses a Swin Transformer UNet with VQ-VAE latent space.
+
+<img width="512" src="sample_apps/SinSRDemo/sinsr_demo.png">
+
+*Left: bicubic 4x upscale, Right: SinSR single-step diffusion SR (128x128 → 512x512)*
+
+3 CoreML models: VQ-VAE encoder, Swin-UNet denoiser (single step), and VQ-VAE decoder with vector quantization.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- | ----------------- |
+| SinSR_Encoder.mlpackage | 43 MB | image [1,3,1024,1024] | latent [1,3,256,256] | [wyf0912/SinSR](https://github.com/wyf0912/SinSR) | [S-Lab](https://github.com/wyf0912/SinSR/blob/main/LICENSE) | 2024 | [SinSRDemo](sample_apps/SinSRDemo) | [convert_sinsr.py](conversion_scripts/convert_sinsr.py) |
+| SinSR_Denoiser.mlpackage | 455 MB | input [1,6,256,256] | predicted_latent [1,3,256,256] | | | | | |
+| SinSR_Decoder.mlpackage | 63 MB | latent [1,3,256,256] | image [1,3,1024,1024] | | | | | |
+
+**Conversion notes:**
+- Swin Transformer requires several patches for CoreML tracing: (1) pre-compute relative position bias as buffers, (2) replace `torch.roll` with slice+concat, (3) rewrite attention mask creation to avoid `__setitem__`, (4) patch coremltools `int` op converter for multi-dim tensor shape casts.
+- VQ-VAE decoder includes vector quantization (8192-entry codebook, argmin nearest-neighbor lookup) inside the CoreML model.
+- Denoiser input is 6-channel concat of `[scaled_noisy_latent, lq_image]` with baked-in timestep (always t=14 for single-step).
+- **Denoiser must use FP32 precision** — FP16 causes color shift (pinkish tint) in the Swin Transformer attention layers. Encoder/Decoder use FP16.
+- **Denoiser should use `cpuOnly`** compute units for best accuracy.
+- Swift orchestration handles noise injection, scaling (kappa=2.0, normalizeStd=2.218), and latent space encoding/decoding.
+- The model produces slight color shifts from the original image — this is inherent to SinSR's single-step distilled architecture, not a conversion artifact.
 
 
 # Low Light Enhancement
