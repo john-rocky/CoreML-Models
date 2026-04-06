@@ -1,0 +1,126 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		H1A001 /* HyperSDDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B001 /* HyperSDDemoApp.swift */; };
+		H1A002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B002 /* ContentView.swift */; };
+		H1A003 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = H1B003 /* Assets.xcassets */; };
+		H1A101 /* BPETokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B101 /* BPETokenizer.swift */; };
+		H1A102 /* BPETokenizer+Reading.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B102 /* BPETokenizer+Reading.swift */; };
+		H1A103 /* CGImage+vImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B103 /* CGImage+vImage.swift */; };
+		H1A104 /* ControlNet.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B104 /* ControlNet.swift */; };
+		H1A105 /* DPMSolverMultistepScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B105 /* DPMSolverMultistepScheduler.swift */; };
+		H1A106 /* Decoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B106 /* Decoder.swift */; };
+		H1A107 /* Encoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B107 /* Encoder.swift */; };
+		H1A108 /* ManagedMLModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B108 /* ManagedMLModel.swift */; };
+		H1A109 /* MultilingualTextEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B109 /* MultilingualTextEncoder.swift */; };
+		H1A10A /* NumPyRandomSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B10A /* NumPyRandomSource.swift */; };
+		H1A10B /* NvRandomSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B10B /* NvRandomSource.swift */; };
+		H1A10C /* RandomSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B10C /* RandomSource.swift */; };
+		H1A10D /* ResourceManaging.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B10D /* ResourceManaging.swift */; };
+		H1A10E /* SafetyChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B10E /* SafetyChecker.swift */; };
+		H1A10F /* SampleTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B10F /* SampleTimer.swift */; };
+		H1A110 /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B110 /* Scheduler.swift */; };
+		H1A111 /* StableDiffusionPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B111 /* StableDiffusionPipeline.swift */; };
+		H1A112 /* StableDiffusionPipeline+Resources.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B112 /* StableDiffusionPipeline+Resources.swift */; };
+		H1A113 /* StableDiffusionPipeline.Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B113 /* StableDiffusionPipeline.Configuration.swift */; };
+		H1A114 /* StableDiffusionXL+Resources.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B114 /* StableDiffusionXL+Resources.swift */; };
+		H1A115 /* StableDiffusionXLPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B115 /* StableDiffusionXLPipeline.swift */; };
+		H1A116 /* TextEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B116 /* TextEncoder.swift */; };
+		H1A117 /* TextEncoderXL.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B117 /* TextEncoderXL.swift */; };
+		H1A118 /* TorchRandomSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B118 /* TorchRandomSource.swift */; };
+		H1A119 /* Unet.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B119 /* Unet.swift */; };
+		H1A11A /* TCDScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = H1B11A /* TCDScheduler.swift */; };
+		H1A201 /* HyperSDTextEncoder.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = H1B201 /* HyperSDTextEncoder.mlpackage */; };
+		H1A202 /* HyperSDUnetChunk1.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = H1B202 /* HyperSDUnetChunk1.mlpackage */; };
+		H1A203 /* HyperSDUnetChunk2.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = H1B203 /* HyperSDUnetChunk2.mlpackage */; };
+		H1A204 /* HyperSDVAEDecoder.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = H1B204 /* HyperSDVAEDecoder.mlpackage */; };
+		H1A301 /* vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = H1B301 /* vocab.json */; };
+		H1A302 /* merges.txt in Resources */ = {isa = PBXBuildFile; fileRef = H1B302 /* merges.txt */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		H1B001 /* HyperSDDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperSDDemoApp.swift; sourceTree = "<group>"; };
+		H1B002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		H1B003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		H1B005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		H1B010 /* HyperSDDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HyperSDDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		H1B101 /* BPETokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BPETokenizer.swift; sourceTree = "<group>"; };
+		H1B102 /* BPETokenizer+Reading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BPETokenizer+Reading.swift"; sourceTree = "<group>"; };
+		H1B103 /* CGImage+vImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGImage+vImage.swift"; sourceTree = "<group>"; };
+		H1B104 /* ControlNet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlNet.swift; sourceTree = "<group>"; };
+		H1B105 /* DPMSolverMultistepScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DPMSolverMultistepScheduler.swift; sourceTree = "<group>"; };
+		H1B106 /* Decoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Decoder.swift; sourceTree = "<group>"; };
+		H1B107 /* Encoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Encoder.swift; sourceTree = "<group>"; };
+		H1B108 /* ManagedMLModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManagedMLModel.swift; sourceTree = "<group>"; };
+		H1B109 /* MultilingualTextEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultilingualTextEncoder.swift; sourceTree = "<group>"; };
+		H1B10A /* NumPyRandomSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumPyRandomSource.swift; sourceTree = "<group>"; };
+		H1B10B /* NvRandomSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NvRandomSource.swift; sourceTree = "<group>"; };
+		H1B10C /* RandomSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RandomSource.swift; sourceTree = "<group>"; };
+		H1B10D /* ResourceManaging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResourceManaging.swift; sourceTree = "<group>"; };
+		H1B10E /* SafetyChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafetyChecker.swift; sourceTree = "<group>"; };
+		H1B10F /* SampleTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleTimer.swift; sourceTree = "<group>"; };
+		H1B110 /* Scheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scheduler.swift; sourceTree = "<group>"; };
+		H1B111 /* StableDiffusionPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StableDiffusionPipeline.swift; sourceTree = "<group>"; };
+		H1B112 /* StableDiffusionPipeline+Resources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StableDiffusionPipeline+Resources.swift"; sourceTree = "<group>"; };
+		H1B113 /* StableDiffusionPipeline.Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StableDiffusionPipeline.Configuration.swift"; sourceTree = "<group>"; };
+		H1B114 /* StableDiffusionXL+Resources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StableDiffusionXL+Resources.swift"; sourceTree = "<group>"; };
+		H1B115 /* StableDiffusionXLPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StableDiffusionXLPipeline.swift; sourceTree = "<group>"; };
+		H1B116 /* TextEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEncoder.swift; sourceTree = "<group>"; };
+		H1B117 /* TextEncoderXL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEncoderXL.swift; sourceTree = "<group>"; };
+		H1B118 /* TorchRandomSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TorchRandomSource.swift; sourceTree = "<group>"; };
+		H1B119 /* Unet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unet.swift; sourceTree = "<group>"; };
+		H1B11A /* TCDScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TCDScheduler.swift; sourceTree = "<group>"; };
+		H1B201 /* HyperSDTextEncoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = HyperSDTextEncoder.mlpackage; sourceTree = "<group>"; };
+		H1B202 /* HyperSDUnetChunk1.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = HyperSDUnetChunk1.mlpackage; sourceTree = "<group>"; };
+		H1B203 /* HyperSDUnetChunk2.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = HyperSDUnetChunk2.mlpackage; sourceTree = "<group>"; };
+		H1B204 /* HyperSDVAEDecoder.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = HyperSDVAEDecoder.mlpackage; sourceTree = "<group>"; };
+		H1B301 /* vocab.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = vocab.json; sourceTree = "<group>"; };
+		H1B302 /* merges.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = merges.txt; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		H1C001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		H1D001 = {isa = PBXGroup; children = (H1D002, H1D003); sourceTree = "<group>"; };
+		H1D002 /* HyperSDDemo */ = {isa = PBXGroup; children = (H1B001, H1B002, H1B11A, H1B101, H1B102, H1B103, H1B104, H1B105, H1B106, H1B107, H1B108, H1B109, H1B10A, H1B10B, H1B10C, H1B10D, H1B10E, H1B10F, H1B110, H1B111, H1B112, H1B113, H1B114, H1B115, H1B116, H1B117, H1B118, H1B119, H1B201, H1B202, H1B203, H1B204, H1B301, H1B302, H1B003, H1B005); path = HyperSDDemo; sourceTree = "<group>"; };
+		H1D003 /* Products */ = {isa = PBXGroup; children = (H1B010); name = Products; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		H1E001 /* HyperSDDemo */ = {isa = PBXNativeTarget; buildConfigurationList = H1G001; buildPhases = (H1F001, H1C001, H1F002); buildRules = (); dependencies = (); name = HyperSDDemo; productName = HyperSDDemo; productReference = H1B010; productType = "com.apple.product-type.application"; };
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		H1H001 /* Project object */ = {isa = PBXProject; attributes = { BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 1500; LastUpgradeCheck = 1500; TargetAttributes = { H1E001 = { CreatedOnToolsVersion = 15.0; }; }; }; buildConfigurationList = H1G003; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base); mainGroup = H1D001; productRefGroup = H1D003; projectDirPath = ""; projectRoot = ""; targets = (H1E001); };
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		H1F002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (H1A003, H1A301, H1A302); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		H1F001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (H1A001, H1A002, H1A11A, H1A101, H1A102, H1A103, H1A104, H1A105, H1A106, H1A107, H1A108, H1A109, H1A10A, H1A10B, H1A10C, H1A10D, H1A10E, H1A10F, H1A110, H1A111, H1A112, H1A113, H1A114, H1A115, H1A116, H1A117, H1A118, H1A119, H1A201, H1A202, H1A203, H1A204); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		H1I001 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES; CLANG_ANALYZER_NONNULL = YES; CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE; CLANG_CXX_LANGUAGE_STANDARD = "gnu++20"; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; CLANG_ENABLE_OBJC_WEAK = YES; CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES; CLANG_WARN_BOOL_CONVERSION = YES; CLANG_WARN_COMMA = YES; CLANG_WARN_CONSTANT_CONVERSION = YES; CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES; CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR; CLANG_WARN_DOCUMENTATION_COMMENTS = YES; CLANG_WARN_EMPTY_BODY = YES; CLANG_WARN_ENUM_CONVERSION = YES; CLANG_WARN_INFINITE_RECURSION = YES; CLANG_WARN_INT_CONVERSION = YES; CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES; CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES; CLANG_WARN_OBJC_LITERAL_CONVERSION = YES; CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR; CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES; CLANG_WARN_RANGE_LOOP_ANALYSIS = YES; CLANG_WARN_STRICT_PROTOTYPES = YES; CLANG_WARN_SUSPICIOUS_MOVE = YES; CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE; CLANG_WARN_UNREACHABLE_CODE = YES; CLANG_WARN__DUPLICATE_METHOD_MATCH = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_STRICT_OBJC_MSGSEND = YES; ENABLE_TESTABILITY = YES; ENABLE_USER_SCRIPT_SANDBOXING = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_DYNAMIC_NO_PIC = NO; GCC_NO_COMMON_BLOCKS = YES; GCC_OPTIMIZATION_LEVEL = 0; GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)"); GCC_WARN_64_TO_32_BIT_CONVERSION = YES; GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR; GCC_WARN_UNDECLARED_SELECTOR = YES; GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE; GCC_WARN_UNUSED_FUNCTION = YES; GCC_WARN_UNUSED_VARIABLE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE; MTL_FAST_MATH = YES; ONLY_ACTIVE_ARCH = YES; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
+		H1I002 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES; CLANG_ANALYZER_NONNULL = YES; CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE; CLANG_CXX_LANGUAGE_STANDARD = "gnu++20"; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; CLANG_ENABLE_OBJC_WEAK = YES; CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES; CLANG_WARN_BOOL_CONVERSION = YES; CLANG_WARN_COMMA = YES; CLANG_WARN_CONSTANT_CONVERSION = YES; CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES; CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR; CLANG_WARN_DOCUMENTATION_COMMENTS = YES; CLANG_WARN_EMPTY_BODY = YES; CLANG_WARN_ENUM_CONVERSION = YES; CLANG_WARN_INFINITE_RECURSION = YES; CLANG_WARN_INT_CONVERSION = YES; CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES; CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES; CLANG_WARN_OBJC_LITERAL_CONVERSION = YES; CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR; CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES; CLANG_WARN_RANGE_LOOP_ANALYSIS = YES; CLANG_WARN_STRICT_PROTOTYPES = YES; CLANG_WARN_SUSPICIOUS_MOVE = YES; CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE; CLANG_WARN_UNREACHABLE_CODE = YES; CLANG_WARN__DUPLICATE_METHOD_MATCH = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_NS_ASSERTIONS = NO; ENABLE_STRICT_OBJC_MSGSEND = YES; ENABLE_USER_SCRIPT_SANDBOXING = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_NO_COMMON_BLOCKS = YES; GCC_WARN_64_TO_32_BIT_CONVERSION = YES; GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR; GCC_WARN_UNDECLARED_SELECTOR = YES; GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE; GCC_WARN_UNUSED_FUNCTION = YES; GCC_WARN_UNUSED_VARIABLE = YES; IPHONEOS_DEPLOYMENT_TARGET = 17.0; MTL_ENABLE_DEBUG_INFO = NO; MTL_FAST_MATH = YES; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; VALIDATE_PRODUCT = YES; }; name = Release; };
+		H1I003 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_TEAM = MFN25KNUGJ; ENABLE_PREVIEWS = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_FILE = HyperSDDemo/Info.plist; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks"); MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = "com.coreml-models.hypersddemo"; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Debug; };
+		H1I004 /* Release */ = {isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_TEAM = MFN25KNUGJ; ENABLE_PREVIEWS = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_FILE = HyperSDDemo/Info.plist; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks"); MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = "com.coreml-models.hypersddemo"; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		H1G001 = {isa = XCConfigurationList; buildConfigurations = (H1I003, H1I004); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		H1G003 = {isa = XCConfigurationList; buildConfigurations = (H1I001, H1I002); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = H1H001 /* Project object */;
+}

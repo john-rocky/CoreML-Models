@@ -108,6 +108,7 @@ You are free to do or not.
   - [MiDaS](#midas)
   
 - [**Stable Diffusion**](#stable-diffusion) **:text2image**
+  - [Hyper-SD](#hyper-sd)
   - [stable-diffusion-v1-5](#stable-diffusion-v1-5)
   - [pastel-mix](#pastel-mix)
   - [Orange Mix](#orange-mix)
@@ -862,6 +863,31 @@ Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-d
 | [MiDaS_Small](https://drive.google.com/file/d/1agGnt5Cq5CGzoNDl9Nb-3u7pB5SrIbN4/view?usp=share_link) | 66.3MB | MultiArray(1x256x256) | [isl-org/MiDaS](https://github.com/isl-org/MiDaS)  |[MIT](https://github.com/isl-org/MiDaS/blob/master/LICENSE)|2022|[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/13cVDO6gYdQvbKimcfbgGOfuoQmrTbarU?usp=sharing) |
 
 # Stable Diffusion
+
+### Hyper-SD
+
+[ByteDance/Hyper-SD](https://huggingface.co/ByteDance/Hyper-SD) — single-step text-to-image distilled from SD1.5 via Trajectory Segmented Consistency Distillation. ByteDance reports user preference 2x over SD-Turbo at 1 step. Combined with Apple's ml-stable-diffusion (Split-Einsum attention, chunked UNet, 6-bit palettization), runs at acceptable speed and quality on iPhone 15+.
+
+<img width="400" src="sample_apps/HyperSDDemo/hypersd_demo.png">
+
+*1-step generations on iPhone, 512×512. Prompts: cat with sunglasses, cyberpunk city, japanese garden, astronaut on horse.*
+
+4 CoreML models (~947 MB total): CLIP text encoder + Swin-style chunked UNet (6-bit palettized) + VAE decoder. Uses TCD scheduler for single-step inference.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- | ----------------- |
+| [HyperSDTextEncoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/hypersd-v1/HyperSDTextEncoder.mlpackage.zip) | 235 MB | input_ids [1,77] | encoder_hidden_states [1,77,768] | [ByteDance/Hyper-SD](https://huggingface.co/ByteDance/Hyper-SD) | [OpenRAIL++](https://huggingface.co/ByteDance/Hyper-SD/blob/main/README.md) | 2024 | [HyperSDDemo](sample_apps/HyperSDDemo) | [convert_hypersd.py](conversion_scripts/convert_hypersd.py) |
+| [HyperSDUnetChunk1.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/hypersd-v1/HyperSDUnetChunk1.mlpackage.zip) | 318 MB | latent + encoder_hs + timestep | first half intermediates | | | | | |
+| [HyperSDUnetChunk2.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/hypersd-v1/HyperSDUnetChunk2.mlpackage.zip) | 299 MB | first half outputs + skip connections | noise_pred [2,4,64,64] | | | | | |
+| [HyperSDVAEDecoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/hypersd-v1/HyperSDVAEDecoder.mlpackage.zip) | 95 MB | latent [1,4,64,64] | image [1,3,512,512] | | | | | |
+
+**Conversion notes:**
+- Hyper-SD 1-step LoRA fused into SD1.5 base model with `pipe.fuse_lora()` before CoreML conversion.
+- Apple `ml-stable-diffusion` (`torch2coreml`) used with `--attention-implementation SPLIT_EINSUM` and `--chunk-unet` for Neural Engine deployment and memory-efficient inference.
+- 6-bit kmeans palettization on UNet only (TextEncoder FP16 contains inf values that break kmeans).
+- UNet must be quantized AFTER chunking — Apple's tool quantizes the unchunked model so chunks must be re-palettized separately.
+- coremltools 9.0 patches required: custom `int` op converter for multi-dim tensor shapes, `list(block.operations)` for `chunk_mlprogram.py` (CacheDoublyLinkedList API change).
+- Inference uses **TCD scheduler** (custom Swift implementation) with `guidance_scale=1.0` (no CFG amplification, single-step).
 
 ### [stable-diffusion-v1-5](https://drive.google.com/file/d/1dqYEdhSPi7y0Dgans-Fk7_ViNviUTUJj/view?usp=share_link)
 
