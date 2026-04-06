@@ -868,6 +868,8 @@ Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-d
 
 [ByteDance/Hyper-SD](https://huggingface.co/ByteDance/Hyper-SD) — single-step text-to-image distilled from SD1.5 via Trajectory Segmented Consistency Distillation. ByteDance reports user preference 2x over SD-Turbo at 1 step. Combined with Apple's ml-stable-diffusion (Split-Einsum attention, chunked UNet, 6-bit palettization), runs at acceptable speed and quality on iPhone 15+.
 
+<video src="https://github.com/user-attachments/assets/dd456c13-d778-4a84-8bb2-9dfd78de3070" width="400"></video>
+
 <img width="400" src="sample_apps/HyperSDDemo/hypersd_demo.png">
 
 *1-step generations on iPhone, 512×512. Prompts: cat with sunglasses, cyberpunk city, japanese garden, astronaut on horse.*
