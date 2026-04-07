@@ -58,6 +58,9 @@ You are free to do or not.
   - [MobileSAM](#mobilesam)
   - [SAM2-Tiny](#sam2-tiny)
 
+- [**Video Matting**](#video-matting)
+  - [MatAnyone](#matanyone)
+
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#real-esrgan)
   - [GFPGAN](#gfpgan)
@@ -131,6 +134,9 @@ You are free to do or not.
 
 - [**Voice Conversion**](#voice-conversion)
   - [OpenVoice V2](#openvoice-v2)
+
+- [**Text-to-Speech**](#text-to-speech)
+  - [Kokoro-82M](#kokoro-82m)
 
 - [**Text-to-Music Generation**](#text-to-music-generation)
   - [Stable Audio Open Small](#stable-audio-open-small)
@@ -472,6 +478,28 @@ SAM 2: Segment Anything in Images and Videos. SAM 2 extends promptable segmentat
 | Download Link | Size | Output | Original Project | License | Year | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [SAM2Tiny.zip](https://github.com/john-rocky/SamKit/releases/download/v1.0.0/SAM2Tiny.zip) | 76 MB (ImageEncoder 64 MB + PromptEncoder 2 MB + MaskDecoder 9.8 MB) | Segmentation Mask | [facebookresearch/sam2](https://github.com/facebookresearch/sam2) | [Apache 2.0](https://github.com/facebookresearch/sam2/blob/main/LICENSE) | 2024 | [SamKit](https://github.com/john-rocky/SamKit) |
+
+# Video Matting
+
+### MatAnyone
+
+[pq-yang/MatAnyone](https://github.com/pq-yang/MatAnyone) (CVPR 2025) — temporally consistent video matting with object-level memory propagation. Given a first-frame mask the network tracks and refines an alpha matte across the whole clip, holding sharp edges (hair, semitransparent regions) much better than per-frame matting baselines. Built on the Cutie video object segmentation backbone with a dedicated mask decoder for matting.
+
+The CoreML port splits the network into 5 stateless modules so the per-frame memory state machine can live in Swift while CoreML handles the heavy compute. End-to-end alpha matte parity vs the official PyTorch reference: MAE < 2e-4, correlation 0.9999+ across 18 frames including 3 memory cycles.
+
+The sample app uses Vision's `VNGeneratePersonSegmentationRequest` to bootstrap the first-frame mask automatically — pick a video, tap "Remove BG", and it composites the foreground over the chosen background colour.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- | ----------------- |
+| MatAnyone (5 mlpackages, ~111 MB FP16 total) | 111 MB | image [1,3,432,768] (per-frame state in Swift) | alpha matte [1,1,432,768] | [pq-yang/MatAnyone](https://github.com/pq-yang/MatAnyone) | [NTU S-Lab 1.0](https://github.com/pq-yang/MatAnyone/blob/main/LICENSE) | 2025 | [MatAnyoneDemo](sample_apps/MatAnyoneDemo) | [convert_matanyone.py](conversion_scripts/convert_matanyone.py) |
+
+**Conversion notes:**
+- Network split into 5 mlpackages: `encoder` (multi-scale features + key/shrinkage/selection), `mask_encoder`, `read_first` (first-frame readout, no memory attention), `read` (memory attention readout over a fixed-T ring buffer), and `decoder` (alpha matte head).
+- Memory carried in Swift between frames: sensory, last_mask, last_pix_feat, last_msk_value, accumulated obj_memory, plus a fixed `(T_max=5)` ring buffer of working-memory keys/shrinkages/values with a per-slot validity mask.
+- `single_object=False` but hard-coded `num_objects=1` lets the chunk loops collapse to a fast path; `flip_aug=False`, `use_long_term=False`, `chunk_size=-1` match the official matting config.
+- `torch.prod(1-mask, dim=1)` in `aggregate` is monkey-patched to `1-mask` (identity for `num_objects=1`) since `prod` isn't supported by coremltools.
+- Memory tensors are pre-flattened to rank 3 (`[1, C, T*h*w]`) to stay within Core ML's rank-5 limit; the variable-length working memory is handled by adding `(1-valid)*-6e4` to the similarity before top-k softmax (FP16-safe -inf substitute).
+- Resolution fixed at 768×432 (mobile 16:9, divisible by 16). For other aspect ratios re-run the converter with `--height/--width`.
 
 # Super Resolution
 
@@ -1045,6 +1073,40 @@ Google SigLIP — sigmoid-based contrastive image-text model for zero-shot class
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [SigLIP_ImageEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/siglip-v2/SigLIP_ImageEncoder.mlpackage.zip) / [TextEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/siglip-v2/SigLIP_TextEncoder.mlpackage.zip) | 386 MB (FP16, 2 models total) | 224x224 RGB image + text labels | Per-label similarity scores (softmax) | [google/siglip-base-patch16-224](https://huggingface.co/google/siglip-base-patch16-224) | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | 2024 | [SigLIPDemo](sample_apps/SigLIPDemo) | [convert_siglip.py](conversion_scripts/convert_siglip.py) |
+
+# Text-to-Speech
+
+### Kokoro-82M
+
+[hexgrad/Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) — open-weight 82M-parameter TTS by hexgrad. Style-conditioned StyleTTS2 architecture (BERT + duration predictor + iSTFTNet vocoder) producing 24kHz speech in 9 languages from per-voice style embeddings. The first CoreML port with **on-device bilingual (English + Japanese) free-text input** — no MLX, no MeCab, no IPADic, no Python G2P at runtime.
+
+<video src="https://github.com/user-attachments/assets/56eb2ffc-f915-4f8b-b6d3-1021f3d490ca" width="400"></video>
+
+2 CoreML models: a flexible-length **Predictor** (BERT + LSTM duration head + text encoder) and **3 fixed-shape Decoder buckets** (128 / 256 / 512 frames). The Swift pipeline picks the smallest bucket that fits the predicted total duration, pads input features with zeros, and trims the output audio.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- | ----------------- |
+| [Kokoro_Predictor.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/kokoro-v1/Kokoro_Predictor.mlpackage.zip) | 75 MB | input_ids [1, T≤256] (int32) + ref_s_style [1, 128] | duration [1, T] + d_for_align [1, 640, T] + t_en [1, 512, T] | [hexgrad/Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) | [Apache-2.0](https://huggingface.co/hexgrad/Kokoro-82M/blob/main/LICENSE) | 2025 | [KokoroDemo](sample_apps/KokoroDemo) | [convert_kokoro.py](conversion_scripts/convert_kokoro.py) |
+| [Kokoro_Decoder_128.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/kokoro-v1/Kokoro_Decoder_128.mlpackage.zip) | 238 MB | en_aligned [1, 640, 128] + asr_aligned [1, 512, 128] + ref_s [1, 256] | audio [1, 76800] @ 24kHz | | | | | |
+| [Kokoro_Decoder_256.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/kokoro-v1/Kokoro_Decoder_256.mlpackage.zip) | 241 MB | en_aligned [1, 640, 256] + asr_aligned [1, 512, 256] + ref_s [1, 256] | audio [1, 153600] @ 24kHz | | | | | |
+| [Kokoro_Decoder_512.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/kokoro-v1/Kokoro_Decoder_512.mlpackage.zip) | 246 MB | en_aligned [1, 640, 512] + asr_aligned [1, 512, 512] + ref_s [1, 256] | audio [1, 307200] @ 24kHz | | | | | |
+
+**On-device G2P (no external dependencies):**
+- **English**: lexicon-based (`us_gold` 90k entries + `us_silver` fallback) with possessive splitting, acronym detection, and a rule-based grapheme→phoneme fallback for OOV. ~6 MB of bundled JSON. No MLX, no Python.
+- **Japanese**: Apple's `CFStringTokenizer` (ja_JP locale) gives romaji per token; `Latin-Hiragana` ICU transform converts to hiragana; a ported subset of misaki's `cutlet.HEPBURN` IPA table + context rules (long vowels, ん assimilation, particles は→βa / へ→e) emits Kokoro-compatible phonemes. **No MeCab, no IPADic, ~zero overhead.**
+
+**Conversion notes:**
+- The Predictor uses `RangeDim` for flexible phoneme length (1–256 incl. BOS/EOS), so the bidirectional LSTM never sees padding.
+- The Decoder uses fixed-shape buckets because its iSTFTNet vocoder + InstanceNorm + bidirectional LSTM are length-sensitive — padding inside one bucket only causes a phase shift (spec corr 0.93 vs unpadded reference) which is perceptually inaudible. Smaller padding ratio = cleaner output, hence multiple buckets.
+- **Critical bug fix**: CoreML's `mod` op silently produces wrong values for `(float / scalar) % 1` (e.g., in the SineGen of iSTFTNet). Output spec correlation drops to 0.67 vs PyTorch. Replacing `(f0 / sr) % 1` with `(f0/sr) - floor(f0/sr)` brings it to **0.996**. See [conversion_scripts/convert_kokoro.py](conversion_scripts/convert_kokoro.py) and the patched `kokoro/istftnet.py`.
+- `pack_padded_sequence` and `pad_packed_sequence` are bypassed in the predictor's TextEncoder and DurationEncoder LSTMs (CoreML incompatible) — the LSTM runs on the unpadded tensor directly via `RangeDim`.
+- The decoder converts at FP32 (`compute_precision=ct.precision.FLOAT32`); FP16 corrupts audio quality.
+- Random noise generators (`torch.randn_like` in SineGen and SourceModuleHnNSF) are zeroed before tracing so the CoreML model is deterministic and matches PyTorch bit-for-bit.
+- The decoder vocoder runs efficiently on Neural Engine — first inference ~700ms, subsequent inferences ~200ms on iPhone (warm cache).
+
+**Voices included** in the demo (all 510×256 style tensors, ~512KB each):
+- English (5): `af_heart`, `af_bella`, `am_michael`, `bf_emma`, `bm_george`
+- Japanese (5): `jf_alpha`, `jf_gongitsune`, `jm_kumo`, `jf_nezumi`, `jf_tebukuro`
 
 # Anomaly Detection
 

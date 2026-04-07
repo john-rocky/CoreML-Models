@@ -1,0 +1,417 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		C10000010000000000000001 /* KokoroDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000001 /* KokoroDemoApp.swift */; };
+		C10000010000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000002 /* ContentView.swift */; };
+		C10000010000000000000003 /* KokoroTTS.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000003 /* KokoroTTS.swift */; };
+		C10000010000000000000004 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000004 /* Assets.xcassets */; };
+		C10000010000000000000006 /* Kokoro_Predictor.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000006 /* Kokoro_Predictor.mlpackage */; };
+		C10000010000000000000007 /* Kokoro_Decoder_128.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000007 /* Kokoro_Decoder_128.mlpackage */; };
+		C10000010000000000000008 /* Kokoro_Decoder_256.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000008 /* Kokoro_Decoder_256.mlpackage */; };
+		C10000010000000000000009 /* Kokoro_Decoder_512.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000009 /* Kokoro_Decoder_512.mlpackage */; };
+		C1000001000000000000000A /* kokoro_vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = C1000002000000000000000A /* kokoro_vocab.json */; };
+		C1000001000000000000000B /* samples.json in Resources */ = {isa = PBXBuildFile; fileRef = C1000002000000000000000B /* samples.json */; };
+		C1000001000000000000000C /* voice_af_heart.bin in Resources */ = {isa = PBXBuildFile; fileRef = C1000002000000000000000C /* voice_af_heart.bin */; };
+		C1000001000000000000000D /* voice_af_bella.bin in Resources */ = {isa = PBXBuildFile; fileRef = C1000002000000000000000D /* voice_af_bella.bin */; };
+		C1000001000000000000000E /* voice_am_michael.bin in Resources */ = {isa = PBXBuildFile; fileRef = C1000002000000000000000E /* voice_am_michael.bin */; };
+		C1000001000000000000000F /* voice_bf_emma.bin in Resources */ = {isa = PBXBuildFile; fileRef = C1000002000000000000000F /* voice_bf_emma.bin */; };
+		C10000010000000000000020 /* voice_bm_george.bin in Resources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000020 /* voice_bm_george.bin */; };
+		C10000010000000000000021 /* EnglishG2P.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000021 /* EnglishG2P.swift */; };
+		C10000010000000000000022 /* us_gold.json in Resources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000022 /* us_gold.json */; };
+		C10000010000000000000023 /* us_silver.json in Resources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000023 /* us_silver.json */; };
+		C10000010000000000000024 /* JapaneseG2P.swift in Sources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000024 /* JapaneseG2P.swift */; };
+		C10000010000000000000025 /* voice_jf_alpha.bin in Resources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000025 /* voice_jf_alpha.bin */; };
+		C10000010000000000000026 /* voice_jf_gongitsune.bin in Resources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000026 /* voice_jf_gongitsune.bin */; };
+		C10000010000000000000027 /* voice_jm_kumo.bin in Resources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000027 /* voice_jm_kumo.bin */; };
+		C10000010000000000000028 /* voice_jf_nezumi.bin in Resources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000028 /* voice_jf_nezumi.bin */; };
+		C10000010000000000000029 /* voice_jf_tebukuro.bin in Resources */ = {isa = PBXBuildFile; fileRef = C10000020000000000000029 /* voice_jf_tebukuro.bin */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		C10000020000000000000001 /* KokoroDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroDemoApp.swift; sourceTree = "<group>"; };
+		C10000020000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		C10000020000000000000003 /* KokoroTTS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KokoroTTS.swift; sourceTree = "<group>"; };
+		C10000020000000000000004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C10000020000000000000006 /* Kokoro_Predictor.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = Kokoro_Predictor.mlpackage; sourceTree = "<group>"; };
+		C10000020000000000000007 /* Kokoro_Decoder_128.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = Kokoro_Decoder_128.mlpackage; sourceTree = "<group>"; };
+		C10000020000000000000008 /* Kokoro_Decoder_256.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = Kokoro_Decoder_256.mlpackage; sourceTree = "<group>"; };
+		C10000020000000000000009 /* Kokoro_Decoder_512.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; path = Kokoro_Decoder_512.mlpackage; sourceTree = "<group>"; };
+		C1000002000000000000000A /* kokoro_vocab.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = kokoro_vocab.json; sourceTree = "<group>"; };
+		C1000002000000000000000B /* samples.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = samples.json; sourceTree = "<group>"; };
+		C1000002000000000000000C /* voice_af_heart.bin */ = {isa = PBXFileReference; lastKnownFileType = file; path = voice_af_heart.bin; sourceTree = "<group>"; };
+		C1000002000000000000000D /* voice_af_bella.bin */ = {isa = PBXFileReference; lastKnownFileType = file; path = voice_af_bella.bin; sourceTree = "<group>"; };
+		C1000002000000000000000E /* voice_am_michael.bin */ = {isa = PBXFileReference; lastKnownFileType = file; path = voice_am_michael.bin; sourceTree = "<group>"; };
+		C1000002000000000000000F /* voice_bf_emma.bin */ = {isa = PBXFileReference; lastKnownFileType = file; path = voice_bf_emma.bin; sourceTree = "<group>"; };
+		C10000020000000000000020 /* voice_bm_george.bin */ = {isa = PBXFileReference; lastKnownFileType = file; path = voice_bm_george.bin; sourceTree = "<group>"; };
+		C10000020000000000000021 /* EnglishG2P.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnglishG2P.swift; sourceTree = "<group>"; };
+		C10000020000000000000022 /* us_gold.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = us_gold.json; sourceTree = "<group>"; };
+		C10000020000000000000023 /* us_silver.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = us_silver.json; sourceTree = "<group>"; };
+		C10000020000000000000024 /* JapaneseG2P.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JapaneseG2P.swift; sourceTree = "<group>"; };
+		C10000020000000000000025 /* voice_jf_alpha.bin */ = {isa = PBXFileReference; lastKnownFileType = file; path = voice_jf_alpha.bin; sourceTree = "<group>"; };
+		C10000020000000000000026 /* voice_jf_gongitsune.bin */ = {isa = PBXFileReference; lastKnownFileType = file; path = voice_jf_gongitsune.bin; sourceTree = "<group>"; };
+		C10000020000000000000027 /* voice_jm_kumo.bin */ = {isa = PBXFileReference; lastKnownFileType = file; path = voice_jm_kumo.bin; sourceTree = "<group>"; };
+		C10000020000000000000028 /* voice_jf_nezumi.bin */ = {isa = PBXFileReference; lastKnownFileType = file; path = voice_jf_nezumi.bin; sourceTree = "<group>"; };
+		C10000020000000000000029 /* voice_jf_tebukuro.bin */ = {isa = PBXFileReference; lastKnownFileType = file; path = voice_jf_tebukuro.bin; sourceTree = "<group>"; };
+		C10000020000000000000010 /* KokoroDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KokoroDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C10000030000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C10000040000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				C10000040000000000000002 /* KokoroDemo */,
+				C10000040000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		C10000040000000000000002 /* KokoroDemo */ = {
+			isa = PBXGroup;
+			children = (
+				C10000020000000000000001 /* KokoroDemoApp.swift */,
+				C10000020000000000000002 /* ContentView.swift */,
+				C10000020000000000000003 /* KokoroTTS.swift */,
+				C10000020000000000000021 /* EnglishG2P.swift */,
+				C10000020000000000000024 /* JapaneseG2P.swift */,
+				C10000020000000000000006 /* Kokoro_Predictor.mlpackage */,
+				C10000020000000000000007 /* Kokoro_Decoder_128.mlpackage */,
+				C10000020000000000000008 /* Kokoro_Decoder_256.mlpackage */,
+				C10000020000000000000009 /* Kokoro_Decoder_512.mlpackage */,
+				C1000002000000000000000A /* kokoro_vocab.json */,
+				C1000002000000000000000B /* samples.json */,
+				C1000002000000000000000C /* voice_af_heart.bin */,
+				C1000002000000000000000D /* voice_af_bella.bin */,
+				C1000002000000000000000E /* voice_am_michael.bin */,
+				C1000002000000000000000F /* voice_bf_emma.bin */,
+				C10000020000000000000020 /* voice_bm_george.bin */,
+				C10000020000000000000022 /* us_gold.json */,
+				C10000020000000000000023 /* us_silver.json */,
+				C10000020000000000000025 /* voice_jf_alpha.bin */,
+				C10000020000000000000026 /* voice_jf_gongitsune.bin */,
+				C10000020000000000000027 /* voice_jm_kumo.bin */,
+				C10000020000000000000028 /* voice_jf_nezumi.bin */,
+				C10000020000000000000029 /* voice_jf_tebukuro.bin */,
+				C10000020000000000000004 /* Assets.xcassets */,
+			);
+			path = KokoroDemo;
+			sourceTree = "<group>";
+		};
+		C10000040000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C10000020000000000000010 /* KokoroDemo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		C10000050000000000000001 /* KokoroDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C10000070000000000000001;
+			buildPhases = (
+				C10000060000000000000001 /* Sources */,
+				C10000030000000000000001 /* Frameworks */,
+				C10000060000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = KokoroDemo;
+			productName = KokoroDemo;
+			productReference = C10000020000000000000010 /* KokoroDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C10000080000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					C10000050000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = C10000070000000000000003;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C10000040000000000000001;
+			productRefGroup = C10000040000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C10000050000000000000001 /* KokoroDemo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C10000060000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C10000010000000000000004 /* Assets.xcassets in Resources */,
+				C1000001000000000000000A /* kokoro_vocab.json in Resources */,
+				C1000001000000000000000B /* samples.json in Resources */,
+				C1000001000000000000000C /* voice_af_heart.bin in Resources */,
+				C1000001000000000000000D /* voice_af_bella.bin in Resources */,
+				C1000001000000000000000E /* voice_am_michael.bin in Resources */,
+				C1000001000000000000000F /* voice_bf_emma.bin in Resources */,
+				C10000010000000000000020 /* voice_bm_george.bin in Resources */,
+				C10000010000000000000022 /* us_gold.json in Resources */,
+				C10000010000000000000023 /* us_silver.json in Resources */,
+				C10000010000000000000025 /* voice_jf_alpha.bin in Resources */,
+				C10000010000000000000026 /* voice_jf_gongitsune.bin in Resources */,
+				C10000010000000000000027 /* voice_jm_kumo.bin in Resources */,
+				C10000010000000000000028 /* voice_jf_nezumi.bin in Resources */,
+				C10000010000000000000029 /* voice_jf_tebukuro.bin in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C10000060000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C10000010000000000000006 /* Kokoro_Predictor.mlpackage in Sources */,
+				C10000010000000000000007 /* Kokoro_Decoder_128.mlpackage in Sources */,
+				C10000010000000000000008 /* Kokoro_Decoder_256.mlpackage in Sources */,
+				C10000010000000000000009 /* Kokoro_Decoder_512.mlpackage in Sources */,
+				C10000010000000000000001 /* KokoroDemoApp.swift in Sources */,
+				C10000010000000000000002 /* ContentView.swift in Sources */,
+				C10000010000000000000003 /* KokoroTTS.swift in Sources */,
+				C10000010000000000000021 /* EnglishG2P.swift in Sources */,
+				C10000010000000000000024 /* JapaneseG2P.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		C10000090000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		C10000090000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C10000090000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.coreml-models.kokorodemo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C10000090000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.coreml-models.kokorodemo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C10000070000000000000001 /* Build configuration list for PBXNativeTarget "KokoroDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C10000090000000000000003 /* Debug */,
+				C10000090000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C10000070000000000000003 /* Build configuration list for PBXProject "KokoroDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C10000090000000000000001 /* Debug */,
+				C10000090000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C10000080000000000000001 /* Project object */;
+}
