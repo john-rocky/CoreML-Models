@@ -181,6 +181,13 @@ Some PyTorch operations are not supported by coremltools and cause conversion fa
 | In-place tensor assign | `tensor[..., :n] = val` | Rewrite with `torch.where` or scatter |
 | `torch.nonzero` | Data-dependent indexing | Pre-compute outside model |
 | `torchvision::deform_conv2d` | BiRefNet, deformable attention | No workaround — use model variant without it |
+| `torch.prod` | MatAnyone `aggregate(prob, dim=1)` | For a singleton dim, replace with identity. General case: lower to a sequence of multiplications. |
+| `pack_padded_sequence` / `pad_packed_sequence` | Kokoro Predictor LSTMs | Run the LSTM on the unpadded tensor directly via `RangeDim`; the model never sees padding tokens. |
+| `tensor.float() % 1` (`mod` on float / scalar) | Kokoro iSTFTNet `SineGen` | CoreML's `mod` silently produces wrong values. Replace with `x - torch.floor(x)`. Spec corr 0.67 → 0.996. |
+| `torch.randn_like` etc. | Kokoro `SourceModuleHnNSF`, any "regularisation" noise | Replace with `zeros_like` before tracing — otherwise the converted model is non-deterministic and parity tests are meaningless. |
+| `torch.roll` | Swin Transformer shifted windows | Replace with `slice + concat`. |
+| In-place attention-mask construction | Swin Transformer | Build the mask functionally (e.g. via `torch.where` / arange comparisons); avoid `mask[a:b, c:d] = val`. |
+| `nn.utils.weight_norm` | Stable Audio Snake activations, etc. | Call `remove_weight_norm()` on the module before tracing. coremltools sees a much cleaner graph. |
 
 ---
 
@@ -290,3 +297,127 @@ Even with correct audio and correct MLMultiArray reads, the post-processing port
 - The melodia trick must zero out `remaining_energy[i, freq_idx]` and the `freq_idx ± 1` neighbors **inside** the forward/backward walks, not just at the end. Python's outer `while np.max > frame_thresh` loop relies on this in-place erasure to converge — without it the outer loop never makes progress and you end up needing an iteration cap.
 
 After porting these exactly, the Swift algorithm matches Python `output_to_notes_polyphonic` note-for-note when given identical model output.
+
+---
+
+## Tensor Rank Limits
+
+**Core ML supports tensor rank ≤ 5.** Anything higher fails at conversion time with an error like:
+
+```
+ValueError: Core ML only supports tensors with rank <= 5.
+Layer "cast_X", with type "cast", outputs a rank 6 tensor.
+```
+
+This typically bites video / multi-object models that carry both an "objects" and a "time" dimension on top of `(B, C, H, W)`.
+
+**Fix:** flatten one of the singleton dims at the IO boundary. For MatAnyone the working memory is stored as `(1, num_obj, C, T, h, w)` in PyTorch (rank 6). With `num_obj=1` hard-coded we can collapse it to `(1, C, T·h·w)` (rank 3) before passing it as a Core ML input, and reshape back inside the wrapper if needed.
+
+The general rule: pre-flatten any singleton dim and reshape back inside the model.
+
+---
+
+## FP16 Attention Overflow
+
+**Several attention architectures overflow when run at FP16, even on Apple Silicon GPU.**
+
+Symptoms:
+- **Swin Transformer (SinSR Denoiser)** — pinkish / wrong colour cast on the entire output.
+- **Stable Audio DiT** — NaNs in the velocity prediction.
+- Most softmax-based attention with large logits ranges.
+
+Diagnosis: convert with `compute_precision=ct.precision.FLOAT16`, run on the device, look at the first inference. If the output is wildly off but PyTorch is fine, FP16 overflow is the most likely culprit.
+
+Fixes (in order of preference):
+
+1. **Convert at FP32** with `compute_precision=ct.precision.FLOAT32` and run on `.cpuOnly`. Larger model (~2× FP16), slower than ANE / GPU, but correct.
+2. **INT8 quantize** the offending block and run it on `.cpuAndGPU`. Often works because INT8 dequantizes element-wise without the giant intermediate softmax tensor in FP16.
+3. **Per-block precision** — keep most of the model FP16 and override the precision for the specific submodule. Rarely worth the complexity.
+
+Don't try to "scale the logits down" inside the model — by the time you're running inference the conversion is already done.
+
+---
+
+## FP16-Safe Masked Softmax
+
+**`-1e9` overflows in FP16.** Anywhere you do `logits + (1 - valid_mask) * -1e9` to mask out positions before a softmax, the converted model will turn the masked positions into `-inf` and then `nan` after the softmax.
+
+Use `-6e4` (or even `-3e4`) instead. It's still smaller than any realistic similarity value but stays representable in FP16.
+
+```python
+masked = logits + (1.0 - valid) * -6.0e4
+attn = masked.softmax(dim=-1)
+```
+
+This applies to MatAnyone's working-memory attention, but the same trick is needed for any masked attention you convert.
+
+---
+
+## FP16 Feedback Loops Drift
+
+**Don't iterate the same input through a recurrent / feedback model more times than the Python reference does.**
+
+MatAnyone's official `process_video` runs the first frame 10 times with `first_frame_pred=True` to refine the memory. In the FP16 CoreML port, those 10 repeated passes drift the alpha matte to zero — the foreground disappears entirely.
+
+The PyTorch reference is FP32, which has enough headroom to absorb the iterative drift. A FP16 CoreML graph does not. **Replicate the official iteration count only when you've verified that each iteration is bit-stable in FP16.** Otherwise stick to the minimum number of passes (1 seed + 1 `first_frame_pred` is usually enough; the Python parity test should confirm).
+
+---
+
+## Swin Transformer Conversion Checklist
+
+Several models in this repo (SinSR, etc.) wrap a Swin Transformer that needs the same set of patches before it traces cleanly:
+
+1. **Pre-compute the relative-position bias as a `register_buffer`**, instead of building it from `arange` + `meshgrid` inside `forward`.
+2. **Replace `torch.roll`** with `slice + concat` along H and W (the shifted-window mechanism).
+3. **Rewrite the attention mask construction** to avoid `__setitem__` (no `mask[a:b, c:d] = val`). Build it functionally with `torch.where` / boolean arithmetic.
+4. **Patch the coremltools `int` op converter** to handle multi-dim tensor shape casts. The default converter only handles scalar shapes; Swin's window partitioning produces a 2-D shape that needs the patched op.
+
+A reference implementation is in [`conversion_scripts/convert_sinsr.py`](../conversion_scripts/convert_sinsr.py).
+
+---
+
+## Apple `ml-stable-diffusion` (`torch2coreml`) Gotchas
+
+When using Apple's `ml-stable-diffusion` toolchain (Hyper-SD, SD 1.5, etc.):
+
+- **Quantize after chunking, not before.** `torch2coreml` palettizes the unchunked model; once chunks are emitted by `chunk_mlprogram.py`, each chunk has to be re-palettized separately.
+- **6-bit kmeans palettization breaks on weights containing `inf`.** This is most common in CLIP-style text encoders. Quantize the UNet only and ship the text encoder at FP16.
+- **coremltools 9.0 patches** required for the toolchain itself:
+  - Custom `int` op converter for multi-dim tensor shape casts.
+  - `list(block.operations)` workaround in `chunk_mlprogram.py` for the new `CacheDoublyLinkedList` API.
+
+---
+
+## NaN Sanitisation Around INT8 Models
+
+Some INT8-quantized text/vision encoders (notably Stable Audio's T5) intermittently emit `NaN` values for specific token positions. The downstream model then poisons everything from that point on.
+
+**Mitigation:** sanitise on the Swift side before passing the embeddings to the next model.
+
+```swift
+for i in 0..<count {
+    let v = embeddings[i].floatValue
+    embeddings[i] = NSNumber(value: v.isNaN ? 0 : v)
+}
+```
+
+It's not a fix for the underlying issue (FP32 conversion of the same encoder is clean), but it keeps the pipeline running on devices where the INT8 path is the only one that fits in memory.
+
+---
+
+## MPS Slice on Singleton Dimension Crashes
+
+**Some Core ML graphs crash on iOS GPU with:**
+
+```
+[MPSNDArrayDescriptor sliceDimension:withSubrange:] error:
+subRange.start (18446744073709551615) is not less than length of dimension[1] (1)
+```
+
+`18446744073709551615` is `UINT64_MAX` — the result of casting `-1` to unsigned. It happens when an op slices a length-1 dimension with a negative index, and Metal Performance Shaders does not handle that case.
+
+This bites models with reshapes/slices over a singleton "num_objects" or "T" dimension (MatAnyone's `read_first` / `read` modules hit it because the QueryTransformer reshapes obj memory across the size-1 num_objects dim).
+
+**Fix:** load the offending model with `.cpuOnly`. The CPU path handles the slice correctly. The "real" fix is to drop the singleton dimension at the wrapper level before tracing, but that's a bigger refactor.
+
+---
