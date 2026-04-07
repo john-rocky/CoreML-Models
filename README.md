@@ -58,6 +58,9 @@ You are free to do or not.
   - [MobileSAM](#mobilesam)
   - [SAM2-Tiny](#sam2-tiny)
 
+- [**Video Matting**](#video-matting)
+  - [MatAnyone](#matanyone)
+
 - [**Super Resolution**](#super-resolution)
   - [Real ESRGAN](#real-esrgan)
   - [GFPGAN](#gfpgan)
@@ -472,6 +475,28 @@ SAM 2: Segment Anything in Images and Videos. SAM 2 extends promptable segmentat
 | Download Link | Size | Output | Original Project | License | Year | Sample Project |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [SAM2Tiny.zip](https://github.com/john-rocky/SamKit/releases/download/v1.0.0/SAM2Tiny.zip) | 76 MB (ImageEncoder 64 MB + PromptEncoder 2 MB + MaskDecoder 9.8 MB) | Segmentation Mask | [facebookresearch/sam2](https://github.com/facebookresearch/sam2) | [Apache 2.0](https://github.com/facebookresearch/sam2/blob/main/LICENSE) | 2024 | [SamKit](https://github.com/john-rocky/SamKit) |
+
+# Video Matting
+
+### MatAnyone
+
+[pq-yang/MatAnyone](https://github.com/pq-yang/MatAnyone) (CVPR 2025) — temporally consistent video matting with object-level memory propagation. Given a first-frame mask the network tracks and refines an alpha matte across the whole clip, holding sharp edges (hair, semitransparent regions) much better than per-frame matting baselines. Built on the Cutie video object segmentation backbone with a dedicated mask decoder for matting.
+
+The CoreML port splits the network into 5 stateless modules so the per-frame memory state machine can live in Swift while CoreML handles the heavy compute. End-to-end alpha matte parity vs the official PyTorch reference: MAE < 2e-4, correlation 0.9999+ across 18 frames including 3 memory cycles.
+
+The sample app uses Vision's `VNGeneratePersonSegmentationRequest` to bootstrap the first-frame mask automatically — pick a video, tap "Remove BG", and it composites the foreground over the chosen background colour.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- | ----------------- |
+| MatAnyone (5 mlpackages, ~111 MB FP16 total) | 111 MB | image [1,3,432,768] (per-frame state in Swift) | alpha matte [1,1,432,768] | [pq-yang/MatAnyone](https://github.com/pq-yang/MatAnyone) | [NTU S-Lab 1.0](https://github.com/pq-yang/MatAnyone/blob/main/LICENSE) | 2025 | [MatAnyoneDemo](sample_apps/MatAnyoneDemo) | [convert_matanyone.py](conversion_scripts/convert_matanyone.py) |
+
+**Conversion notes:**
+- Network split into 5 mlpackages: `encoder` (multi-scale features + key/shrinkage/selection), `mask_encoder`, `read_first` (first-frame readout, no memory attention), `read` (memory attention readout over a fixed-T ring buffer), and `decoder` (alpha matte head).
+- Memory carried in Swift between frames: sensory, last_mask, last_pix_feat, last_msk_value, accumulated obj_memory, plus a fixed `(T_max=5)` ring buffer of working-memory keys/shrinkages/values with a per-slot validity mask.
+- `single_object=False` but hard-coded `num_objects=1` lets the chunk loops collapse to a fast path; `flip_aug=False`, `use_long_term=False`, `chunk_size=-1` match the official matting config.
+- `torch.prod(1-mask, dim=1)` in `aggregate` is monkey-patched to `1-mask` (identity for `num_objects=1`) since `prod` isn't supported by coremltools.
+- Memory tensors are pre-flattened to rank 3 (`[1, C, T*h*w]`) to stay within Core ML's rank-5 limit; the variable-length working memory is handled by adding `(1-valid)*-6e4` to the similarity before top-k softmax (FP16-safe -inf substitute).
+- Resolution fixed at 768×432 (mobile 16:9, divisible by 16). For other aspect ratios re-run the converter with `--height/--width`.
 
 # Super Resolution
 
