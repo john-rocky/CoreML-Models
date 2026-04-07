@@ -228,3 +228,65 @@ anomaly_map = 0.5 * normalize(map_st) + 0.5 * normalize(map_ae)
 4. **Clamp output to [0, 1]** — raw anomaly maps can go negative (normal regions) or exceed 1 (severe anomalies) after quantile normalization. Clamping gives a clean probability-like output for downstream use.
 
 5. **PatchCore is not suitable for CoreML** — it requires a nearest-neighbor search against a memory bank at inference time, which is not a standard neural network operation. EfficientAD is pure feed-forward CNN, making it directly convertible.
+
+---
+
+## Music Transcription (Basic Pitch) — iOS Pitfalls
+
+Two non-obvious issues bit me when porting Spotify's Basic Pitch from Python to a Swift iOS app. The model conversion itself was trivial (Spotify ships an `.mlpackage` in the pip package), but reproducing Python's results on-device required fixing both of these.
+
+### 1. Neural Engine pads MLMultiArray rows for alignment
+
+The Basic Pitch model outputs three tensors of shape `(1, 172, 88)` and `(1, 172, 264)`. On iOS with `.all` compute units the Neural Engine returns these with **non-contiguous strides**:
+
+```
+Note shape: [1, 172, 88], strides: [16512, 96, 1]
+Contour shape: [1, 172, 264], strides: [46784, 272, 1]
+```
+
+The row stride is **96 instead of 88** (and 272 instead of 264). The ANE pads each row to a multiple of 8 (or some hardware-specific alignment) for SIMD access. If you read `dataPointer` linearly assuming row stride = `cols`, you get garbage interleaved with real activations — the symptom in our case was that note detection produced a perfect 8-semitone pattern (D-F#-A#-D...) regardless of the input audio.
+
+**Fix:** always use `array.strides` to compute the correct offset, never assume the data is C-contiguous:
+
+```swift
+let strides = array.strides.map { $0.intValue }
+let s1 = strides[1]  // row stride (96, not 88)
+let s2 = strides[2]  // 1
+for r in 0..<rows {
+    for c in 0..<cols {
+        row[c] = ptr[r * s1 + c * s2]
+    }
+}
+```
+
+This is harmless on CPU/GPU (where strides usually match cols) but essential when ANE is involved.
+
+### 2. iOS Core Audio MP3 decoder is hotter than librosa
+
+Python `basic_pitch` loads audio with `librosa.load(path, sr=22050, mono=True)`, which goes through audioread → ffmpeg/soundfile and produces normalized samples in `[-0.978, 0.984]` for our test track (RMS 0.210). Loading the same MP3 through `AVAudioFile` + `AVAudioConverter` on iOS produces samples in `[-0.999, 1.0004]` with **RMS 0.225 — about 7% hotter** — and some peaks slightly exceed ±1.0.
+
+This 7% gain difference is enough to push activations across the basic_pitch detection thresholds (0.5 onset, 0.3 frame), so the same MP3 yields different MIDI on Python vs Swift even with byte-identical algorithms downstream. The symptom was the Swift app missing every other melody note.
+
+**Fix:** peak-normalize after loading, before windowing:
+
+```swift
+var peak: Float = 0
+vDSP_maxmgv(samples, 1, &peak, vDSP_Length(samples.count))
+if peak > 0 {
+    var scale: Float = 0.98 / peak
+    vDSP_vsmul(samples, 1, &scale, &samples, 1, vDSP_Length(samples.count))
+}
+```
+
+After this fix, loading `Morning.mp3` directly into the iOS app gave a melody timeline matching Python's reference. WAV files (which both decoders pass through unchanged) were unaffected.
+
+### 3. Algorithmic gotchas when porting `note_creation.py`
+
+Even with correct audio and correct MLMultiArray reads, the post-processing port had several off-by-ones that quietly halved the detected note count:
+
+- The greedy tracker uses `i -= k` (where `k` is the trailing below-threshold count from the Python loop), **not** `i -= energy_tol`. The two only agree when the loop exited via the `k >= energy_tol` condition; for notes that hit the audio boundary the difference is significant.
+- The boundary check is `i < n_frames - 1`, not `i < n_frames`.
+- `min_note_len` uses `<=` for skip (notes of length exactly `min_note_len` are rejected), not `<`.
+- The melodia trick must zero out `remaining_energy[i, freq_idx]` and the `freq_idx ± 1` neighbors **inside** the forward/backward walks, not just at the end. Python's outer `while np.max > frame_thresh` loop relies on this in-place erasure to converge — without it the outer loop never makes progress and you end up needing an iteration cap.
+
+After porting these exactly, the Swift algorithm matches Python `output_to_notes_polyphonic` note-for-note when given identical model output.

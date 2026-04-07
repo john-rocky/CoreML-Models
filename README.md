@@ -153,6 +153,9 @@ You are free to do or not.
 - [**Anomaly Detection**](#anomaly-detection)
   - [EfficientAD](#efficientad)
 
+- [**Music Transcription**](#music-transcription)
+  - [Basic Pitch](#basic-pitch)
+
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
 See the section below for how to use it in Xcode.
@@ -1117,6 +1120,25 @@ EfficientAD (PDN-Small) — lightweight unsupervised anomaly detection for indus
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [EfficientAD_Bottle.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/efficientad-v1/EfficientAD_Bottle.mlpackage.zip) | 15 MB (FP16) | 256x256 RGB image | anomaly_map [1,1,256,256] + anomaly_score [0-1] | [nelson1425/EfficientAD](https://github.com/nelson1425/EfficientAD) | [MIT](https://opensource.org/licenses/MIT) | 2023 | [EfficientADDemo](sample_apps/EfficientADDemo) | [convert_efficientad.py](conversion_scripts/convert_efficientad.py) |
+
+# Music Transcription
+
+### Basic Pitch
+
+[spotify/basic-pitch](https://github.com/spotify/basic-pitch) — polyphonic Automatic Music Transcription. Converts any audio (any instrument, any voice) into MIDI notes with pitch bend detection. Just **17K parameters / 272 KB** — runs in real time on iPhone with full ANE acceleration.
+
+<video src="https://github.com/user-attachments/assets/d4e96b51-680f-471c-93d1-7546d5890cd7" width="400"></video>
+
+The first open-source iOS implementation. Loads any audio file, runs the CoreML model in 2-second sliding windows, then runs the full Python `note_creation.py` pipeline natively in Swift (onset inference, greedy backwards-in-time tracking, melodia trick, pitch bend extraction). Detected notes are visualized as a piano roll, exported as a Standard MIDI File, and played back through a built-in additive sine synth so you can A/B compare with the original audio.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [BasicPitch_nmp.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/basic-pitch-v1/BasicPitch_nmp.mlpackage.zip) | 272 KB | audio waveform [1, 43844, 1] @ 22050 Hz mono | note [1,172,88] + onset [1,172,88] + contour [1,172,264] | [spotify/basic-pitch](https://github.com/spotify/basic-pitch) | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | 2022 | [BasicPitchDemo](sample_apps/BasicPitchDemo) |
+
+**Implementation notes:**
+- **MLMultiArray strides matter on ANE.** The Neural Engine returns the (1, 172, 88) output with stride `[16512, 96, 1]` — rows are padded from 88 to 96 columns for alignment. Reading `dataPointer` linearly gives garbage; you must use `array.strides` to skip the padding.
+- **MP3 decoder mismatch.** iOS Core Audio's MP3 decoder produces ~7% louder samples than librosa (sometimes exceeding ±1.0). Pass the same MP3 to Python and to the iOS app and you get different note detections from the same model. Fix: peak-normalize the loaded audio to 0.98 with `vDSP_maxmgv` before windowing.
+- **Algorithm port is exact.** Onset inference uses element-wise min across diff orders, the greedy tracker uses Python's `i -= k` rollback with `i < n_frames - 1` boundary, melodia trick zeroes energy in-place during forward/backward passes including the ±1 freq neighbors. With matching audio input the Swift output matches the Python reference note-for-note.
 
 # Text-to-Music Generation
 
