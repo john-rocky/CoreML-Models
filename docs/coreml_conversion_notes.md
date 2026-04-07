@@ -194,3 +194,37 @@ Some PyTorch operations are not supported by coremltools and cause conversion fa
 6. **INT8 quantize** — `linear_quantize_weights` for production
 7. **Verify end-to-end** — compare CoreML output against PyTorch reference
 8. **Test on device** — ANE issues and memory issues only surface on real hardware
+
+---
+
+## Anomaly Detection (EfficientAD) Conversion
+
+**Multi-network models need a single wrapper for clean CoreML export.**
+
+EfficientAD uses 3 separate networks (teacher, student, autoencoder) that must run together at inference time. The anomaly map is computed from the *difference* between their outputs, not from any single network.
+
+**Architecture:**
+
+```
+Input (256x256 RGB)
+  ├── Teacher (PDN-Small, frozen) → [1, 384, 56, 56]
+  ├── Student (PDN-Small)         → [1, 768, 56, 56]
+  └── Autoencoder                 → [1, 384, 56, 56]
+
+map_st = mean((teacher - student[:,:384])², dim=channel)  → [1,1,56,56]
+map_ae = mean((autoencoder - student[:,384:])², dim=channel) → [1,1,56,56]
+anomaly_map = 0.5 * normalize(map_st) + 0.5 * normalize(map_ae)
+→ upsample to [1,1,256,256]
+```
+
+**Key lessons:**
+
+1. **Wrap all 3 networks + postprocessing into one `nn.Module`** — don't export 3 separate CoreML models. The anomaly map computation (MSE, quantile normalization, combination, upsample) should all be inside the wrapper so the CoreML model is self-contained.
+
+2. **Pretrained weight completeness varies** — EfficientAD needs 4 extra parameters beyond the network weights: `teacher_mean`, `teacher_std` (channel-wise normalization), `q_st_start/end`, `q_ae_start/end` (quantile normalization). These are computed during training over the dataset. Without them, the anomaly map is uncalibrated. Always check that pretrained weights include these.
+
+3. **Dropout layers are harmless** — the autoencoder has `Dropout(p=0.2)` layers. In `model.eval()` mode these become identity ops. `torch.jit.trace` correctly handles this; no need to remove them.
+
+4. **Clamp output to [0, 1]** — raw anomaly maps can go negative (normal regions) or exceed 1 (severe anomalies) after quantile normalization. Clamping gives a clean probability-like output for downstream use.
+
+5. **PatchCore is not suitable for CoreML** — it requires a nearest-neighbor search against a memory bank at inference time, which is not a standard neural network operation. EfficientAD is pure feed-forward CNN, making it directly convertible.

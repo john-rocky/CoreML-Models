@@ -150,6 +150,9 @@ You are free to do or not.
 - [**Zero-Shot Image Classification**](#zero-shot-image-classification)
   - [SigLIP ViT-B/16](#siglip-vit-b16)
 
+- [**Anomaly Detection**](#anomaly-detection)
+  - [EfficientAD](#efficientad)
+
 # How to get the model
 You can get the model converted to CoreML format from the link of Google drive.
 See the section below for how to use it in Xcode.
@@ -1104,6 +1107,16 @@ Google SigLIP — sigmoid-based contrastive image-text model for zero-shot class
 **Voices included** in the demo (all 510×256 style tensors, ~512KB each):
 - English (5): `af_heart`, `af_bella`, `am_michael`, `bf_emma`, `bm_george`
 - Japanese (5): `jf_alpha`, `jf_gongitsune`, `jm_kumo`, `jf_nezumi`, `jf_tebukuro`
+
+# Anomaly Detection
+
+### EfficientAD
+
+EfficientAD (PDN-Small) — lightweight unsupervised anomaly detection for industrial inspection. Wraps teacher, student, and autoencoder networks into a single model that outputs a per-pixel anomaly heatmap and image-level anomaly score. Pretrained on MVTec AD bottle category.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [EfficientAD_Bottle.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/efficientad-v1/EfficientAD_Bottle.mlpackage.zip) | 15 MB (FP16) | 256x256 RGB image | anomaly_map [1,1,256,256] + anomaly_score [0-1] | [nelson1425/EfficientAD](https://github.com/nelson1425/EfficientAD) | [MIT](https://opensource.org/licenses/MIT) | 2023 | [EfficientADDemo](sample_apps/EfficientADDemo) | [convert_efficientad.py](conversion_scripts/convert_efficientad.py) |
 
 # Text-to-Music Generation
 
