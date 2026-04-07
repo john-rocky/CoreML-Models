@@ -132,6 +132,9 @@ You are free to do or not.
 - [**Voice Conversion**](#voice-conversion)
   - [OpenVoice V2](#openvoice-v2)
 
+- [**Text-to-Speech**](#text-to-speech)
+  - [Kokoro-82M](#kokoro-82m)
+
 - [**Text-to-Music Generation**](#text-to-music-generation)
   - [Stable Audio Open Small](#stable-audio-open-small)
 
@@ -1042,6 +1045,38 @@ Google SigLIP — sigmoid-based contrastive image-text model for zero-shot class
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [SigLIP_ImageEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/siglip-v2/SigLIP_ImageEncoder.mlpackage.zip) / [TextEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/siglip-v2/SigLIP_TextEncoder.mlpackage.zip) | 386 MB (FP16, 2 models total) | 224x224 RGB image + text labels | Per-label similarity scores (softmax) | [google/siglip-base-patch16-224](https://huggingface.co/google/siglip-base-patch16-224) | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | 2024 | [SigLIPDemo](sample_apps/SigLIPDemo) | [convert_siglip.py](conversion_scripts/convert_siglip.py) |
+
+# Text-to-Speech
+
+### Kokoro-82M
+
+[hexgrad/Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) — open-weight 82M-parameter TTS by hexgrad. Style-conditioned StyleTTS2 architecture (BERT + duration predictor + iSTFTNet vocoder) producing 24kHz speech in 9 languages from per-voice style embeddings. The first CoreML port with **on-device bilingual (English + Japanese) free-text input** — no MLX, no MeCab, no IPADic, no Python G2P at runtime.
+
+2 CoreML models: a flexible-length **Predictor** (BERT + LSTM duration head + text encoder) and **3 fixed-shape Decoder buckets** (128 / 256 / 512 frames). The Swift pipeline picks the smallest bucket that fits the predicted total duration, pads input features with zeros, and trims the output audio.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- | ----------------- |
+| [Kokoro_Predictor.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/kokoro-v1/Kokoro_Predictor.mlpackage.zip) | 75 MB | input_ids [1, T≤256] (int32) + ref_s_style [1, 128] | duration [1, T] + d_for_align [1, 640, T] + t_en [1, 512, T] | [hexgrad/Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) | [Apache-2.0](https://huggingface.co/hexgrad/Kokoro-82M/blob/main/LICENSE) | 2025 | [KokoroDemo](sample_apps/KokoroDemo) | [convert_kokoro.py](conversion_scripts/convert_kokoro.py) |
+| [Kokoro_Decoder_128.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/kokoro-v1/Kokoro_Decoder_128.mlpackage.zip) | 238 MB | en_aligned [1, 640, 128] + asr_aligned [1, 512, 128] + ref_s [1, 256] | audio [1, 76800] @ 24kHz | | | | | |
+| [Kokoro_Decoder_256.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/kokoro-v1/Kokoro_Decoder_256.mlpackage.zip) | 241 MB | en_aligned [1, 640, 256] + asr_aligned [1, 512, 256] + ref_s [1, 256] | audio [1, 153600] @ 24kHz | | | | | |
+| [Kokoro_Decoder_512.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/kokoro-v1/Kokoro_Decoder_512.mlpackage.zip) | 246 MB | en_aligned [1, 640, 512] + asr_aligned [1, 512, 512] + ref_s [1, 256] | audio [1, 307200] @ 24kHz | | | | | |
+
+**On-device G2P (no external dependencies):**
+- **English**: lexicon-based (`us_gold` 90k entries + `us_silver` fallback) with possessive splitting, acronym detection, and a rule-based grapheme→phoneme fallback for OOV. ~6 MB of bundled JSON. No MLX, no Python.
+- **Japanese**: Apple's `CFStringTokenizer` (ja_JP locale) gives romaji per token; `Latin-Hiragana` ICU transform converts to hiragana; a ported subset of misaki's `cutlet.HEPBURN` IPA table + context rules (long vowels, ん assimilation, particles は→βa / へ→e) emits Kokoro-compatible phonemes. **No MeCab, no IPADic, ~zero overhead.**
+
+**Conversion notes:**
+- The Predictor uses `RangeDim` for flexible phoneme length (1–256 incl. BOS/EOS), so the bidirectional LSTM never sees padding.
+- The Decoder uses fixed-shape buckets because its iSTFTNet vocoder + InstanceNorm + bidirectional LSTM are length-sensitive — padding inside one bucket only causes a phase shift (spec corr 0.93 vs unpadded reference) which is perceptually inaudible. Smaller padding ratio = cleaner output, hence multiple buckets.
+- **Critical bug fix**: CoreML's `mod` op silently produces wrong values for `(float / scalar) % 1` (e.g., in the SineGen of iSTFTNet). Output spec correlation drops to 0.67 vs PyTorch. Replacing `(f0 / sr) % 1` with `(f0/sr) - floor(f0/sr)` brings it to **0.996**. See [conversion_scripts/convert_kokoro.py](conversion_scripts/convert_kokoro.py) and the patched `kokoro/istftnet.py`.
+- `pack_padded_sequence` and `pad_packed_sequence` are bypassed in the predictor's TextEncoder and DurationEncoder LSTMs (CoreML incompatible) — the LSTM runs on the unpadded tensor directly via `RangeDim`.
+- The decoder converts at FP32 (`compute_precision=ct.precision.FLOAT32`); FP16 corrupts audio quality.
+- Random noise generators (`torch.randn_like` in SineGen and SourceModuleHnNSF) are zeroed before tracing so the CoreML model is deterministic and matches PyTorch bit-for-bit.
+- The decoder vocoder runs efficiently on Neural Engine — first inference ~700ms, subsequent inferences ~200ms on iPhone (warm cache).
+
+**Voices included** in the demo (all 510×256 style tensors, ~512KB each):
+- English (5): `af_heart`, `af_bella`, `am_michael`, `bf_emma`, `bm_george`
+- Japanese (5): `jf_alpha`, `jf_gongitsune`, `jm_kumo`, `jf_nezumi`, `jf_tebukuro`
 
 # Text-to-Music Generation
 
