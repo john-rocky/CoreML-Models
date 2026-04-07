@@ -496,13 +496,7 @@ The sample app uses Vision's `VNGeneratePersonSegmentationRequest` to bootstrap 
 | ------------- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- | ----------------- |
 | MatAnyone (5 mlpackages, ~111 MB FP16 total) | 111 MB | image [1,3,432,768] (per-frame state in Swift) | alpha matte [1,1,432,768] | [pq-yang/MatAnyone](https://github.com/pq-yang/MatAnyone) | [NTU S-Lab 1.0](https://github.com/pq-yang/MatAnyone/blob/main/LICENSE) | 2025 | [MatAnyoneDemo](sample_apps/MatAnyoneDemo) | [convert_matanyone.py](conversion_scripts/convert_matanyone.py) |
 
-**Conversion notes:**
-- Network split into 5 mlpackages: `encoder` (multi-scale features + key/shrinkage/selection), `mask_encoder`, `read_first` (first-frame readout, no memory attention), `read` (memory attention readout over a fixed-T ring buffer), and `decoder` (alpha matte head).
-- Memory carried in Swift between frames: sensory, last_mask, last_pix_feat, last_msk_value, accumulated obj_memory, plus a fixed `(T_max=5)` ring buffer of working-memory keys/shrinkages/values with a per-slot validity mask.
-- `single_object=False` but hard-coded `num_objects=1` lets the chunk loops collapse to a fast path; `flip_aug=False`, `use_long_term=False`, `chunk_size=-1` match the official matting config.
-- `torch.prod(1-mask, dim=1)` in `aggregate` is monkey-patched to `1-mask` (identity for `num_objects=1`) since `prod` isn't supported by coremltools.
-- Memory tensors are pre-flattened to rank 3 (`[1, C, T*h*w]`) to stay within Core ML's rank-5 limit; the variable-length working memory is handled by adding `(1-valid)*-6e4` to the similarity before top-k softmax (FP16-safe -inf substitute).
-- Resolution fixed at 768×432 (mobile 16:9, divisible by 16). For other aspect ratios re-run the converter with `--height/--width`.
+See [`sample_apps/MatAnyoneDemo/README.md`](sample_apps/MatAnyoneDemo/README.md) for the per-frame state machine, the 5-module split, and conversion details.
 
 # Super Resolution
 
@@ -657,14 +651,7 @@ Pytorch implementation of "Unsupervised Degradation Representation Learning for 
 | [SinSR_Denoiser.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/sinsr-v1/SinSR_Denoiser.mlpackage.zip) | 420 MB | input [1,6,256,256] | predicted_latent [1,3,256,256] | | | | | |
 | [SinSR_Decoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/sinsr-v1/SinSR_Decoder.mlpackage.zip) | 58 MB | latent [1,3,256,256] | image [1,3,1024,1024] | | | | | |
 
-**Conversion notes:**
-- Swin Transformer requires several patches for CoreML tracing: (1) pre-compute relative position bias as buffers, (2) replace `torch.roll` with slice+concat, (3) rewrite attention mask creation to avoid `__setitem__`, (4) patch coremltools `int` op converter for multi-dim tensor shape casts.
-- VQ-VAE decoder includes vector quantization (8192-entry codebook, argmin nearest-neighbor lookup) inside the CoreML model.
-- Denoiser input is 6-channel concat of `[scaled_noisy_latent, lq_image]` with baked-in timestep (always t=14 for single-step).
-- **Denoiser must use FP32 precision** — FP16 causes color shift (pinkish tint) in the Swin Transformer attention layers. Encoder/Decoder use FP16.
-- **Denoiser should use `cpuOnly`** compute units for best accuracy.
-- Swift orchestration handles noise injection, scaling (kappa=2.0, normalizeStd=2.218), and latent space encoding/decoding.
-- The model produces slight color shifts from the original image — this is inherent to SinSR's single-step distilled architecture, not a conversion artifact.
+See [`sample_apps/SinSRDemo/README.md`](sample_apps/SinSRDemo/README.md) for the inference pipeline and conversion details.
 
 
 # Low Light Enhancement
@@ -917,13 +904,7 @@ Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-d
 | [HyperSDUnetChunk2.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/hypersd-v1/HyperSDUnetChunk2.mlpackage.zip) | 299 MB | first half outputs + skip connections | noise_pred [2,4,64,64] | | | | | |
 | [HyperSDVAEDecoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/hypersd-v1/HyperSDVAEDecoder.mlpackage.zip) | 95 MB | latent [1,4,64,64] | image [1,3,512,512] | | | | | |
 
-**Conversion notes:**
-- Hyper-SD 1-step LoRA fused into SD1.5 base model with `pipe.fuse_lora()` before CoreML conversion.
-- Apple `ml-stable-diffusion` (`torch2coreml`) used with `--attention-implementation SPLIT_EINSUM` and `--chunk-unet` for Neural Engine deployment and memory-efficient inference.
-- 6-bit kmeans palettization on UNet only (TextEncoder FP16 contains inf values that break kmeans).
-- UNet must be quantized AFTER chunking — Apple's tool quantizes the unchunked model so chunks must be re-palettized separately.
-- coremltools 9.0 patches required: custom `int` op converter for multi-dim tensor shapes, `list(block.operations)` for `chunk_mlprogram.py` (CacheDoublyLinkedList API change).
-- Inference uses **TCD scheduler** (custom Swift implementation) with `guidance_scale=1.0` (no CFG amplification, single-step).
+See [`sample_apps/HyperSDDemo/README.md`](sample_apps/HyperSDDemo/README.md) for the LoRA fusion, chunked-UNet palettization, and TCD scheduler details.
 
 ### [stable-diffusion-v1-5](https://drive.google.com/file/d/1dqYEdhSPi7y0Dgans-Fk7_ViNviUTUJj/view?usp=share_link)
 
@@ -1094,22 +1075,7 @@ Google SigLIP — sigmoid-based contrastive image-text model for zero-shot class
 | [Kokoro_Decoder_256.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/kokoro-v1/Kokoro_Decoder_256.mlpackage.zip) | 241 MB | en_aligned [1, 640, 256] + asr_aligned [1, 512, 256] + ref_s [1, 256] | audio [1, 153600] @ 24kHz | | | | | |
 | [Kokoro_Decoder_512.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/kokoro-v1/Kokoro_Decoder_512.mlpackage.zip) | 246 MB | en_aligned [1, 640, 512] + asr_aligned [1, 512, 512] + ref_s [1, 256] | audio [1, 307200] @ 24kHz | | | | | |
 
-**On-device G2P (no external dependencies):**
-- **English**: lexicon-based (`us_gold` 90k entries + `us_silver` fallback) with possessive splitting, acronym detection, and a rule-based grapheme→phoneme fallback for OOV. ~6 MB of bundled JSON. No MLX, no Python.
-- **Japanese**: Apple's `CFStringTokenizer` (ja_JP locale) gives romaji per token; `Latin-Hiragana` ICU transform converts to hiragana; a ported subset of misaki's `cutlet.HEPBURN` IPA table + context rules (long vowels, ん assimilation, particles は→βa / へ→e) emits Kokoro-compatible phonemes. **No MeCab, no IPADic, ~zero overhead.**
-
-**Conversion notes:**
-- The Predictor uses `RangeDim` for flexible phoneme length (1–256 incl. BOS/EOS), so the bidirectional LSTM never sees padding.
-- The Decoder uses fixed-shape buckets because its iSTFTNet vocoder + InstanceNorm + bidirectional LSTM are length-sensitive — padding inside one bucket only causes a phase shift (spec corr 0.93 vs unpadded reference) which is perceptually inaudible. Smaller padding ratio = cleaner output, hence multiple buckets.
-- **Critical bug fix**: CoreML's `mod` op silently produces wrong values for `(float / scalar) % 1` (e.g., in the SineGen of iSTFTNet). Output spec correlation drops to 0.67 vs PyTorch. Replacing `(f0 / sr) % 1` with `(f0/sr) - floor(f0/sr)` brings it to **0.996**. See [conversion_scripts/convert_kokoro.py](conversion_scripts/convert_kokoro.py) and the patched `kokoro/istftnet.py`.
-- `pack_padded_sequence` and `pad_packed_sequence` are bypassed in the predictor's TextEncoder and DurationEncoder LSTMs (CoreML incompatible) — the LSTM runs on the unpadded tensor directly via `RangeDim`.
-- The decoder converts at FP32 (`compute_precision=ct.precision.FLOAT32`); FP16 corrupts audio quality.
-- Random noise generators (`torch.randn_like` in SineGen and SourceModuleHnNSF) are zeroed before tracing so the CoreML model is deterministic and matches PyTorch bit-for-bit.
-- The decoder vocoder runs efficiently on Neural Engine — first inference ~700ms, subsequent inferences ~200ms on iPhone (warm cache).
-
-**Voices included** in the demo (all 510×256 style tensors, ~512KB each):
-- English (5): `af_heart`, `af_bella`, `am_michael`, `bf_emma`, `bm_george`
-- Japanese (5): `jf_alpha`, `jf_gongitsune`, `jm_kumo`, `jf_nezumi`, `jf_tebukuro`
+See [`sample_apps/KokoroDemo/README.md`](sample_apps/KokoroDemo/README.md) for the on-device G2P (English + Japanese), bucketed decoder strategy, and conversion details.
 
 # Anomaly Detection
 
@@ -1135,10 +1101,7 @@ The first open-source iOS implementation. Loads any audio file, runs the CoreML 
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [BasicPitch_nmp.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/basic-pitch-v1/BasicPitch_nmp.mlpackage.zip) | 272 KB | audio waveform [1, 43844, 1] @ 22050 Hz mono | note [1,172,88] + onset [1,172,88] + contour [1,172,264] | [spotify/basic-pitch](https://github.com/spotify/basic-pitch) | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | 2022 | [BasicPitchDemo](sample_apps/BasicPitchDemo) |
 
-**Implementation notes:**
-- **MLMultiArray strides matter on ANE.** The Neural Engine returns the (1, 172, 88) output with stride `[16512, 96, 1]` — rows are padded from 88 to 96 columns for alignment. Reading `dataPointer` linearly gives garbage; you must use `array.strides` to skip the padding.
-- **MP3 decoder mismatch.** iOS Core Audio's MP3 decoder produces ~7% louder samples than librosa (sometimes exceeding ±1.0). Pass the same MP3 to Python and to the iOS app and you get different note detections from the same model. Fix: peak-normalize the loaded audio to 0.98 with `vDSP_maxmgv` before windowing.
-- **Algorithm port is exact.** Onset inference uses element-wise min across diff orders, the greedy tracker uses Python's `i -= k` rollback with `i < n_frames - 1` boundary, melodia trick zeroes energy in-place during forward/backward passes including the ±1 freq neighbors. With matching audio input the Swift output matches the Python reference note-for-note.
+See [`sample_apps/BasicPitchDemo/README.md`](sample_apps/BasicPitchDemo/README.md) for the sliding-window inference, post-processing port, and iOS-specific gotchas.
 
 # Text-to-Music Generation
 
@@ -1158,11 +1121,7 @@ The first open-source iOS implementation. Loads any audio file, runs the CoreML 
 | [StableAudioDiT_FP32.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/stable-audio-v1/StableAudioDiT_FP32.mlpackage.zip) | 1.3 GB | latent [1,64,256] + timestep + conditioning | velocity [1,64,256] | | | | | |
 | [StableAudioVAEDecoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/stable-audio-v1/StableAudioVAEDecoder.mlpackage.zip) | 149 MB | latent [1, 64, 256] | stereo audio [1, 2, 524288] at 44.1kHz | | | | | |
 
-**Conversion notes:**
-- DiT INT8 (`StableAudioDiT`): use with `cpuAndGPU`. Fastest, slight quality loss from quantization.
-- DiT FP32 (`StableAudioDiT_FP32`): use with `cpuOnly`. Best quality, slower (~1.3GB). FP16 weights overflow in attention on iOS GPU, so FP32 compute + CPU is required.
-- T5 INT8: may produce occasional NaN values — the sample app sanitizes these before passing to DiT.
-- VAE Decoder FP16: weight_norm must be removed before tracing (Snake activation).
+See [`sample_apps/StableAudioDemo/README.md`](sample_apps/StableAudioDemo/README.md) for INT8 vs FP32 DiT selection and conversion details.
 
 ## Models converted by someone other than me.
 
