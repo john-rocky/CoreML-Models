@@ -12,8 +12,8 @@ This demo uses the **MoGe-2 ViT-B + normal** variant (104 M parameters) at a fix
 
 ## Setup
 
-1. Build the mlpackage from [`conversion_scripts/convert_moge2.py`](../../conversion_scripts/convert_moge2.py)
-2. Drop `MoGe2_ViTB_Normal_504.mlpackage` into the Xcode project
+1. Download [MoGe2_ViTB_Normal_504.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/moge2-v1/MoGe2_ViTB_Normal_504.mlpackage.zip) (or build from [`conversion_scripts/convert_moge2.py`](../../conversion_scripts/convert_moge2.py))
+2. Unzip and drop `MoGe2_ViTB_Normal_504.mlpackage` into the Xcode project
 3. Build and run on a physical device (iOS 17+)
 
 ## Conversion Notes

@@ -881,7 +881,7 @@ White-box facial image cartoonizaiton
 
 | Module | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| MoGe-2 ViT-B + normal | ~200 MB FP16 | Image (RGB 504 × 504) | depth + normal + mask + metric_scale | [microsoft/MoGe](https://github.com/microsoft/MoGe) | [MIT](https://github.com/microsoft/MoGe/blob/main/LICENSE) | 2025 | [MoGe2Demo](sample_apps/MoGe2Demo/) | [convert_moge2.py](conversion_scripts/convert_moge2.py) |
+| [MoGe-2 ViT-B + normal](https://github.com/john-rocky/CoreML-Models/releases/download/moge2-v1/MoGe2_ViTB_Normal_504.mlpackage.zip) | ~200 MB FP16 | Image (RGB 504 × 504) | depth + normal + mask + metric_scale | [microsoft/MoGe](https://github.com/microsoft/MoGe) | [MIT](https://github.com/microsoft/MoGe/blob/main/LICENSE) | 2025 | [MoGe2Demo](sample_apps/MoGe2Demo/) | [convert_moge2.py](conversion_scripts/convert_moge2.py) |
 
 ### [MiDaS](https://drive.google.com/file/d/1agGnt5Cq5CGzoNDl9Nb-3u7pB5SrIbN4/view?usp=share_link)
 Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer
