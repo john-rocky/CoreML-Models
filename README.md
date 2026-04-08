@@ -108,6 +108,7 @@ You are free to do or not.
   - [Lama](#lama)
 
 - [**Monocular Depth Estimation**](#monocular-depth-estimation)
+  - [MoGe-2](#moge-2)
   - [MiDaS](#midas)
   
 - [**Stable Diffusion**](#stable-diffusion) **:text2image**
@@ -873,6 +874,14 @@ White-box facial image cartoonizaiton
 |[Lama](https://drive.google.com/drive/folders/1s_uICJQykFFxgVubpBNeLLDL0JsxgdCd?usp=sharing)|216.6MB| Image (Color 800 × 800), Image (GrayScale 800 × 800)| Image (Color 800 × 800) |[advimman/lama](https://github.com/advimman/lama)|[Apache2.0](https://github.com/advimman/lama/blob/main/LICENSE)|To use see sample.| [john-rocky/lama-cleaner-iOS](https://github.com/john-rocky/lama-cleaner-iOS) | [mallman/CoreMLaMa](https://github.com/mallman/CoreMLaMa)|
 
 # Monocular Depth Estimation
+
+### MoGe-2
+
+[microsoft/MoGe](https://github.com/microsoft/MoGe) (CVPR 2025 Oral) — open-domain monocular 3D geometry from a single image. Predicts a metric depth map, surface normals, and a confidence mask in one forward pass on a DINOv2 ViT-B backbone with three task heads. The successor to MiDaS-style relative depth: depth comes out in real meters.
+
+| Module | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| MoGe-2 ViT-B + normal | ~200 MB FP16 | Image (RGB 504 × 504) | depth + normal + mask + metric_scale | [microsoft/MoGe](https://github.com/microsoft/MoGe) | [MIT](https://github.com/microsoft/MoGe/blob/main/LICENSE) | 2025 | [MoGe2Demo](sample_apps/MoGe2Demo/) | [convert_moge2.py](conversion_scripts/convert_moge2.py) |
 
 ### [MiDaS](https://drive.google.com/file/d/1agGnt5Cq5CGzoNDl9Nb-3u7pB5SrIbN4/view?usp=share_link)
 Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-dataset Transfer

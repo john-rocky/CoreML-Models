@@ -6,3 +6,6 @@
 __pycache__/
 *.xcuserstate
 .DS_Store
+
+# Vendored upstream repos (clone from README link, do not commit)
+conversion_scripts/MoGe/
