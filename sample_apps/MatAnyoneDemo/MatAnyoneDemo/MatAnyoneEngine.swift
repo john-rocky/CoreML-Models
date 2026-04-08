@@ -103,22 +103,23 @@ final class MatAnyoneEngine {
         nextFifoSlot = 1
     }
 
-    /// Initialize state from the very first frame and its segmentation mask.
+    /// Seed the engine with the very first frame and its segmentation mask.
     /// `image` should be (3, H, W) float in [0, 1] in CHW order.
     /// `mask` should be (H, W) float in [0, 1].
-    /// `warmupPasses` matches the official `n_warmup` parameter (default 10):
-    /// re-running the first frame this many times stabilises the memory before
-    /// the actual sequence starts. Without it the alpha tends to erode.
-    func initialize(firstImage image: MLMultiArray, mask: MLMultiArray, warmupPasses: Int = 10) async throws {
+    ///
+    /// This only runs the `need_segment = false` seed pass (the equivalent
+    /// of Python `inference_core.step(image, mask, objects=[1])`). The
+    /// caller should follow up with one `step(image, firstFramePred: true)`
+    /// to get the first usable alpha matte — that pass goes through
+    /// `read_first` which is much more FP16-stable than the regular `read`
+    /// attention path and matches Python's `process_video` flow (the first
+    /// captured frame at `ti = n_warmup` is also a `first_frame_pred=true`
+    /// call). The official `n_warmup = 10` repeats are skipped on purpose:
+    /// at FP16 the repeated feedback iterations drift the alpha towards
+    /// zero (the matte erodes more on every pass).
+    func initializeSeed(firstImage image: MLMultiArray, mask: MLMultiArray) async throws {
         reset()
-        // 1) Seed slot 0 with the supplied mask (need_segment = false).
         _ = try await step(image: image, providedMask: mask, firstFramePred: false)
-        // 2) Replicate the official `n_warmup` first-frame passes. Each pass
-        //    clears working memory, runs read_first/decoder/mask_encoder again
-        //    using the previous pass's mask_value, and refines the entry.
-        for _ in 0..<warmupPasses {
-            _ = try await step(image: image, providedMask: nil, firstFramePred: true)
-        }
     }
 
     /// Run a single matting step. Returns the alpha matte as a flat row-major
@@ -248,9 +249,15 @@ final class MatAnyoneEngine {
     private func writeMemorySlot(slot: Int, key: MLMultiArray, shrinkage: MLMultiArray, mskValue: MLMultiArray) {
         let HW = Self.queryHW
         let start = slot * HW
-        // memKey shape (1, 64, capacity); key shape (1, 64, h, w) flattened.
+
+        // Materialise the model outputs into dense buffers so we can index
+        // them with simple flat strides regardless of CoreML's internal layout.
+        let inK = Self.dense(key)             // shape (1, 64, h, w)  → 64 * HW
+        let inS = Self.dense(shrinkage)       // shape (1, 1, h, w)   → HW
+        let inM = Self.dense(mskValue)        // shape (1, 1, 256, h, w) → 256 * HW
+
+        // memKey shape (1, 64, capacity); key flattened to 64 * HW.
         let kPtr = memKey.dataPointer.assumingMemoryBound(to: Float.self)
-        let inK = key.dataPointer.assumingMemoryBound(to: Float.self)
         for c in 0..<Self.keyDim {
             let dst = c * Self.memCapacity + start
             let src = c * HW
@@ -259,12 +266,10 @@ final class MatAnyoneEngine {
 
         // memShrinkage (1, 1, capacity)
         let sPtr = memShrinkage.dataPointer.assumingMemoryBound(to: Float.self)
-        let inS = shrinkage.dataPointer.assumingMemoryBound(to: Float.self)
         for i in 0..<HW { sPtr[start + i] = inS[i] }
 
-        // memMskValue (1, 256, capacity); mskValue shape (1, 1, 256, h, w)
+        // memMskValue (1, 256, capacity); mskValue flattened to 256 * HW.
         let mPtr = memMskValue.dataPointer.assumingMemoryBound(to: Float.self)
-        let inM = mskValue.dataPointer.assumingMemoryBound(to: Float.self)
         for c in 0..<Self.valueDim {
             let dst = c * Self.memCapacity + start
             let src = c * HW
@@ -279,8 +284,8 @@ final class MatAnyoneEngine {
         // summary: (1, 1, 16, 257). We add into objMemory channelwise; the
         // last value in each row is the count and is treated identically to
         // the embedding sums (matches the streaming average in MemoryManager).
+        let src = Self.dense(summary)
         let dst = objMemory.dataPointer.assumingMemoryBound(to: Float.self)
-        let src = summary.dataPointer.assumingMemoryBound(to: Float.self)
         let n = Self.querySlots * Self.summaryDim
         // If everything is still zero this is the first call → straight copy
         var any: Float = 0
@@ -309,19 +314,73 @@ final class MatAnyoneEngine {
 
     private func copyArrayContents(from src: MLMultiArray, to dst: MLMultiArray) {
         precondition(src.count == dst.count, "shape mismatch \(src.count) vs \(dst.count)")
-        let s = src.dataPointer.assumingMemoryBound(to: Float.self)
-        let d = dst.dataPointer.assumingMemoryBound(to: Float.self)
-        memcpy(d, s, src.count * MemoryLayout<Float>.size)
+        let dPtr = dst.dataPointer.assumingMemoryBound(to: Float.self)
+        Self.readFloats(src, into: dPtr, count: src.count)
     }
 
     private func copyArray(_ src: MLMultiArray, into dst: inout [Float]) {
-        let s = src.dataPointer.assumingMemoryBound(to: Float.self)
-        for i in 0..<min(src.count, dst.count) { dst[i] = s[i] }
+        let n = min(src.count, dst.count)
+        dst.withUnsafeMutableBufferPointer { buf in
+            Self.readFloats(src, into: buf.baseAddress!, count: n)
+        }
     }
 
     private func zero(_ a: MLMultiArray) {
+        // State arrays are created locally and are always dense, so memset is safe.
         let p = a.dataPointer.assumingMemoryBound(to: Float.self)
         memset(p, 0, a.count * MemoryLayout<Float>.size)
+    }
+
+    /// Stride-safe read of a CoreML output `MLMultiArray` into a contiguous
+    /// `Float` buffer. CoreML on iOS device is allowed to return multi-arrays
+    /// with non-default (padded) strides — for ANE alignment, for example.
+    /// Reading via `dataPointer + memcpy` then silently scrambles the data.
+    /// We detect the dense case and fast-path it; otherwise we walk the array
+    /// using its declared strides.
+    static func readFloats(_ src: MLMultiArray, into dst: UnsafeMutablePointer<Float>, count: Int) {
+        let shape = src.shape.map { $0.intValue }
+        let strides = src.strides.map { $0.intValue }
+        let srcPtr = src.dataPointer.assumingMemoryBound(to: Float.self)
+
+        // Dense check: rightmost dim has stride 1, each preceding dim has
+        // stride equal to the product of dimensions to its right.
+        var expected = 1
+        var dense = true
+        for i in (0..<shape.count).reversed() {
+            if strides[i] != expected { dense = false; break }
+            expected *= shape[i]
+        }
+        if dense {
+            memcpy(dst, srcPtr, count * MemoryLayout<Float>.size)
+            return
+        }
+
+        // Slow path: walk multi-dim indices using declared strides.
+        let n = shape.count
+        var counters = [Int](repeating: 0, count: n)
+        for i in 0..<count {
+            var offset = 0
+            for d in 0..<n { offset += counters[d] * strides[d] }
+            dst[i] = srcPtr[offset]
+            // Increment from the rightmost dim.
+            var d = n - 1
+            while d >= 0 {
+                counters[d] += 1
+                if counters[d] < shape[d] { break }
+                counters[d] = 0
+                d -= 1
+            }
+        }
+    }
+
+    /// Convenience: copy a (possibly non-dense) MLMultiArray into a fresh
+    /// dense `[Float]`.
+    static func dense(_ src: MLMultiArray) -> [Float] {
+        let count = src.count
+        let buf = UnsafeMutablePointer<Float>.allocate(capacity: count)
+        defer { buf.deallocate() }
+        readFloats(src, into: buf, count: count)
+        return Array(UnsafeBufferPointer(start: buf, count: count))
     }
 }
 

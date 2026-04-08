@@ -130,15 +130,26 @@ final class VideoMatter {
             fillImageArray(cg: cg, dst: imageArray)
 
             // 4. Run MatAnyone (Vision-bootstrapped on the first frame).
+            //    Frame 0 is processed via the seed step + a single
+            //    `firstFramePred=true` pass — that mirrors the official
+            //    `process_video` capture point at `ti = n_warmup` and goes
+            //    through the FP16-stable `read_first` path. From frame 1
+            //    onwards we use the regular memory-attention `read` path.
             let alpha: [Float]
             if frameIndex == 0 {
                 let visionAlpha = try generatePersonMaskFloat(cgImage: cg, width: engineW, height: engineH)
-                let dilated = softDilate(visionAlpha, width: engineW, height: engineH, radius: 6)
-                let seed = try makeSeedMaskMLArray(dilated, width: engineW, height: engineH)
-                try await engine.initialize(firstImage: imageArray, mask: seed)
-                alpha = try await engine.step(image: imageArray)
+                // Match the official `gen_dilate` preprocessing: binarise the
+                // soft Vision alpha at 0.5 and dilate once with radius 8 so
+                // the seed comfortably covers the subject. MatAnyone can
+                // shrink the matte but cannot recover from a seed that misses
+                // parts of the foreground.
+                let seedFloat = binaryDilate(visionAlpha, width: engineW, height: engineH,
+                                             threshold: 0.5, radius: 8)
+                let seed = try makeSeedMaskMLArray(seedFloat, width: engineW, height: engineH)
+                try await engine.initializeSeed(firstImage: imageArray, mask: seed)
+                alpha = try await engine.step(image: imageArray, providedMask: nil, firstFramePred: true)
                 seedMaskPreview = makeMaskPreviewImage(
-                    dilated, width: engineW, height: engineH, rotateLeft: isPortrait
+                    seedFloat, width: engineW, height: engineH, rotateLeft: isPortrait
                 )
             } else {
                 alpha = try await engine.step(image: imageArray)
@@ -214,15 +225,24 @@ final class VideoMatter {
         return out
     }
 
-    /// Build the MatAnyone seed mask from a Vision alpha. We dilate slightly
-    /// (matches the official `gen_dilate` behaviour at r=10/2 effective) so
-    /// the seed covers hair/silhouette edges that Vision tends to under-cover.
+    /// Wrap an already-prepared `[0, 1]` alpha array in a (1, 1, H, W) MLMultiArray
+    /// for the engine. Caller is responsible for any thresholding / dilation.
     private func makeSeedMaskMLArray(_ alpha: [Float], width: Int, height: Int) throws -> MLMultiArray {
         let mask = try MLMultiArray(shape: [1, 1, NSNumber(value: height), NSNumber(value: width)], dataType: .float32)
         let dst = mask.dataPointer.assumingMemoryBound(to: Float.self)
-        let dilated = softDilate(alpha, width: width, height: height, radius: 6)
-        for i in 0..<(width * height) { dst[i] = dilated[i] }
+        for i in 0..<(width * height) { dst[i] = alpha[i] }
         return mask
+    }
+
+    /// Threshold a soft alpha to binary `{0, 1}` then dilate with a square
+    /// max filter of the given radius. Approximates the official `gen_dilate`
+    /// (`np.not_equal(alpha, 0)` then `cv2.dilate`).
+    private func binaryDilate(_ src: [Float], width: Int, height: Int,
+                              threshold: Float, radius: Int) -> [Float] {
+        var bin = [Float](repeating: 0, count: width * height)
+        for i in 0..<bin.count { bin[i] = src[i] > threshold ? 1 : 0 }
+        guard radius > 0 else { return bin }
+        return softDilate(bin, width: width, height: height, radius: radius)
     }
 
     /// Separable max-filter dilation that preserves the [0,1] alpha values.
