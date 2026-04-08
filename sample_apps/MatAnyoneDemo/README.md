@@ -6,6 +6,8 @@ The sample app uses Vision's `VNGeneratePersonSegmentationRequest` to bootstrap 
 
 End-to-end alpha matte parity vs the official PyTorch reference: **MAE < 2e-4, correlation 0.9999+** across 18 frames including 3 memory cycles.
 
+<video src="https://github.com/user-attachments/assets/dd92ee70-93cb-40a7-af8f-14864b3aa99b" width="400"></video>
+
 ## Models
 
 5 mlpackages, ~111 MB total at FP16. The CoreML graph is locked to landscape **768 × 432**; portrait sources are rotated to landscape before the pipeline and rotated back afterwards.

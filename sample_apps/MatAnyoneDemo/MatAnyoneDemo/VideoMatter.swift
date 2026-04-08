@@ -14,8 +14,12 @@ import Vision
 ///
 /// The CoreML graph is locked to landscape 768×432. Portrait sources are
 /// rotated to landscape before the pipeline and rotated back afterwards.
-@MainActor
-final class VideoMatter {
+/// `@unchecked Sendable` so the loader can build the engine on a background
+/// task at app launch and then hand the ready-to-use `VideoMatter` to the
+/// main-actor view. The interesting state is the engine's per-frame ring
+/// buffer, which is itself only touched from inside `process(...)`, and we
+/// don't allow more than one `process(...)` to run at a time.
+final class VideoMatter: @unchecked Sendable {
     private let engine: MatAnyoneEngine
     private let ciContext = CIContext(options: [.useSoftwareRenderer: false])
 
@@ -134,7 +138,11 @@ final class VideoMatter {
             width: vImagePixelCount(engineW),
             rowBytes: bgraRowBytes
         )
-        vImageOverwriteChannelsWithScalar_ARGB8888(255, &bgViBuf, &bgViBuf, 0x08, vImage_Flags(kvImageNoFlags))
+        // copyMask is interpreted in ARGB byte order: 0x8=byte0, 0x4=byte1,
+        // 0x2=byte2, 0x1=byte3. Our buffer is BGRA, so the alpha byte is at
+        // index 3 → use 0x1. (0x8 would clobber the blue channel, which is
+        // exactly what made the matted subject turn solid blue.)
+        vImageOverwriteChannelsWithScalar_ARGB8888(255, &bgViBuf, &bgViBuf, 0x01, vImage_Flags(kvImageNoFlags))
 
         var frameIndex = 0
         var seedMaskPreview: UIImage? = nil
@@ -464,8 +472,10 @@ final class VideoMatter {
             vImageConvert_PlanarFtoPlanar8(&srcF, &dst8, 1.0, 0.0, vImage_Flags(kvImageNoFlags))
         }
 
-        // 3. Stamp the alpha plane into the foreground BGRA buffer's A channel
-        //    (offset 3 = bit 3 of the channel mask).
+        // 3. Stamp the alpha plane into the foreground BGRA buffer's A
+        //    channel. vImage's copyMask is fixed to ARGB byte order:
+        //    0x8 = byte0, 0x4 = byte1, 0x2 = byte2, 0x1 = byte3. Our buffer
+        //    is BGRA, so the alpha byte sits at index 3 → use 0x1.
         var alphaPlaneBuf = vImage_Buffer(
             data: alphaScratch,
             height: vImagePixelCount(h),
@@ -478,7 +488,7 @@ final class VideoMatter {
             width: vImagePixelCount(w),
             rowBytes: bpr
         )
-        vImageOverwriteChannels_ARGB8888(&alphaPlaneBuf, &fgBuf, &fgBuf, 0x08, vImage_Flags(kvImageNoFlags))
+        vImageOverwriteChannels_ARGB8888(&alphaPlaneBuf, &fgBuf, &fgBuf, 0x01, vImage_Flags(kvImageNoFlags))
 
         // 4. Premultiply the BGR channels by the alpha. vImage has no
         //    non-premultiplied BGRA8888 blender, only the premultiplied one.

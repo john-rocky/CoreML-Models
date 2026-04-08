@@ -7,8 +7,15 @@ import Accelerate
 /// Reproduces the Python `InferenceCore.step` loop in Swift. The model split
 /// pushes all "object/memory bookkeeping" up to this class so each Core ML
 /// model is a pure function of its inputs.
-@MainActor
-final class MatAnyoneEngine {
+///
+/// `@unchecked Sendable` because we want callers to be able to construct the
+/// engine on a background thread (model loading is the slow part and must
+/// not block the main thread on app launch). The mutable per-frame state
+/// (sensory, ring buffer, etc.) is *not* internally synchronised — callers
+/// are responsible for serialising access. In practice that means a single
+/// `VideoMatter.process(...)` call drives the engine end-to-end and no other
+/// caller touches it until that returns.
+final class MatAnyoneEngine: @unchecked Sendable {
     // MARK: Resolution & topology — must match the converter
 
     static let inputHeight = 432
