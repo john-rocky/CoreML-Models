@@ -13,6 +13,12 @@ struct ContentView: View {
     @State private var progress: Double = 0
     @State private var status: String = ""
     @State private var bgChoice: BackgroundChoice = .green
+    /// Loaded once on app launch in the background and reused across runs.
+    /// Holding `VideoMatter` here means the 5 mlpackage loads (~30-100MB
+    /// each, several hundred ms in total) happen during the splash/idle
+    /// time instead of when the user taps Remove BG.
+    @State private var videoMatter: VideoMatter?
+    @State private var modelLoadError: String?
 
     enum BackgroundChoice: String, CaseIterable, Identifiable {
         case green = "Green"
@@ -109,13 +115,20 @@ struct ContentView: View {
                     } label: {
                         if isProcessing {
                             ProgressView().frame(maxWidth: .infinity)
+                        } else if videoMatter == nil && modelLoadError == nil {
+                            // Models still loading from app launch.
+                            HStack(spacing: 6) {
+                                ProgressView().controlSize(.small)
+                                Text("Loading models")
+                            }
+                            .frame(maxWidth: .infinity)
                         } else {
                             Label("Remove BG", systemImage: "person.crop.rectangle")
                                 .frame(maxWidth: .infinity)
                         }
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(sourceURL == nil || isProcessing)
+                    .disabled(sourceURL == nil || isProcessing || videoMatter == nil)
                 }
                 .padding(.horizontal)
 
@@ -144,6 +157,27 @@ struct ContentView: View {
             .onChange(of: selectedItem) {
                 Task { await loadVideo() }
             }
+            .task {
+                // Pre-load the 5 MatAnyone mlpackages on a background task
+                // as soon as the app comes up, so the user doesn't sit on a
+                // ~1-2s spinner the first time they tap Remove BG.
+                await preloadModels()
+            }
+        }
+    }
+
+    private func preloadModels() async {
+        guard videoMatter == nil, modelLoadError == nil else { return }
+        if status.isEmpty { status = "Loading models…" }
+        do {
+            let matter = try await Task.detached(priority: .userInitiated) {
+                try VideoMatter()
+            }.value
+            videoMatter = matter
+            if status == "Loading models…" { status = "" }
+        } catch {
+            modelLoadError = error.localizedDescription
+            status = "Model load failed: \(error.localizedDescription)"
         }
     }
 
@@ -164,16 +198,14 @@ struct ContentView: View {
     }
 
     private func runMatting() {
-        guard let url = sourceURL else { return }
+        guard let url = sourceURL, let matter = videoMatter else { return }
         isProcessing = true
         progress = 0
-        status = "Loading models..."
+        status = "Processing frames..."
         resultURL = nil
 
         Task {
             do {
-                let matter = try VideoMatter()
-                status = "Processing frames..."
                 let asset = AVURLAsset(url: url)
                 let result = try await matter.process(
                     asset: asset,

@@ -48,6 +48,36 @@ import matanyone.model.transformer.object_transformer as _ot  # noqa: E402
 _ma.aggregate = _aggregate_single_object
 _ot.aggregate = _aggregate_single_object
 
+
+# Monkey-patch PixelFeatureFuser.forward to skip its `[:, i:i+chunk_size]`
+# slice over the singleton num_objects dim. That slice is what trips Metal
+# Performance Shaders on iOS GPU with `subRange.start = -1 vs length 1`,
+# forcing the read / read_first models onto CPU. We hard-code the
+# num_objects = 1, single_object = False (matting) fast path: one shot, no
+# loop, no slicing on the singleton dim.
+import matanyone.model.big_modules as _bm  # noqa: E402
+
+
+def _pixel_feature_fuser_single_object_forward(
+    self,
+    pix_feat: torch.Tensor,
+    pixel_memory: torch.Tensor,
+    sensory_memory: torch.Tensor,
+    last_mask: torch.Tensor,
+    last_others: torch.Tensor,
+    *,
+    chunk_size: int = -1,
+):
+    # Matanyone matting config: single_object=False, num_objects=1.
+    last_mask = torch.stack([last_mask, last_others], dim=2)
+    sensory_readout = self.sensory_compress(torch.cat([sensory_memory, last_mask], 2))
+    p16 = pixel_memory + sensory_readout
+    p16 = self.fuser(pix_feat, p16)
+    return p16
+
+
+_bm.PixelFeatureFuser.forward = _pixel_feature_fuser_single_object_forward
+
 from matanyone import InferenceCore  # noqa: E402
 from matanyone.model.matanyone import MatAnyone  # noqa: E402
 
@@ -187,10 +217,11 @@ class ReadWrapper(nn.Module):
         # Visual readout: (B, 256, N) @ (B, N, HW) -> (B, 256, HW) -> (B, 1, 256, h, w)
         visual_readout = (mem_msk_value @ affinity).reshape(bs, 1, 256, h, w)
 
-        # Uncertainty
-        uncert = n.pred_uncertainty(
-            last_pix_feat, pix_feat, last_mask, visual_readout[:, 0] - last_msk_value[:, 0]
-        )
+        # Uncertainty. We deliberately use `.squeeze(1)` instead of `[:, 0]`
+        # here — the singleton-dim index trips MPS on iOS GPU with the same
+        # `subRange.start = -1` assertion that the chunk-loop slice did.
+        diff = visual_readout.squeeze(1) - last_msk_value.squeeze(1)
+        uncert = n.pred_uncertainty(last_pix_feat, pix_feat, last_mask, diff)
         uncert_prob = torch.sigmoid(uncert["logits"]).unsqueeze(1)  # (B, 1, 1, h, w)
         visual_readout = visual_readout * uncert_prob + last_msk_value * (1.0 - uncert_prob)
 
