@@ -53,21 +53,20 @@ final class MatAnyoneEngine {
     // MARK: Init
 
     init() throws {
-        // Encoder/decoder/mask_encoder are pure conv stacks and run fine on
-        // GPU. The two memory-readout modules contain reshapes and slices on
-        // the singleton num_objects dimension that crash Metal Performance
-        // Shaders ("subRange.start = -1 vs length 1"), so they have to stay
-        // on the CPU until the converter is rewritten to drop those singleton
-        // dims.
+        // All five models now run on `.cpuAndGPU`. The previous CPU-only
+        // restriction on `read` / `read_first` came from a Metal Performance
+        // Shaders assertion ("subRange.start = -1 vs length 1") triggered by
+        // PixelFeatureFuser slicing the singleton num_objects dim. The
+        // converter now monkey-patches PixelFeatureFuser.forward to use the
+        // single-object fast path and uses `.squeeze(1)` instead of `[:, 0]`
+        // for the uncertainty diff, so the slices are gone and MPS is happy.
         let gpuCfg = MLModelConfiguration()
         gpuCfg.computeUnits = .cpuAndGPU
-        let cpuCfg = MLModelConfiguration()
-        cpuCfg.computeUnits = .cpuOnly
 
         encoder     = try Self.loadModel("MatAnyone_encoder", config: gpuCfg)
         maskEncoder = try Self.loadModel("MatAnyone_mask_encoder", config: gpuCfg)
-        readFirst   = try Self.loadModel("MatAnyone_read_first", config: cpuCfg)
-        read        = try Self.loadModel("MatAnyone_read", config: cpuCfg)
+        readFirst   = try Self.loadModel("MatAnyone_read_first", config: gpuCfg)
+        read        = try Self.loadModel("MatAnyone_read", config: gpuCfg)
         decoder     = try Self.loadModel("MatAnyone_decoder", config: gpuCfg)
 
         sensory      = try MLMultiArray(shape: [1, 1, NSNumber(value: Self.sensoryDim), NSNumber(value: Self.queryHeight), NSNumber(value: Self.queryWidth)], dataType: .float32)

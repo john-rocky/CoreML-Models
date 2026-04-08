@@ -1,3 +1,4 @@
+import Accelerate
 import AVFoundation
 import CoreImage
 import CoreML
@@ -98,12 +99,42 @@ final class VideoMatter {
             dataType: .float32
         )
 
-        // Background composited at engine resolution then rotated alongside.
-        let backgroundCG = ciContext.createCGImage(
-            CIImage(color: backgroundColor)
-                .cropped(to: CGRect(x: 0, y: 0, width: engineW, height: engineH)),
-            from: CGRect(x: 0, y: 0, width: engineW, height: engineH)
+        // Pre-allocate per-frame scratch buffers so the inner loop never
+        // hits the allocator. All vImage ops below run against these.
+        let bgraRowBytes = engineW * 4
+        let bgraPlaneSize = engineH * bgraRowBytes
+        let monoPlaneSize = engineW * engineH
+        let inputBGRA  = UnsafeMutablePointer<UInt8>.allocate(capacity: bgraPlaneSize)
+        defer { inputBGRA.deallocate() }
+        let planeR = UnsafeMutablePointer<UInt8>.allocate(capacity: monoPlaneSize)
+        let planeG = UnsafeMutablePointer<UInt8>.allocate(capacity: monoPlaneSize)
+        let planeB = UnsafeMutablePointer<UInt8>.allocate(capacity: monoPlaneSize)
+        defer { planeR.deallocate(); planeG.deallocate(); planeB.deallocate() }
+        let alphaPlane = UnsafeMutablePointer<UInt8>.allocate(capacity: monoPlaneSize)
+        defer { alphaPlane.deallocate() }
+        // Pre-render the solid background colour into a BGRA buffer once.
+        // The alpha byte is set to 255 so vImageAlphaBlend treats it as opaque.
+        let bgBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bgraPlaneSize)
+        defer { bgBuffer.deallocate() }
+        if let bgFillCtx = CGContext(
+            data: bgBuffer, width: engineW, height: engineH, bitsPerComponent: 8, bytesPerRow: bgraRowBytes,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
+        ) {
+            let bgCG = ciContext.createCGImage(
+                CIImage(color: backgroundColor)
+                    .cropped(to: CGRect(x: 0, y: 0, width: engineW, height: engineH)),
+                from: CGRect(x: 0, y: 0, width: engineW, height: engineH)
+            )
+            if let bgCG { bgFillCtx.draw(bgCG, in: CGRect(x: 0, y: 0, width: engineW, height: engineH)) }
+        }
+        var bgViBuf = vImage_Buffer(
+            data: bgBuffer,
+            height: vImagePixelCount(engineH),
+            width: vImagePixelCount(engineW),
+            rowBytes: bgraRowBytes
         )
+        vImageOverwriteChannelsWithScalar_ARGB8888(255, &bgViBuf, &bgViBuf, 0x08, vImage_Flags(kvImageNoFlags))
 
         var frameIndex = 0
         var seedMaskPreview: UIImage? = nil
@@ -127,7 +158,15 @@ final class VideoMatter {
             ))
             let renderRect = CGRect(x: 0, y: 0, width: engineW, height: engineH)
             guard let cg = ciContext.createCGImage(scaled, from: renderRect) else { continue }
-            fillImageArray(cg: cg, dst: imageArray)
+            fillImageArray(
+                cg: cg,
+                dst: imageArray,
+                scratchBGRA: inputBGRA,
+                rowBytes: bgraRowBytes,
+                planeR: planeR,
+                planeG: planeG,
+                planeB: planeB
+            )
 
             // 4. Run MatAnyone (Vision-bootstrapped on the first frame).
             //    Frame 0 is processed via the seed step + a single
@@ -157,7 +196,14 @@ final class VideoMatter {
 
             // 5. Composite at engine resolution and rotate back.
             let landscapePB = try makeOutputPixelBuffer(width: engineW, height: engineH)
-            composite(input: cg, alpha: alpha, background: backgroundCG, into: landscapePB)
+            composite(
+                input: cg,
+                alpha: alpha,
+                bgBuffer: bgBuffer,
+                bgRowBytes: bgraRowBytes,
+                alphaScratch: alphaPlane,
+                into: landscapePB
+            )
             let outPB: CVPixelBuffer
             if isPortrait {
                 outPB = try rotateBuffer(landscapePB, by: .left, width: outW, height: outH)
@@ -305,31 +351,53 @@ final class VideoMatter {
 
     // MARK: Image <-> array
 
-    private func fillImageArray(cg: CGImage, dst: MLMultiArray) {
+    /// Render `cg` into the engine's planar (1, 3, H, W) float input tensor
+    /// using vImage. The interleaved BGRA8 → 3 PlanarF deinterleave + scale
+    /// runs in vectorised code instead of a per-pixel Swift loop.
+    ///
+    /// `scratchBGRA`, `planeR`, `planeG`, `planeB` are caller-owned buffers
+    /// of size `w*h*4`, `w*h`, `w*h`, `w*h` respectively, reused across frames.
+    private func fillImageArray(
+        cg: CGImage,
+        dst: MLMultiArray,
+        scratchBGRA: UnsafeMutablePointer<UInt8>,
+        rowBytes: Int,
+        planeR: UnsafeMutablePointer<UInt8>,
+        planeG: UnsafeMutablePointer<UInt8>,
+        planeB: UnsafeMutablePointer<UInt8>
+    ) {
         let w = MatAnyoneEngine.inputWidth
         let h = MatAnyoneEngine.inputHeight
-        var pixels = [UInt8](repeating: 0, count: w * h * 4)
-        let ctx = CGContext(
-            data: &pixels, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+        let spatial = w * h
+
+        // 1. Render CGImage into the BGRA8 scratch buffer.
+        guard let ctx = CGContext(
+            data: scratchBGRA, width: w, height: h, bitsPerComponent: 8, bytesPerRow: rowBytes,
             space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
-        )!
+        ) else { return }
         ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
 
-        let spatial = w * h
-        let p = dst.dataPointer.assumingMemoryBound(to: Float.self)
-        for y in 0..<h {
-            for x in 0..<w {
-                let pi = (y * w + x) * 4
-                let b = Float(pixels[pi]) / 255.0
-                let g = Float(pixels[pi + 1]) / 255.0
-                let r = Float(pixels[pi + 2]) / 255.0
-                let idx = y * w + x
-                p[idx] = r
-                p[spatial + idx] = g
-                p[2 * spatial + idx] = b
-            }
-        }
+        // 2. Wrap the engine input tensor as 3 PlanarF buffers (R, G, B).
+        let dstPtr = dst.dataPointer.assumingMemoryBound(to: Float.self)
+        let rowBytesF = w * MemoryLayout<Float>.size
+        var rDst = vImage_Buffer(data: dstPtr,                            height: vImagePixelCount(h), width: vImagePixelCount(w), rowBytes: rowBytesF)
+        var gDst = vImage_Buffer(data: dstPtr.advanced(by: spatial),      height: vImagePixelCount(h), width: vImagePixelCount(w), rowBytes: rowBytesF)
+        var bDst = vImage_Buffer(data: dstPtr.advanced(by: 2 * spatial),  height: vImagePixelCount(h), width: vImagePixelCount(w), rowBytes: rowBytesF)
+
+        // 3. Extract each channel from the interleaved BGRA buffer into a
+        //    Planar8, then convert each Planar8 → PlanarF mapping [0,255] → [0,1].
+        //    BGRA byte order: channel 0 = B, 1 = G, 2 = R, 3 = A.
+        var src = vImage_Buffer(data: scratchBGRA, height: vImagePixelCount(h), width: vImagePixelCount(w), rowBytes: rowBytes)
+        var rPlane = vImage_Buffer(data: planeR, height: vImagePixelCount(h), width: vImagePixelCount(w), rowBytes: w)
+        var gPlane = vImage_Buffer(data: planeG, height: vImagePixelCount(h), width: vImagePixelCount(w), rowBytes: w)
+        var bPlane = vImage_Buffer(data: planeB, height: vImagePixelCount(h), width: vImagePixelCount(w), rowBytes: w)
+        vImageExtractChannel_ARGB8888(&src, &bPlane, 0, vImage_Flags(kvImageNoFlags))
+        vImageExtractChannel_ARGB8888(&src, &gPlane, 1, vImage_Flags(kvImageNoFlags))
+        vImageExtractChannel_ARGB8888(&src, &rPlane, 2, vImage_Flags(kvImageNoFlags))
+        vImageConvert_Planar8toPlanarF(&rPlane, &rDst, 1.0, 0.0, vImage_Flags(kvImageNoFlags))
+        vImageConvert_Planar8toPlanarF(&gPlane, &gDst, 1.0, 0.0, vImage_Flags(kvImageNoFlags))
+        vImageConvert_Planar8toPlanarF(&bPlane, &bDst, 1.0, 0.0, vImage_Flags(kvImageNoFlags))
     }
 
     private func makeOutputPixelBuffer(width: Int, height: Int) throws -> CVPixelBuffer {
@@ -345,45 +413,84 @@ final class VideoMatter {
         return buf
     }
 
-    private func composite(input: CGImage, alpha: [Float], background: CGImage?, into pb: CVPixelBuffer) {
+    /// Alpha-composite the input frame over a pre-rendered background buffer
+    /// using vImage. The model alpha is converted to a Planar8 mask, written
+    /// into the foreground BGRA's alpha channel, then `vImageAlphaBlend_BGRA8888`
+    /// performs `out = fg * α + bg * (1 - α)` in vectorised code over the
+    /// whole frame in one call.
+    ///
+    /// `bgBuffer` must be a BGRA8 buffer at the same WxH with alpha = 255.
+    /// `alphaScratch` is a w*h Planar8 scratch slot reused across frames.
+    private func composite(
+        input: CGImage,
+        alpha: [Float],
+        bgBuffer: UnsafeMutablePointer<UInt8>,
+        bgRowBytes: Int,
+        alphaScratch: UnsafeMutablePointer<UInt8>,
+        into pb: CVPixelBuffer
+    ) {
         let w = CVPixelBufferGetWidth(pb)
         let h = CVPixelBufferGetHeight(pb)
         CVPixelBufferLockBaseAddress(pb, [])
         defer { CVPixelBufferUnlockBaseAddress(pb, []) }
         guard let base = CVPixelBufferGetBaseAddress(pb) else { return }
         let bpr = CVPixelBufferGetBytesPerRow(pb)
-        let ctx = CGContext(
+
+        // 1. Render the foreground frame into the output PB (BGRA byte order;
+        //    the byte at offset 3 is currently a "skip" placeholder).
+        guard let fgCtx = CGContext(
             data: base, width: w, height: h, bitsPerComponent: 8, bytesPerRow: bpr,
             space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
-        )!
-        if let bg = background {
-            ctx.draw(bg, in: CGRect(x: 0, y: 0, width: w, height: h))
+        ) else { return }
+        fgCtx.draw(input, in: CGRect(x: 0, y: 0, width: w, height: h))
+
+        // 2. Convert the model alpha [Float] in [0, 1] to a Planar8 in [0, 255].
+        alpha.withUnsafeBufferPointer { fp in
+            var srcF = vImage_Buffer(
+                data: UnsafeMutableRawPointer(mutating: fp.baseAddress),
+                height: vImagePixelCount(h),
+                width: vImagePixelCount(w),
+                rowBytes: w * MemoryLayout<Float>.size
+            )
+            var dst8 = vImage_Buffer(
+                data: alphaScratch,
+                height: vImagePixelCount(h),
+                width: vImagePixelCount(w),
+                rowBytes: w
+            )
+            vImageConvert_PlanarFtoPlanar8(&srcF, &dst8, 1.0, 0.0, vImage_Flags(kvImageNoFlags))
         }
 
-        var fg = [UInt8](repeating: 0, count: w * h * 4)
-        let inCtx = CGContext(
-            data: &fg, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
-            space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
-        )!
-        inCtx.draw(input, in: CGRect(x: 0, y: 0, width: w, height: h))
+        // 3. Stamp the alpha plane into the foreground BGRA buffer's A channel
+        //    (offset 3 = bit 3 of the channel mask). After this, the fg buffer
+        //    is ready to use as the source for non-premultiplied alpha blending.
+        var alphaPlaneBuf = vImage_Buffer(
+            data: alphaScratch,
+            height: vImagePixelCount(h),
+            width: vImagePixelCount(w),
+            rowBytes: w
+        )
+        var fgBuf = vImage_Buffer(
+            data: base,
+            height: vImagePixelCount(h),
+            width: vImagePixelCount(w),
+            rowBytes: bpr
+        )
+        vImageOverwriteChannels_ARGB8888(&alphaPlaneBuf, &fgBuf, &fgBuf, 0x08, vImage_Flags(kvImageNoFlags))
 
-        let bgBytes = base.assumingMemoryBound(to: UInt8.self)
-        for y in 0..<h {
-            for x in 0..<w {
-                let aa = max(0, min(1, alpha[y * w + x]))
-                let pi = (y * w + x) * 4
-                let bgIdx = y * bpr + x * 4
-                let fb = Float(bgBytes[bgIdx]) * (1 - aa) + Float(fg[pi]) * aa
-                let fg_ = Float(bgBytes[bgIdx + 1]) * (1 - aa) + Float(fg[pi + 1]) * aa
-                let fr = Float(bgBytes[bgIdx + 2]) * (1 - aa) + Float(fg[pi + 2]) * aa
-                bgBytes[bgIdx]     = UInt8(min(255, max(0, fb)))
-                bgBytes[bgIdx + 1] = UInt8(min(255, max(0, fg_)))
-                bgBytes[bgIdx + 2] = UInt8(min(255, max(0, fr)))
-                bgBytes[bgIdx + 3] = 255
-            }
-        }
+        // 4. Alpha blend fg over the precomputed bg in place.
+        var bgBuf = vImage_Buffer(
+            data: bgBuffer,
+            height: vImagePixelCount(h),
+            width: vImagePixelCount(w),
+            rowBytes: bgRowBytes
+        )
+        vImageAlphaBlend_BGRA8888(&fgBuf, &bgBuf, &fgBuf, vImage_Flags(kvImageNoFlags))
+
+        // 5. The blend leaves a non-255 value in the alpha byte; force it back
+        //    to opaque so AVAssetWriter accepts the BGRA frame.
+        vImageOverwriteChannelsWithScalar_ARGB8888(255, &fgBuf, &fgBuf, 0x08, vImage_Flags(kvImageNoFlags))
     }
 
     /// Rotate a CVPixelBuffer using CIImage. `direction` matches CIImage's

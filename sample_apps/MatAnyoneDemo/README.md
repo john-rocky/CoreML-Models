@@ -50,7 +50,7 @@ Per-frame loop: encoder → (read_first or read) → decoder → mask_encoder �
 - **Memory tensors are pre-flattened to rank 3** (`[1, C, T·h·w]`) to stay within Core ML's rank-5 limit.
 - **Variable-length working memory is handled by adding `(1 - valid) * -6e4`** to the similarity before top-k softmax (FP16-safe `-inf` substitute).
 - **Resolution fixed at 768 × 432** (mobile 16:9, divisible by 16). For other aspect ratios, re-run the converter with `--height/--width`.
-- **`read` and `read_first` ship CPU-only**. Their internal reshapes/slices over the singleton `num_objects` dim hit a Metal Performance Shaders assertion (`subRange.start = -1` on a length-1 dim) on iOS GPU. The encoder, mask_encoder, and decoder run fine on `.cpuAndGPU`.
+- **All five models run on `.cpuAndGPU`**. The previous CPU-only restriction on `read` / `read_first` came from `PixelFeatureFuser.forward` slicing `[:, i:i+chunk_size]` on the singleton `num_objects` dim, which trips Metal Performance Shaders with `subRange.start = -1 vs length 1`. The converter now monkey-patches `PixelFeatureFuser.forward` to use the single-object fast path (no chunk loop, no singleton-dim slicing) and replaces the `visual_readout[:, 0] - last_msk_value[:, 0]` slice in the read wrapper with `.squeeze(1)`, so MPS is happy.
 - **No warmup loop**. The official `process_video` runs the first frame 10 times with `first_frame_pred=true` to stabilise memory, but at FP16 those repeated feedback iterations drift the alpha to zero. The single seed step + one `first_frame_pred` pass already matches the Python reference within MAE < 2e-4.
 
 ## First-Frame Mask Bootstrap (Vision)
