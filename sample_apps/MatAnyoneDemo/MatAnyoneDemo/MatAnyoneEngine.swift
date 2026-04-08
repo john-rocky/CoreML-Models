@@ -53,20 +53,28 @@ final class MatAnyoneEngine {
     // MARK: Init
 
     init() throws {
-        // All five models now run on `.cpuAndGPU`. The previous CPU-only
-        // restriction on `read` / `read_first` came from a Metal Performance
-        // Shaders assertion ("subRange.start = -1 vs length 1") triggered by
-        // PixelFeatureFuser slicing the singleton num_objects dim. The
-        // converter now monkey-patches PixelFeatureFuser.forward to use the
-        // single-object fast path and uses `.squeeze(1)` instead of `[:, 0]`
-        // for the uncertainty diff, so the slices are gone and MPS is happy.
+        // Encoder / mask_encoder / decoder run fine on `.cpuAndGPU`.
+        //
+        // `read` / `read_first` ship CPU-only by default because the
+        // `PixelFeatureFuser.forward` chunk loop and the
+        // `visual_readout[:, 0] - last_msk_value[:, 0]` diff in the read
+        // wrapper both slice the singleton num_objects dim, which trips
+        // Metal Performance Shaders ("subRange.start = -1 vs length 1") on
+        // iOS GPU. The converter has been patched to bypass both, but you
+        // need to re-run `convert_matanyone.py` to rebuild the
+        // `MatAnyone_read.mlpackage` and `MatAnyone_read_first.mlpackage`
+        // before flipping these two lines from `cpuCfg` to `gpuCfg`. The old
+        // mlpackages still have the singleton-dim slices baked into the
+        // graph and will crash on `.cpuAndGPU`.
         let gpuCfg = MLModelConfiguration()
         gpuCfg.computeUnits = .cpuAndGPU
+        let cpuCfg = MLModelConfiguration()
+        cpuCfg.computeUnits = .cpuOnly
 
         encoder     = try Self.loadModel("MatAnyone_encoder", config: gpuCfg)
         maskEncoder = try Self.loadModel("MatAnyone_mask_encoder", config: gpuCfg)
-        readFirst   = try Self.loadModel("MatAnyone_read_first", config: gpuCfg)
-        read        = try Self.loadModel("MatAnyone_read", config: gpuCfg)
+        readFirst   = try Self.loadModel("MatAnyone_read_first", config: cpuCfg)
+        read        = try Self.loadModel("MatAnyone_read", config: cpuCfg)
         decoder     = try Self.loadModel("MatAnyone_decoder", config: gpuCfg)
 
         sensory      = try MLMultiArray(shape: [1, 1, NSNumber(value: Self.sensoryDim), NSNumber(value: Self.queryHeight), NSNumber(value: Self.queryWidth)], dataType: .float32)

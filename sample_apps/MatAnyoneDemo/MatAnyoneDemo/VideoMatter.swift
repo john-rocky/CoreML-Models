@@ -415,9 +415,11 @@ final class VideoMatter {
 
     /// Alpha-composite the input frame over a pre-rendered background buffer
     /// using vImage. The model alpha is converted to a Planar8 mask, written
-    /// into the foreground BGRA's alpha channel, then `vImageAlphaBlend_BGRA8888`
-    /// performs `out = fg * α + bg * (1 - α)` in vectorised code over the
-    /// whole frame in one call.
+    /// into the foreground BGRA's alpha channel, then the BGR channels are
+    /// premultiplied and `vImagePremultipliedAlphaBlend_BGRA8888` performs
+    /// `out = fg.rgb * α + bg.rgb * (1 - α)` over the whole frame in one
+    /// vectorised call (vImage has no non-premultiplied BGRA blender, so we
+    /// premultiply first).
     ///
     /// `bgBuffer` must be a BGRA8 buffer at the same WxH with alpha = 255.
     /// `alphaScratch` is a w*h Planar8 scratch slot reused across frames.
@@ -463,8 +465,7 @@ final class VideoMatter {
         }
 
         // 3. Stamp the alpha plane into the foreground BGRA buffer's A channel
-        //    (offset 3 = bit 3 of the channel mask). After this, the fg buffer
-        //    is ready to use as the source for non-premultiplied alpha blending.
+        //    (offset 3 = bit 3 of the channel mask).
         var alphaPlaneBuf = vImage_Buffer(
             data: alphaScratch,
             height: vImagePixelCount(h),
@@ -479,18 +480,24 @@ final class VideoMatter {
         )
         vImageOverwriteChannels_ARGB8888(&alphaPlaneBuf, &fgBuf, &fgBuf, 0x08, vImage_Flags(kvImageNoFlags))
 
-        // 4. Alpha blend fg over the precomputed bg in place.
+        // 4. Premultiply the BGR channels by the alpha. vImage has no
+        //    non-premultiplied BGRA8888 blender, only the premultiplied one.
+        //    `vImagePremultiplyData_RGBA8888` is the underlying function
+        //    (the BGRA-named variant is a C macro that Swift doesn't import)
+        //    and works on any 4-channel 8-bit layout where alpha is the last
+        //    byte — that's true for both RGBA and our BGRA buffer.
+        vImagePremultiplyData_RGBA8888(&fgBuf, &fgBuf, vImage_Flags(kvImageNoFlags))
+
+        // 5. Premultiplied src-over-dst blend. The bg buffer already has
+        //    alpha = 255 so it acts as an opaque "premultiplied" bottom; the
+        //    output's alpha channel ends up at 255 automatically.
         var bgBuf = vImage_Buffer(
             data: bgBuffer,
             height: vImagePixelCount(h),
             width: vImagePixelCount(w),
             rowBytes: bgRowBytes
         )
-        vImageAlphaBlend_BGRA8888(&fgBuf, &bgBuf, &fgBuf, vImage_Flags(kvImageNoFlags))
-
-        // 5. The blend leaves a non-255 value in the alpha byte; force it back
-        //    to opaque so AVAssetWriter accepts the BGRA frame.
-        vImageOverwriteChannelsWithScalar_ARGB8888(255, &fgBuf, &fgBuf, 0x08, vImage_Flags(kvImageNoFlags))
+        vImagePremultipliedAlphaBlend_BGRA8888(&fgBuf, &bgBuf, &fgBuf, vImage_Flags(kvImageNoFlags))
     }
 
     /// Rotate a CVPixelBuffer using CIImage. `direction` matches CIImage's
