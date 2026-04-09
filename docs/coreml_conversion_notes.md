@@ -405,6 +405,38 @@ It's not a fix for the underlying issue (FP32 conversion of the same encoder is 
 
 ---
 
+## DINOv2 Backbone Conversion Checklist
+
+DINOv2 ViT-S/B/L backbones (MoGe-2, etc.) are otherwise straightforward to convert, but the official implementation has two pieces of dynamic logic that you have to neutralise before tracing.
+
+1. **Freeze the interpolated positional embedding.** `interpolate_pos_encoding` does a **bicubic + antialias** resize of the pretrained pos_embed every forward call. coremltools cannot trace bicubic + antialias cleanly. Since the result depends only on the input (h, w), and you are converting at a fixed resolution anyway, pre-compute the interpolated pos_embed once at conversion time and replace the method with a constant lookup:
+
+   ```python
+   def freeze_pos_embed(model, base_h, base_w):
+       backbone = model.encoder.backbone
+       img_h, img_w = base_h * backbone.patch_size, base_w * backbone.patch_size
+       dummy = torch.zeros(1, 3, img_h, img_w)
+       tokens = backbone.patch_embed(dummy)
+       cls = backbone.cls_token.expand(1, -1, -1)
+       x = torch.cat([cls, tokens], dim=1)
+       with torch.no_grad():
+           pos = backbone.interpolate_pos_encoding(x, img_h, img_w)
+       backbone.register_buffer("_frozen_pos_embed", pos.detach().clone(), persistent=False)
+       def _frozen_interp(self, x, h, w):
+           return self._frozen_pos_embed
+       backbone.interpolate_pos_encoding = _frozen_interp.__get__(backbone, type(backbone))
+   ```
+
+2. **Set `onnx_compatible_mode = True`** on the encoder. This disables the antialias path inside the rest of the encoder forward (not just `interpolate_pos_encoding`) so the only `F.interpolate` calls left are bilinear with explicit `size`.
+
+3. **Apply the same `int` op patch as Swin / SinSR.** DINOv2's positional indexing emits int casts on a 2-element shape tensor that the stock coremltools converter assumes are scalars.
+
+4. **Call `model.enable_pytorch_native_sdpa()`** so attention lowers to `F.scaled_dot_product_attention`, which coremltools handles natively. The custom `MemEffAttention` path otherwise emits an op pattern coremltools cannot fold cleanly.
+
+A reference implementation is in [`conversion_scripts/convert_moge2.py`](../conversion_scripts/convert_moge2.py).
+
+---
+
 ## MPS Slice on Singleton Dimension Crashes
 
 **Some Core ML graphs crash on iOS GPU with:**
