@@ -36,6 +36,8 @@ struct DemoLauncherView: View {
                 TextToAudioDemoView(model: model)
             case "audio_to_score":
                 AudioToScoreDemoView(model: model)
+            case "chat":
+                ChatDemoView(model: model)
             default:
                 unknownTemplate
             }
