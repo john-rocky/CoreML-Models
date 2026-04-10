@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>NSCameraUsageDescription</key>
+    <string>Camera access is needed for real-time model demos.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Microphone access is needed for speech and audio model demos.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Photo library access is needed to pick images and videos to run models on.</string>
+</dict>
+</plist>
