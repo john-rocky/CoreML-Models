@@ -49,9 +49,14 @@ struct ZeroShotClassifyDemoView: View {
                             Text(label).font(.body)
                             Spacer()
                             Text(String(format: "%.1f%%", score * 100))
-                                .font(.body.monospacedDigit()).foregroundStyle(.secondary)
-                            ProgressView(value: Double(score))
-                                .frame(width: 80)
+                                .font(.body.monospacedDigit())
+                                .foregroundStyle(score > 0.5 ? .primary : .secondary)
+                            GeometryReader { geo in
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(score > 0.5 ? Color.accentColor : Color(.systemGray4))
+                                    .frame(width: geo.size.width * CGFloat(score))
+                            }
+                            .frame(width: 80, height: 8)
                         }
                     }
                 }

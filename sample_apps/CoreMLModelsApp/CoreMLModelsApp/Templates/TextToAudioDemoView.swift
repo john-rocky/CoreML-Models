@@ -8,100 +8,546 @@ import Accelerate
 struct TextToAudioDemoView: View {
     let model: ModelEntry
 
-    @State private var inputText = ""
-    @State private var selectedVoice: String = ""
-    @State private var duration: Double = 5.0
-    @State private var outputURL: URL?
+    // MARK: - Shared State
+
     @State private var isProcessing = false
     @State private var status = ""
-    @State private var processingTime: Double?
+    @State private var outputURL: URL?
     @State private var player: AVAudioPlayer?
     @State private var isPlaying = false
+    @State private var errorMessage: String?
+
+    // MARK: - TTS State
+
+    enum TTSLanguage: String, CaseIterable, Identifiable {
+        case english = "English"
+        case japanese = "Japanese"
+        var id: String { rawValue }
+        var code: String { self == .english ? "en" : "ja" }
+    }
+
+    enum TTSInputMode: String, CaseIterable, Identifiable {
+        case type = "Type"
+        case sample = "Sample"
+        var id: String { rawValue }
+    }
+
+    @State private var ttsLanguage: TTSLanguage = .english
+    @State private var ttsInputMode: TTSInputMode = .type
+    @State private var ttsVoice: String = ""
+    @State private var ttsFreeTextEN = "Hello, this is a speech synthesis demo."
+    @State private var ttsFreeTextJA = "今日は、これは音声合成のデモです。"
+    @State private var ttsSelectedSampleIndex = 0
+    @State private var ttsPhonemes: String = ""
+    @State private var ttsInferenceMs: Double = 0
+    @State private var ttsAudioDurationSec: Double = 0
+    @FocusState private var ttsTextFocused: Bool
+
+    // MARK: - Music State
+
+    @State private var musicPrompt = "A gentle piano melody with soft strings"
+    @State private var musicDuration: Double = 8.0
+    @State private var musicSteps: Int = 25
+    @State private var musicSeed: String = ""
+    @State private var musicProgressStep: Int = 0
+    @State private var musicProgressTotal: Int = 0
+    @State private var musicProgressMessage: String = ""
+    @FocusState private var musicTextFocused: Bool
+
+    private let musicPresets = [
+        "A gentle piano melody with soft strings",
+        "Drum breaks 174 BPM",
+        "Glitchy bass design",
+        "Synth pluck arp with reverb and delay, 128 BPM",
+        "Birds singing in the forest",
+        "A short beautiful piano riff in C minor",
+    ]
+
+    // MARK: - Derived
 
     private var isTTS: Bool { model.configString("mode") == "tts" }
     private var voices: [String] { model.configStringArray("voices") ?? [] }
-    private var maxDuration: Double { model.configDouble("max_duration") ?? 30.0 }
+    private var maxDuration: Double { model.configDouble("max_duration") ?? 11.9 }
+
+    private var ttsVoicesForLanguage: [String] {
+        let prefixes: [String] = ttsLanguage == .english ? ["a", "b"] : ["j"]
+        return voices.filter { v in prefixes.contains(where: { v.hasPrefix($0) }) }
+    }
+
+    private var ttsSamples: [(index: Int, text: String)] {
+        // Build sample texts from config if available, otherwise use defaults
+        let allSamples: [(text: String, lang: String)]
+        if let configSamples = model.demo.config?["samples"]?.value as? [[String: Any]] {
+            allSamples = configSamples.map { dict in
+                (text: dict["text"] as? String ?? "", lang: dict["language"] as? String ?? "en")
+            }
+        } else {
+            allSamples = [
+                (text: "Hello, this is a test of text to speech.", lang: "en"),
+                (text: "The quick brown fox jumps over the lazy dog.", lang: "en"),
+                (text: "She sells seashells by the seashore.", lang: "en"),
+                (text: "今日はとてもいい天気です。", lang: "ja"),
+                (text: "吾輩は猫である。名前はまだ無い。", lang: "ja"),
+            ]
+        }
+        let code = ttsLanguage.code
+        return allSamples.enumerated()
+            .filter { $0.element.lang == code }
+            .map { (index: $0.offset, text: $0.element.text) }
+    }
+
+    private var ttsCurrentText: String {
+        if ttsInputMode == .sample {
+            let samples = ttsSamples
+            guard ttsSelectedSampleIndex < samples.count else { return "" }
+            return samples[ttsSelectedSampleIndex].text
+        }
+        return ttsLanguage == .english ? ttsFreeTextEN : ttsFreeTextJA
+    }
+
+    // MARK: - Body
 
     var body: some View {
-        VStack(spacing: 0) {
-            if outputURL != nil {
-                VStack(spacing: 16) {
-                    Image(systemName: "waveform").font(.system(size: 60)).foregroundStyle(.tint)
-                    HStack(spacing: 24) {
-                        Button { togglePlayback() } label: {
-                            Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill").font(.system(size: 44))
-                        }
-                        if let url = outputURL {
-                            ShareLink(item: url) { Image(systemName: "square.and.arrow.up").font(.title2) }
+        ScrollView {
+            VStack(spacing: 20) {
+                if isTTS {
+                    ttsBody
+                } else {
+                    musicBody
+                }
+            }
+            .padding(.vertical)
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    ttsTextFocused = false
+                    musicTextFocused = false
+                }
+            }
+        }
+        .onAppear {
+            if ttsVoice.isEmpty, let first = ttsVoicesForLanguage.first {
+                ttsVoice = first
+            }
+        }
+    }
+
+    // MARK: - TTS Body
+
+    private var ttsBody: some View {
+        VStack(spacing: 18) {
+            // Language picker
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Language")
+                    .font(.headline)
+                Picker("Language", selection: $ttsLanguage) {
+                    ForEach(TTSLanguage.allCases) { lang in
+                        Text(lang.rawValue).tag(lang)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: ttsLanguage) { _, _ in
+                    let filtered = ttsVoicesForLanguage
+                    if !filtered.contains(ttsVoice), let first = filtered.first {
+                        ttsVoice = first
+                    }
+                    ttsSelectedSampleIndex = 0
+                }
+            }
+            .padding(.horizontal)
+
+            // Voice picker
+            if !ttsVoicesForLanguage.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Voice")
+                        .font(.headline)
+                    Picker("Voice", selection: $ttsVoice) {
+                        ForEach(ttsVoicesForLanguage, id: \.self) { v in
+                            Text(v).tag(v)
                         }
                     }
-                    if let t = processingTime {
-                        Text(String(format: "Generated in %.1fs", t)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                    }
-                }.frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                VStack(spacing: 12) {
-                    Image(systemName: isTTS ? "mouth.fill" : "music.note").font(.system(size: 60)).foregroundStyle(.secondary)
-                    Text(isTTS ? "Enter text to synthesize speech" : "Enter a prompt to generate audio").foregroundStyle(.secondary)
-                }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .pickerStyle(.segmented)
+                }
+                .padding(.horizontal)
             }
 
-            VStack(spacing: 12) {
-                if isProcessing { ProgressView(status) }
-                TextField(isTTS ? "Text to speak…" : "Describe the audio…", text: $inputText, axis: .vertical)
-                    .textFieldStyle(.roundedBorder).lineLimit(2...4)
-
-                if isTTS && !voices.isEmpty {
-                    Picker("Voice", selection: $selectedVoice) {
-                        ForEach(voices, id: \.self) { v in
-                            Text(v.replacingOccurrences(of: "_", with: " ").capitalized).tag(v)
-                        }
-                    }.pickerStyle(.menu)
-                }
-                if !isTTS {
-                    HStack {
-                        Text("Duration").font(.caption2).foregroundStyle(.secondary)
-                        Slider(value: $duration, in: 1...maxDuration)
-                        Text(String(format: "%.0fs", duration)).font(.caption2.monospacedDigit()).foregroundStyle(.secondary).frame(width: 30)
+            // Input mode picker
+            VStack(alignment: .leading, spacing: 8) {
+                Picker("Input mode", selection: $ttsInputMode) {
+                    ForEach(TTSInputMode.allCases) { m in
+                        Text(m.rawValue).tag(m)
                     }
                 }
-                Button {
-                    Task { await generate() }
-                } label: {
-                    Label(isTTS ? "Speak" : "Generate", systemImage: isTTS ? "speaker.wave.3" : "wand.and.rays").frame(maxWidth: .infinity)
+                .pickerStyle(.segmented)
+
+                if ttsInputMode == .type {
+                    TextEditor(text: ttsLanguage == .english ? $ttsFreeTextEN : $ttsFreeTextJA)
+                        .focused($ttsTextFocused)
+                        .frame(minHeight: 100, maxHeight: 200)
+                        .padding(8)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color(uiColor: .separator), lineWidth: 0.5)
+                        )
+                } else {
+                    let samples = ttsSamples
+                    if !samples.isEmpty {
+                        Picker("Sample", selection: $ttsSelectedSampleIndex) {
+                            ForEach(0..<samples.count, id: \.self) { i in
+                                Text(samples[i].text)
+                                    .lineLimit(1)
+                                    .tag(i)
+                            }
+                        }
+                        .pickerStyle(.menu)
+
+                        if ttsSelectedSampleIndex < samples.count {
+                            Text(samples[ttsSelectedSampleIndex].text)
+                                .font(.body)
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                        }
+                    }
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(isProcessing || inputText.trimmingCharacters(in: .whitespaces).isEmpty)
-            }.padding()
+            }
+            .padding(.horizontal)
+
+            // Generate button
+            Button(action: { Task { await generateTTS() } }) {
+                HStack {
+                    if isProcessing {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                            .tint(.white)
+                    } else {
+                        Image(systemName: "waveform")
+                    }
+                    Text(isProcessing ? "Synthesizing..." : "Generate Speech")
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(!isProcessing && !ttsCurrentText.trimmingCharacters(in: .whitespaces).isEmpty ? Color.accentColor : Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(12)
+            }
+            .disabled(isProcessing || ttsCurrentText.trimmingCharacters(in: .whitespaces).isEmpty)
+            .padding(.horizontal)
+
+            // Processing status
+            if isProcessing {
+                Text(status)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal)
+            }
+
+            // Stats row
+            if ttsInferenceMs > 0 {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("Inference")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(String(format: "%.0f ms", ttsInferenceMs))
+                            .font(.title3.monospacedDigit())
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing) {
+                        Text("Duration")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(String(format: "%.1f s", ttsAudioDurationSec))
+                            .font(.title3.monospacedDigit())
+                    }
+                }
+                .padding(12)
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
+                .padding(.horizontal)
+            }
+
+            // Phonemes display
+            if !ttsPhonemes.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Phonemes")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(ttsPhonemes)
+                        .font(.system(.caption, design: .monospaced))
+                        .padding(8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
+                }
+                .padding(.horizontal)
+            }
+
+            // Playback controls
+            if outputURL != nil {
+                VStack(spacing: 12) {
+                    Divider()
+                    HStack(spacing: 20) {
+                        Button { togglePlayback() } label: {
+                            Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle.fill")
+                                .font(.system(size: 44))
+                                .foregroundColor(.accentColor)
+                        }
+                        if let url = outputURL {
+                            ShareLink(item: url) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.title2)
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+
+            // Error
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding(.horizontal)
+            }
         }
-        .onAppear { if selectedVoice.isEmpty { selectedVoice = voices.first ?? "" }; if inputText.isEmpty { inputText = isTTS ? "Hello, this is a test." : "Upbeat electronic dance music" } }
     }
+
+    // MARK: - Music Body
+
+    private var musicBody: some View {
+        VStack(spacing: 20) {
+            // Prompt
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Prompt", systemImage: "text.quote")
+                    .font(.headline)
+
+                TextEditor(text: $musicPrompt)
+                    .focused($musicTextFocused)
+                    .frame(minHeight: 60, maxHeight: 100)
+                    .padding(8)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(10)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(musicPresets, id: \.self) { preset in
+                            Button(preset) {
+                                musicPrompt = preset
+                            }
+                            .font(.caption)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color(uiColor: .systemGray5))
+                            .cornerRadius(8)
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal)
+
+            // Duration slider
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Duration: \(String(format: "%.1f", musicDuration))s", systemImage: "clock")
+                    .font(.headline)
+                Slider(value: $musicDuration, in: 1.0...min(11.9, maxDuration), step: 0.5)
+            }
+            .padding(.horizontal)
+
+            // Steps slider
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Steps: \(musicSteps)", systemImage: "arrow.triangle.2.circlepath")
+                    .font(.headline)
+                Slider(value: Binding(
+                    get: { Double(musicSteps) },
+                    set: { musicSteps = Int($0) }
+                ), in: 5...50, step: 1)
+            }
+            .padding(.horizontal)
+
+            // Seed
+            HStack {
+                Label("Seed", systemImage: "dice")
+                    .font(.headline)
+                TextField("Random", text: $musicSeed)
+                    .textFieldStyle(.roundedBorder)
+                    .keyboardType(.numberPad)
+                    .frame(width: 120)
+                Spacer()
+            }
+            .padding(.horizontal)
+
+            // Generate button
+            Button {
+                Task { await generateMusic() }
+            } label: {
+                HStack {
+                    if isProcessing {
+                        ProgressView()
+                            .tint(.white)
+                    }
+                    Image(systemName: "waveform")
+                    Text(isProcessing ? "Generating..." : "Generate Music")
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(!isProcessing && !musicPrompt.trimmingCharacters(in: .whitespaces).isEmpty ? Color.accentColor : Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(12)
+            }
+            .disabled(isProcessing || musicPrompt.trimmingCharacters(in: .whitespaces).isEmpty)
+            .padding(.horizontal)
+
+            // Progress bar
+            if isProcessing {
+                VStack(spacing: 8) {
+                    ProgressView(value: Double(musicProgressStep), total: Double(max(musicProgressTotal, 1)))
+                    Text(musicProgressMessage.isEmpty ? status : musicProgressMessage)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal)
+            }
+
+            // Error
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding(.horizontal)
+            }
+
+            // Playback
+            if outputURL != nil {
+                VStack(spacing: 12) {
+                    Divider()
+                    Label("Generated Audio", systemImage: "music.note")
+                        .font(.headline)
+
+                    HStack(spacing: 20) {
+                        Button { togglePlayback() } label: {
+                            Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle.fill")
+                                .font(.system(size: 44))
+                                .foregroundColor(.accentColor)
+                        }
+                        if let url = outputURL {
+                            ShareLink(item: url) {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.title2)
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+
+    // MARK: - Playback
 
     private func togglePlayback() {
-        if isPlaying { player?.stop(); isPlaying = false; return }
+        if isPlaying {
+            player?.stop()
+            isPlaying = false
+            return
+        }
         guard let url = outputURL else { return }
-        player = try? AVAudioPlayer(contentsOf: url); player?.play(); isPlaying = true
+        do {
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.play()
+            isPlaying = true
+        } catch {
+            errorMessage = "Playback error: \(error.localizedDescription)"
+        }
     }
 
-    private func generate() async {
-        isProcessing = true; outputURL = nil; isPlaying = false
+    // MARK: - TTS Generation
+
+    private func generateTTS() async {
+        ttsTextFocused = false
+        isProcessing = true
+        outputURL = nil
+        isPlaying = false
+        player?.stop()
+        errorMessage = nil
+        ttsPhonemes = ""
+        ttsInferenceMs = 0
+        ttsAudioDurationSec = 0
+
         do {
             let start = CFAbsoluteTimeGetCurrent()
-            let url: URL
-            if isTTS { url = try await generateKokoro() }
-            else { url = try await generateStableAudio() }
-            let elapsed = CFAbsoluteTimeGetCurrent() - start
-            await MainActor.run { outputURL = url; processingTime = elapsed; isProcessing = false; status = "" }
+            let url = try await generateKokoro()
+            let elapsed = (CFAbsoluteTimeGetCurrent() - start) * 1000
+
+            await MainActor.run {
+                ttsInferenceMs = elapsed
+                outputURL = url
+                isProcessing = false
+                status = ""
+            }
+
+            // Auto-play
+            await MainActor.run {
+                do {
+                    player = try AVAudioPlayer(contentsOf: url)
+                    player?.play()
+                    isPlaying = true
+                } catch {
+                    errorMessage = "Playback error: \(error.localizedDescription)"
+                }
+            }
         } catch {
-            await MainActor.run { isProcessing = false; status = "Error: \(error.localizedDescription)" }
+            await MainActor.run {
+                isProcessing = false
+                errorMessage = error.localizedDescription
+                status = ""
+            }
+        }
+    }
+
+    // MARK: - Music Generation
+
+    private func generateMusic() async {
+        musicTextFocused = false
+        isProcessing = true
+        outputURL = nil
+        isPlaying = false
+        player?.stop()
+        errorMessage = nil
+        musicProgressStep = 0
+        musicProgressTotal = 0
+        musicProgressMessage = ""
+
+        do {
+            let url = try await generateStableAudio()
+            await MainActor.run {
+                outputURL = url
+                isProcessing = false
+                status = ""
+                musicProgressMessage = ""
+            }
+        } catch {
+            await MainActor.run {
+                isProcessing = false
+                errorMessage = error.localizedDescription
+                status = ""
+            }
         }
     }
 
     // MARK: - Kokoro TTS Pipeline
 
     private func generateKokoro() async throws -> URL {
+        let text = ttsCurrentText
+
         // Load vocab
-        status = "Loading vocab…"
+        status = "Loading vocab..."
         let vocabFile = model.configString("vocab_file") ?? model.files.first { ($0.kind ?? "") == "vocab" }?.name ?? "kokoro_vocab.json"
         let vocabURL = ModelLoader.auxFileURL(modelId: model.id, fileName: vocabFile)
         var vocab: [String: Int32] = [:]
@@ -114,7 +560,8 @@ struct TextToAudioDemoView: View {
         }
 
         // Simple G2P: convert text to phonemes (simplified)
-        let phonemes = simpleG2P(inputText)
+        let phonemes = simpleG2P(text)
+        await MainActor.run { ttsPhonemes = phonemes }
 
         // Tokenize phonemes
         var tokenIds: [Int32] = [0]  // BOS
@@ -127,9 +574,9 @@ struct TextToAudioDemoView: View {
 
         // Load voice embedding
         var refS = [Float](repeating: 0, count: 256)
-        if !selectedVoice.isEmpty {
-            let voiceFile = model.files.first { $0.name.contains(selectedVoice) }?.name
-                ?? "voice_\(selectedVoice).bin"
+        if !ttsVoice.isEmpty {
+            let voiceFile = model.files.first { $0.name.contains(ttsVoice) }?.name
+                ?? "voice_\(ttsVoice).bin"
             let voiceURL = ModelLoader.auxFileURL(modelId: model.id, fileName: voiceFile)
             if let data = try? Data(contentsOf: voiceURL) {
                 let floats = data.withUnsafeBytes { Array($0.bindMemory(to: Float.self)) }
@@ -142,7 +589,7 @@ struct TextToAudioDemoView: View {
         let refSStyle = Array(refS[128..<256])  // Last 128 dims
 
         // Predictor
-        status = "Predicting duration…"
+        status = "Predicting duration..."
         let predictorFile = model.files.first { $0.name.lowercased().contains("predict") }?.name ?? model.files[0].name
         let predictor = try await ModelLoader.load(for: model, named: predictorFile)
 
@@ -163,7 +610,7 @@ struct TextToAudioDemoView: View {
             throw NSError(domain: "Kokoro", code: 1, userInfo: [NSLocalizedDescriptionKey: "Predictor output missing"])
         }
 
-        // Duration → integer frames
+        // Duration -> integer frames
         var predDur = [Int](repeating: 0, count: T)
         var totalFrames = 0
         for i in 0..<T {
@@ -176,7 +623,7 @@ struct TextToAudioDemoView: View {
         let bucket = buckets.first { $0 >= totalFrames } ?? buckets.last!
 
         // Repeat-interleave expansion
-        status = "Expanding features…"
+        status = "Expanding features..."
         let dHidden = 640, tHidden = 512
         let enAligned = try MLMultiArray(shape: [1, NSNumber(value: dHidden), NSNumber(value: bucket)], dataType: .float32)
         let asrAligned = try MLMultiArray(shape: [1, NSNumber(value: tHidden), NSNumber(value: bucket)], dataType: .float32)
@@ -206,7 +653,7 @@ struct TextToAudioDemoView: View {
         }
 
         // Decoder
-        status = "Generating audio…"
+        status = "Generating audio..."
         let decoderFile = model.files.first { $0.name.lowercased().contains("decoder") && $0.name.contains("\(bucket)") }?.name
             ?? model.files.first { $0.name.lowercased().contains("decoder") }?.name ?? model.files.last!.name
         let decoder = try await ModelLoader.load(for: model, named: decoderFile)
@@ -224,6 +671,7 @@ struct TextToAudioDemoView: View {
         }
 
         // Trim and save
+        let sampleRate = model.configInt("sample_rate") ?? 24000
         let actualSamples = totalFrames * 600
         let trimLen = min(actualSamples, audioArr.count)
         var audio = [Float](repeating: 0, count: trimLen)
@@ -236,14 +684,24 @@ struct TextToAudioDemoView: View {
             for i in 0..<trimLen { audio[i] = fp32[i] }
         }
 
-        return try writeWAV(samples: audio, sampleRate: 24000, channels: 1)
+        let audioDuration = Double(trimLen) / Double(sampleRate)
+        await MainActor.run { ttsAudioDurationSec = audioDuration }
+
+        return try writeWAV(samples: audio, sampleRate: sampleRate, channels: 1)
     }
 
     // MARK: - Stable Audio Pipeline
 
     private func generateStableAudio() async throws -> URL {
+        let seedValue: UInt64
+        if let parsed = UInt64(musicSeed), !musicSeed.isEmpty {
+            seedValue = parsed
+        } else {
+            seedValue = UInt64.random(in: 0...UInt64.max)
+        }
+
         // T5 tokenize
-        status = "Tokenizing…"
+        status = "Tokenizing..."
         let vocabFile = model.files.first { ($0.kind ?? "") == "vocab" }?.name ?? "t5_vocab.json"
         let vocabURL = ModelLoader.auxFileURL(modelId: model.id, fileName: vocabFile)
         var pieceToID: [String: Int32] = [:]
@@ -255,10 +713,10 @@ struct TextToAudioDemoView: View {
             }
         }
 
-        let tokens = t5Tokenize(inputText, vocab: pieceToID, maxLen: 64)
+        let tokens = t5Tokenize(musicPrompt, vocab: pieceToID, maxLen: 64)
 
         // Load T5 Encoder
-        status = "Encoding text…"
+        status = "Encoding text..."
         let t5File = model.files.first { $0.name.contains("T5") }?.name ?? model.files[0].name
         let t5 = try await ModelLoader.load(for: model, named: t5File)
 
@@ -283,13 +741,13 @@ struct TextToAudioDemoView: View {
         }
 
         // Number Embedder
-        status = "Embedding duration…"
+        status = "Embedding duration..."
         let neFile = model.files.first { $0.name.contains("NumberEmbedder") }?.name
         guard let neFile else { throw NSError(domain: "StableAudio", code: 2) }
         let ne = try await ModelLoader.load(for: model, named: neFile)
 
         let normSec = try MLMultiArray(shape: [1], dataType: .float16)
-        normSec.dataPointer.assumingMemoryBound(to: Float16.self)[0] = Float16(min(max(Float(duration), 0), 256) / 256.0)
+        normSec.dataPointer.assumingMemoryBound(to: Float16.self)[0] = Float16(min(max(Float(musicDuration), 0), 256) / 256.0)
 
         let neOut = try await ne.prediction(from: MLDictionaryFeatureProvider(dictionary: ["normalized_seconds": normSec]))
         guard let secEmb = neOut.featureValue(for: "seconds_embedding")?.multiArrayValue else {
@@ -316,11 +774,11 @@ struct TextToAudioDemoView: View {
         }
 
         // Create noise [1,64,256]
-        status = "Generating…"
+        status = "Generating..."
         let latent = try MLMultiArray(shape: [1, 64, 256], dataType: .float16)
         let lPtr = latent.dataPointer.assumingMemoryBound(to: Float16.self)
         let count = 64 * 256
-        var rngState: UInt64 = UInt64(arc4random())
+        var rngState: UInt64 = seedValue
         for i in stride(from: 0, to: count, by: 2) {
             rngState = rngState &* 6364136223846793005 &+ 1442695040888963407
             let u1 = max(Float.ulpOfOne, Float(rngState >> 33) / Float(1 << 31))
@@ -336,11 +794,20 @@ struct TextToAudioDemoView: View {
         let dit = try await ModelLoader.load(for: model, named: ditFile)
 
         // Diffusion loop
-        let steps = 100
+        let steps = musicSteps
         let schedule = makeSchedule(steps: steps)
 
+        await MainActor.run {
+            musicProgressTotal = steps
+            musicProgressStep = 0
+        }
+
         for i in 0..<steps {
-            if i % 10 == 0 { status = "Diffusion step \(i)/\(steps)…" }
+            await MainActor.run {
+                musicProgressStep = i
+                musicProgressMessage = "Diffusion step \(i + 1)/\(steps)"
+            }
+
             let tCurr = schedule[i], tNext = schedule[i + 1]
             let dt = tNext - tCurr
 
@@ -364,8 +831,13 @@ struct TextToAudioDemoView: View {
             }
         }
 
+        await MainActor.run {
+            musicProgressStep = steps
+            musicProgressMessage = "Decoding audio..."
+        }
+
         // VAE Decode
-        status = "Decoding audio…"
+        status = "Decoding audio..."
         let vaeFile = model.files.first { $0.name.contains("VAEDecoder") }?.name ?? model.files.last!.name
         let vae = try await ModelLoader.load(for: model, named: vaeFile)
         let vaeOut = try await vae.prediction(from: MLDictionaryFeatureProvider(dictionary: ["latent": latent]))
@@ -374,7 +846,8 @@ struct TextToAudioDemoView: View {
         }
 
         // Extract stereo audio, trim to duration
-        let trimmed = min(Int(duration * 44100), 524288)
+        let sampleRate = model.configInt("sample_rate") ?? 44100
+        let trimmed = min(Int(musicDuration * Double(sampleRate)), 524288)
         var ch0 = [Float](repeating: 0, count: trimmed)
         var ch1 = [Float](repeating: 0, count: trimmed)
         for i in 0..<trimmed {
@@ -385,7 +858,7 @@ struct TextToAudioDemoView: View {
         // Interleave for WAV
         var stereo = [Float](repeating: 0, count: trimmed * 2)
         for i in 0..<trimmed { stereo[i] = ch0[i]; stereo[trimmed + i] = ch1[i] }
-        return try writeWAV(samples: stereo, sampleRate: 44100, channels: 2)
+        return try writeWAV(samples: stereo, sampleRate: sampleRate, channels: 2)
     }
 
     private func makeSchedule(steps: Int) -> [Float] {

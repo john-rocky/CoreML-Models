@@ -3,199 +3,308 @@ import PhotosUI
 import CoreML
 import Vision
 
-/// Face comparison: two photos → embedding cosine similarity.
-/// Used by: AdaFace.
-///
-/// Expected manifest config:
-/// ```
-/// { "input_size": 112, "embedding_dim": 512, "match_threshold": 0.6 }
-/// ```
+/// Face comparison with Register + Compare + Camera tabs.
+/// Matches AdaFaceDemo: face registration, radial similarity visualization, live camera recognition.
 struct FaceCompareDemoView: View {
     let model: ModelEntry
 
-    @State private var imageA: UIImage?
-    @State private var imageB: UIImage?
-    @State private var faceA: UIImage?
-    @State private var faceB: UIImage?
-    @State private var similarity: Float?
-    @State private var isProcessing = false
-    @State private var status = ""
-    @State private var processingTime: Double?
-    @State private var itemA: PhotosPickerItem?
-    @State private var itemB: PhotosPickerItem?
+    enum Tab: String, CaseIterable { case register = "Register", compare = "Compare", camera = "Camera" }
+
+    @State private var tab: Tab = .register
+    @State private var mlModel: MLModel?
+    @State private var isModelLoaded = false
+    @State private var registeredFaces: [(String, UIImage, [Float])] = []  // (name, thumbnail, embedding)
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Picker("Tab", selection: $tab) {
+                ForEach(Tab.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+            }.pickerStyle(.segmented).padding(.horizontal).padding(.top, 4)
+
+            switch tab {
+            case .register: registerTab
+            case .compare: compareTab
+            case .camera: cameraTab
+            }
+        }
+        .task { await loadModel() }
+    }
 
     private var threshold: Float { Float(model.configDouble("match_threshold") ?? 0.6) }
 
-    var body: some View {
-        VStack(spacing: 16) {
-            HStack(spacing: 16) {
-                faceSlot(image: faceA ?? imageA, label: "Face A", item: $itemA)
-                faceSlot(image: faceB ?? imageB, label: "Face B", item: $itemB)
-            }
-            .padding(.horizontal)
+    // MARK: - Register Tab
 
-            if let sim = similarity {
-                VStack(spacing: 8) {
-                    let isMatch = sim >= threshold
-                    HStack {
-                        Image(systemName: isMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundStyle(isMatch ? .green : .red)
-                            .font(.title)
-                        VStack(alignment: .leading) {
-                            Text(isMatch ? "Same Person" : "Different People")
-                                .font(.headline)
-                            Text(String(format: "Similarity: %.3f (threshold: %.2f)", sim, threshold))
-                                .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+    @State private var registerItem: PhotosPickerItem?
+    @State private var registerImage: UIImage?
+    @State private var registerName = ""
+    @State private var registerStatus = ""
+
+    @ViewBuilder
+    private var registerTab: some View {
+        VStack(spacing: 16) {
+            if let img = registerImage {
+                Image(uiImage: img).resizable().aspectRatio(contentMode: .fill)
+                    .frame(width: 120, height: 120).clipShape(Circle())
+            } else {
+                Circle().fill(Color(.systemGray5)).frame(width: 120, height: 120)
+                    .overlay { Image(systemName: "person.crop.circle.badge.plus").font(.title).foregroundStyle(.secondary) }
+            }
+
+            PhotosPicker(selection: $registerItem, matching: .images) {
+                Label("Select Face", systemImage: "photo")
+            }.buttonStyle(.bordered)
+            .onChange(of: registerItem) { _, item in
+                guard let item else { return }
+                Task {
+                    if let data = try? await item.loadTransferable(type: Data.self),
+                       let img = UIImage(data: data) { registerImage = img }
+                }
+            }
+
+            TextField("Name", text: $registerName).textFieldStyle(.roundedBorder).frame(maxWidth: 200)
+
+            Button {
+                Task { await registerFace() }
+            } label: {
+                Label("Register", systemImage: "person.badge.plus").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(registerImage == nil || registerName.isEmpty || !isModelLoaded)
+
+            if !registerStatus.isEmpty {
+                Text(registerStatus).font(.caption).foregroundStyle(registerStatus.contains("Error") ? .red : .green)
+            }
+
+            if !registeredFaces.isEmpty {
+                List {
+                    ForEach(registeredFaces.indices, id: \.self) { i in
+                        HStack {
+                            Image(uiImage: registeredFaces[i].1).resizable().aspectRatio(contentMode: .fill)
+                                .frame(width: 40, height: 40).clipShape(Circle())
+                            Text(registeredFaces[i].0).font(.body)
                         }
                     }
-                    ProgressView(value: Double(max(0, min(1, sim))))
-                        .tint(isMatch ? .green : .red)
-                        .padding(.horizontal)
+                    .onDelete { registeredFaces.remove(atOffsets: $0) }
+                }.listStyle(.plain)
+            }
+
+            Spacer()
+        }.padding()
+    }
+
+    // MARK: - Compare Tab
+
+    @State private var compareItem: PhotosPickerItem?
+    @State private var compareImage: UIImage?
+    @State private var compareResult: (String, Float)?
+
+    @ViewBuilder
+    private var compareTab: some View {
+        VStack(spacing: 16) {
+            if let img = compareImage {
+                Image(uiImage: img).resizable().aspectRatio(contentMode: .fill)
+                    .frame(width: 150, height: 150).clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+
+            if let (name, sim) = compareResult {
+                let isMatch = sim >= threshold
+                HStack {
+                    Image(systemName: isMatch ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .foregroundStyle(isMatch ? .green : .red).font(.title)
+                    VStack(alignment: .leading) {
+                        Text(isMatch ? "Match: \(name)" : "No match").font(.headline)
+                        Text(String(format: "Similarity: %.3f", sim)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                    }
                 }
+                ProgressView(value: Double(max(0, min(1, sim)))).tint(isMatch ? .green : .red).padding(.horizontal)
+            }
+
+            // Radial visualization of all registered faces
+            if !registeredFaces.isEmpty && compareResult != nil {
+                GeometryReader { geo in
+                    let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
+                    let maxR = min(geo.size.width, geo.size.height) / 2 - 30
+
+                    // Threshold circle
+                    Circle().stroke(Color.green.opacity(0.3), lineWidth: 1)
+                        .frame(width: maxR * 2 * CGFloat(threshold), height: maxR * 2 * CGFloat(threshold))
+                        .position(center)
+
+                    ForEach(registeredFaces.indices, id: \.self) { i in
+                        let (_, thumb, emb) = registeredFaces[i]
+                        let sim = compareResult.map { _ in
+                            compareImage.flatMap { img -> Float? in
+                                guard let queryEmb = extractEmbeddingSync(img) else { return nil }
+                                return ImageUtils.cosineSimilarity(queryEmb, emb)
+                            } ?? 0
+                        } ?? Float(0)
+                        let dist = (1 - CGFloat(sim)) * maxR
+                        let angle = CGFloat(i) * 2 * .pi / CGFloat(registeredFaces.count)
+                        let pos = CGPoint(x: center.x + dist * cos(angle), y: center.y + dist * sin(angle))
+
+                        Image(uiImage: thumb).resizable().aspectRatio(contentMode: .fill)
+                            .frame(width: 40, height: 40).clipShape(Circle())
+                            .overlay(Circle().stroke(sim >= threshold ? Color.green : Color.red, lineWidth: 2))
+                            .position(pos)
+                    }
+                }.frame(height: 200)
             }
 
             Spacer()
 
-            VStack(spacing: 12) {
-                if let t = processingTime {
-                    Text(String(format: "%.2fs", t)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+            PhotosPicker(selection: $compareItem, matching: .images) {
+                Label("Select Photo to Compare", systemImage: "person.crop.rectangle").frame(maxWidth: .infinity)
+            }.buttonStyle(.bordered)
+            .onChange(of: compareItem) { _, item in
+                guard let item else { return }
+                Task {
+                    if let data = try? await item.loadTransferable(type: Data.self),
+                       let img = UIImage(data: data) {
+                        compareImage = img
+                        await compare(img)
+                    }
                 }
-                if isProcessing { ProgressView(status) }
-                Button {
-                    Task { await compare() }
-                } label: {
-                    Label("Compare Faces", systemImage: "person.2.circle").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(isProcessing || imageA == nil || imageB == nil)
             }
-            .padding()
-        }
-        .onChange(of: itemA) { _, _ in loadImage(from: itemA, into: { imageA = $0; faceA = nil; similarity = nil }) }
-        .onChange(of: itemB) { _, _ in loadImage(from: itemB, into: { imageB = $0; faceB = nil; similarity = nil }) }
+        }.padding()
     }
+
+    // MARK: - Camera Tab
+
+    @State private var liveFaceLabel = ""
+    @State private var liveSimilarity: Float = 0
+    @State private var isCameraDetecting = false
 
     @ViewBuilder
-    private func faceSlot(image: UIImage?, label: String, item: Binding<PhotosPickerItem?>) -> some View {
-        PhotosPicker(selection: item, matching: .images) {
-            ZStack {
-                if let img = image {
-                    Image(uiImage: img).resizable().aspectRatio(contentMode: .fill)
-                        .frame(width: 150, height: 150)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                } else {
-                    RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6))
-                        .frame(width: 150, height: 150)
-                        .overlay {
-                            VStack(spacing: 4) {
-                                Image(systemName: "person.crop.rectangle").font(.title2).foregroundStyle(.tertiary)
-                                Text(label).font(.caption).foregroundStyle(.tertiary)
-                            }
-                        }
+    private var cameraTab: some View {
+        ZStack(alignment: .bottom) {
+            CameraView(position: .front) { pb in
+                guard isModelLoaded, !registeredFaces.isEmpty, !isCameraDetecting else { return }
+                detectLive(pb)
+            }
+
+            if !liveFaceLabel.isEmpty {
+                HStack {
+                    Circle().fill(liveSimilarity >= threshold ? Color.green : Color.red).frame(width: 12, height: 12)
+                    Text(liveFaceLabel).font(.headline).foregroundStyle(.white)
+                    Text(String(format: "%.0f%%", liveSimilarity * 100)).font(.caption.monospacedDigit()).foregroundStyle(.white)
                 }
+                .padding(.horizontal, 16).padding(.vertical, 10)
+                .background(.ultraThinMaterial).clipShape(Capsule())
+                .padding(.bottom, 20)
+            }
+
+            if registeredFaces.isEmpty {
+                Text("Register faces first").font(.headline).foregroundStyle(.white)
+                    .padding().background(.ultraThinMaterial).clipShape(Capsule())
             }
         }
     }
 
-    private func loadImage(from item: PhotosPickerItem?, into setter: @escaping (UIImage?) -> Void) {
-        guard let item else { return }
-        Task {
-            if let data = try? await item.loadTransferable(type: Data.self),
-               let img = UIImage(data: data) {
-                await MainActor.run { setter(img) }
-            }
-        }
-    }
+    // MARK: - Model Loading
 
-    private func compare() async {
-        guard let imgA = imageA, let imgB = imageB else { return }
-        isProcessing = true; status = "Loading model…"
-
+    private func loadModel() async {
         do {
-            let mlModel = try await ModelLoader.loadPrimary(for: model)
-            let inputSize = model.configInt("input_size") ?? 112
-
-            status = "Detecting faces…"
-            let alignedA = try await detectAndAlign(imgA, size: inputSize)
-            let alignedB = try await detectAndAlign(imgB, size: inputSize)
-
-            await MainActor.run {
-                faceA = alignedA.thumbnail; faceB = alignedB.thumbnail
-            }
-
-            status = "Computing embeddings…"
-            let start = CFAbsoluteTimeGetCurrent()
-
-            let inputName = mlModel.modelDescription.inputDescriptionsByName.first {
-                $0.value.type == .image
-            }?.key ?? "face_image"
-
-            let outA = try await mlModel.prediction(from:
-                MLDictionaryFeatureProvider(dictionary: [inputName: alignedA.buffer]))
-            let outB = try await mlModel.prediction(from:
-                MLDictionaryFeatureProvider(dictionary: [inputName: alignedB.buffer]))
-
-            let embName = outA.featureNames.first(where: { $0.contains("embed") }) ?? outA.featureNames.first ?? ""
-            guard let embA = outA.featureValue(for: embName)?.multiArrayValue,
-                  let embB = outB.featureValue(for: embName)?.multiArrayValue else {
-                isProcessing = false; status = "No embedding output"; return
-            }
-
-            let vecA = ImageUtils.extractFloats(embA)
-            let vecB = ImageUtils.extractFloats(embB)
-            let sim = ImageUtils.cosineSimilarity(vecA, vecB)
-            let elapsed = CFAbsoluteTimeGetCurrent() - start
-
-            await MainActor.run {
-                similarity = sim; processingTime = elapsed
-                isProcessing = false; status = ""
-            }
+            mlModel = try await ModelLoader.loadPrimary(for: model)
+            isModelLoaded = true
         } catch {
-            await MainActor.run { isProcessing = false; status = "Error: \(error.localizedDescription)" }
+            registerStatus = "Error: \(error.localizedDescription)"
         }
     }
 
-    // MARK: - Face detection & alignment
+    // MARK: - Registration
 
-    struct AlignedFace {
-        let buffer: CVPixelBuffer
-        let thumbnail: UIImage
-    }
+    private func registerFace() async {
+        guard let image = registerImage, let model = mlModel else { return }
+        registerStatus = "Detecting face…"
 
-    private func detectAndAlign(_ image: UIImage, size: Int) async throws -> AlignedFace {
-        guard let cgImage = ImageUtils.normalizeOrientation(image) else {
-            throw NSError(domain: "FaceCompare", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid image"])
+        guard let embedding = await extractEmbedding(image) else {
+            registerStatus = "Error: No face detected"; return
         }
 
-        let faceRect = try await withCheckedThrowingContinuation { (cont: CheckedContinuation<CGRect, Error>) in
-            let req = VNDetectFaceRectanglesRequest { req, err in
-                if let err { cont.resume(throwing: err); return }
-                if let face = (req.results as? [VNFaceObservation])?.first {
-                    cont.resume(returning: face.boundingBox)
-                } else {
-                    // No face found — use center crop
-                    cont.resume(returning: CGRect(x: 0.1, y: 0.1, width: 0.8, height: 0.8))
-                }
+        let thumb = ImageUtils.resize(image, to: CGSize(width: 80, height: 80)) ?? image
+        registeredFaces.append((registerName, thumb, embedding))
+        registerStatus = "\(registerName) registered!"
+        registerName = ""; registerImage = nil; registerItem = nil
+    }
+
+    // MARK: - Comparison
+
+    private func compare(_ image: UIImage) async {
+        guard let queryEmb = await extractEmbedding(image) else {
+            compareResult = ("No face", 0); return
+        }
+        var bestName = "Unknown"; var bestSim: Float = 0
+        for (name, _, emb) in registeredFaces {
+            let sim = ImageUtils.cosineSimilarity(queryEmb, emb)
+            if sim > bestSim { bestSim = sim; bestName = name }
+        }
+        compareResult = (bestName, bestSim)
+    }
+
+    // MARK: - Live Camera
+
+    private func detectLive(_ pixelBuffer: CVPixelBuffer) {
+        isCameraDetecting = true
+        let ci = CIImage(cvPixelBuffer: pixelBuffer)
+        guard let cgImage = CIContext().createCGImage(ci, from: ci.extent),
+              let emb = extractEmbeddingSync(UIImage(cgImage: cgImage)) else {
+            isCameraDetecting = false; return
+        }
+
+        var bestName = ""; var bestSim: Float = 0
+        for (name, _, regEmb) in registeredFaces {
+            let sim = ImageUtils.cosineSimilarity(emb, regEmb)
+            if sim > bestSim { bestSim = sim; bestName = name }
+        }
+
+        DispatchQueue.main.async {
+            liveFaceLabel = bestSim >= threshold ? bestName : "Unknown"
+            liveSimilarity = bestSim
+            isCameraDetecting = false
+        }
+    }
+
+    // MARK: - Embedding Extraction
+
+    private func extractEmbedding(_ image: UIImage) async -> [Float]? {
+        guard let cgImage = ImageUtils.normalizeOrientation(image), let mlModel else { return nil }
+
+        // Detect and crop face
+        let faceRect: CGRect = await withCheckedContinuation { cont in
+            let req = VNDetectFaceRectanglesRequest { req, _ in
+                let rect = (req.results as? [VNFaceObservation])?.first?.boundingBox
+                    ?? CGRect(x: 0.1, y: 0.1, width: 0.8, height: 0.8)
+                cont.resume(returning: rect)
             }
             try? VNImageRequestHandler(cgImage: cgImage, orientation: .up).perform([req])
         }
 
-        // Expand face rect for alignment margin
         let w = CGFloat(cgImage.width), h = CGFloat(cgImage.height)
         let fx = faceRect.origin.x * w, fy = (1 - faceRect.origin.y - faceRect.height) * h
         let fw = faceRect.width * w, fh = faceRect.height * h
         let expand: CGFloat = 0.3
-        let cropRect = CGRect(
-            x: max(0, fx - fw * expand), y: max(0, fy - fh * expand),
-            width: min(w, fw * (1 + 2 * expand)), height: min(h, fh * (1 + 2 * expand))
-        ).intersection(CGRect(x: 0, y: 0, width: w, height: h))
+        let cropRect = CGRect(x: fx - fw*expand, y: fy - fh*expand, width: fw*(1+2*expand), height: fh*(1+2*expand))
+            .intersection(CGRect(x: 0, y: 0, width: w, height: h))
 
-        guard let cropped = cgImage.cropping(to: cropRect),
-              let pb = ImageUtils.pixelBuffer(from: cropped, width: size, height: size) else {
-            throw NSError(domain: "FaceCompare", code: 2, userInfo: [NSLocalizedDescriptionKey: "Face crop failed"])
-        }
+        guard let cropped = cgImage.cropping(to: cropRect) else { return nil }
+        let inputSize = model.configInt("input_size") ?? 112
+        guard let pb = ImageUtils.pixelBuffer(from: cropped, width: inputSize, height: inputSize) else { return nil }
 
-        let thumb = UIImage(cgImage: cropped)
-        return AlignedFace(buffer: pb, thumbnail: thumb)
+        let inputName = mlModel.modelDescription.inputDescriptionsByName.first { $0.value.type == .image }?.key ?? "face_image"
+        guard let output = try? await mlModel.prediction(from: MLDictionaryFeatureProvider(dictionary: [inputName: pb])) else { return nil }
+        let embName = output.featureNames.first(where: { $0.contains("embed") }) ?? output.featureNames.first ?? ""
+        guard let embArr = output.featureValue(for: embName)?.multiArrayValue else { return nil }
+        return ImageUtils.extractFloats(embArr)
+    }
+
+    private func extractEmbeddingSync(_ image: UIImage) -> [Float]? {
+        guard let cgImage = ImageUtils.normalizeOrientation(image), let mlModel else { return nil }
+        let inputSize = model.configInt("input_size") ?? 112
+        guard let pb = ImageUtils.pixelBuffer(from: cgImage, width: inputSize, height: inputSize) else { return nil }
+        let inputName = mlModel.modelDescription.inputDescriptionsByName.first { $0.value.type == .image }?.key ?? "face_image"
+        guard let output = try? mlModel.prediction(from: MLDictionaryFeatureProvider(dictionary: [inputName: pb])) else { return nil }
+        let embName = output.featureNames.first(where: { $0.contains("embed") }) ?? output.featureNames.first ?? ""
+        guard let embArr = output.featureValue(for: embName)?.multiArrayValue else { return nil }
+        return ImageUtils.extractFloats(embArr)
     }
 }

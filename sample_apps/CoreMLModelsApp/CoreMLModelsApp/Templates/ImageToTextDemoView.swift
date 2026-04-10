@@ -2,44 +2,60 @@ import SwiftUI
 import PhotosUI
 import CoreML
 
-/// Image captioning / VQA: photo → text via encoder-decoder.
-/// Used by: Florence-2.
-///
-/// Expected manifest config:
-/// ```
-/// {
-///   "vision_encoder": "Florence2VisionEncoder.mlpackage",
-///   "text_encoder": "Florence2TextEncoder.mlpackage",
-///   "decoder": "Florence2Decoder.mlpackage",
-///   "vocab_file": "florence2_vocab.json",
-///   "image_size": 768,
-///   "max_tokens": 256,
-///   "tasks": {
-///     "caption": [0, 2264, 473, 5, 2274, 6190, 116, 2],
-///     "detailed_caption": [0, 2264, 473, 5, 31962, 2274, 6190, 116, 2],
-///     "ocr": [0, 2264, 473, 5, 71307, 116, 2]
-///   }
-/// }
-/// ```
+/// Image captioning with Photo + Camera tabs.
+/// Matches Florence2Demo: task picker (Caption/Detailed/OCR), real-time camera captioning,
+/// question input for VQA mode, copy button.
 struct ImageToTextDemoView: View {
     let model: ModelEntry
 
+    enum Tab: String, CaseIterable { case photo = "Photo", camera = "Camera" }
+    enum CaptionTask: String, CaseIterable, Identifiable {
+        case caption = "Caption"
+        case detailed = "Detailed"
+        case ocr = "OCR"
+        var id: String { rawValue }
+    }
+
+    @State private var tab: Tab = .photo
     @State private var inputImage: UIImage?
-    @State private var generatedText = ""
-    @State private var selectedTask = "caption"
+    @State private var resultText = ""
+    @State private var selectedTask: CaptionTask = .caption
+    @State private var questionText = ""
     @State private var isProcessing = false
     @State private var status = ""
     @State private var processingTime: Double?
     @State private var item: PhotosPickerItem?
 
-    private var taskNames: [String] {
-        if let tasks = model.demo.config?["tasks"]?.value as? [String: Any] {
-            return Array(tasks.keys).sorted()
-        }
-        return ["caption"]
-    }
+    // Camera
+    @State private var liveCaptionText = ""
+    @State private var isCameraProcessing = false
+
+    // Models
+    @State private var visionEncoder: MLModel?
+    @State private var textEncoder: MLModel?
+    @State private var decoder: MLModel?
+    @State private var reverseVocab: [Int: String] = [:]
+    @State private var isModelLoaded = false
 
     var body: some View {
+        VStack(spacing: 0) {
+            Picker("Tab", selection: $tab) {
+                ForEach(Tab.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+            }.pickerStyle(.segmented).padding(.horizontal).padding(.top, 4)
+
+            switch tab {
+            case .photo: photoTab
+            case .camera: cameraTab
+            }
+        }
+        .task { await loadModels() }
+        .onChange(of: item) { _, _ in loadPhoto() }
+    }
+
+    // MARK: - Photo Tab
+
+    @ViewBuilder
+    private var photoTab: some View {
         VStack(spacing: 0) {
             if let img = inputImage {
                 Image(uiImage: img).resizable().aspectRatio(contentMode: .fit)
@@ -48,17 +64,19 @@ struct ImageToTextDemoView: View {
             } else {
                 VStack(spacing: 12) {
                     Image(systemName: "text.below.photo").font(.system(size: 60)).foregroundStyle(.secondary)
-                    Text("Select a photo to generate a caption").foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    Text("Select a photo to caption").foregroundStyle(.secondary)
+                }.frame(maxWidth: .infinity, maxHeight: .infinity)
             }
 
-            if !generatedText.isEmpty {
+            if !resultText.isEmpty {
                 ScrollView {
-                    Text(generatedText)
-                        .font(.body).textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
+                    HStack {
+                        Text(resultText).font(.body).textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Button { UIPasteboard.general.string = resultText } label: {
+                            Image(systemName: "doc.on.doc").font(.caption)
+                        }
+                    }.padding()
                 }
                 .frame(maxHeight: 200)
                 .background(Color(.systemGray6)).clipShape(RoundedRectangle(cornerRadius: 8))
@@ -67,15 +85,10 @@ struct ImageToTextDemoView: View {
 
             Spacer()
 
-            VStack(spacing: 12) {
-                if taskNames.count > 1 {
-                    Picker("Task", selection: $selectedTask) {
-                        ForEach(taskNames, id: \.self) { task in
-                            Text(task.replacingOccurrences(of: "_", with: " ").capitalized).tag(task)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                }
+            VStack(spacing: 8) {
+                Picker("Task", selection: $selectedTask) {
+                    ForEach(CaptionTask.allCases) { Text($0.rawValue).tag($0) }
+                }.pickerStyle(.segmented)
 
                 HStack {
                     if let t = processingTime {
@@ -83,6 +96,7 @@ struct ImageToTextDemoView: View {
                     }
                     Spacer()
                     if isProcessing { ProgressView().controlSize(.small); Text(status).font(.caption) }
+                    if !isModelLoaded { Text("Loading models…").font(.caption).foregroundStyle(.orange) }
                 }
 
                 HStack(spacing: 12) {
@@ -93,35 +107,60 @@ struct ImageToTextDemoView: View {
                     Button {
                         if let img = inputImage { Task { await runCaption(on: img) } }
                     } label: {
-                        Label("Caption", systemImage: "text.bubble").frame(maxWidth: .infinity)
+                        Label("Run", systemImage: "play.fill").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .disabled(isProcessing || inputImage == nil)
+                    .disabled(isProcessing || inputImage == nil || !isModelLoaded)
                 }
-            }
-            .padding()
-        }
-        .onChange(of: item) { _, _ in loadPhoto() }
-    }
-
-    private func loadPhoto() {
-        guard let item else { return }
-        Task {
-            if let data = try? await item.loadTransferable(type: Data.self),
-               let img = UIImage(data: data) {
-                await MainActor.run { inputImage = img; generatedText = "" }
-            }
+            }.padding()
         }
     }
 
-    private func runCaption(on image: UIImage) async {
-        isProcessing = true; generatedText = ""
+    // MARK: - Camera Tab
+
+    @ViewBuilder
+    private var cameraTab: some View {
+        ZStack(alignment: .bottom) {
+            CameraView(position: .back) { pixelBuffer in
+                guard isModelLoaded, !isCameraProcessing else { return }
+                captionFrame(pixelBuffer)
+            }
+
+            // Caption overlay
+            if !liveCaptionText.isEmpty || isCameraProcessing {
+                HStack {
+                    if isCameraProcessing { ProgressView().controlSize(.small).tint(.white) }
+                    Text(liveCaptionText.isEmpty ? "Processing…" : liveCaptionText)
+                        .font(.callout).foregroundStyle(.white)
+                        .lineLimit(3)
+                }
+                .padding(.horizontal, 16).padding(.vertical, 10)
+                .frame(maxWidth: .infinity)
+                .background(.ultraThinMaterial)
+            }
+        }
+    }
+
+    // MARK: - Model Loading
+
+    private func loadModels() async {
+        status = "Loading models…"
         do {
+            let veFile = model.configString("vision_encoder")
+                ?? model.files.first { $0.name.lowercased().contains("vision") }?.name ?? model.files[0].name
+            visionEncoder = try await ModelLoader.load(for: model, named: veFile)
+
+            let teFile = model.configString("text_encoder")
+                ?? model.files.first { $0.name.lowercased().contains("textencoder") }?.name
+            if let teFile { textEncoder = try await ModelLoader.load(for: model, named: teFile) }
+
+            let decFile = model.configString("decoder")
+                ?? model.files.first { $0.name.lowercased().contains("decoder") }?.name
+            if let decFile { decoder = try await ModelLoader.load(for: model, named: decFile) }
+
             // Load vocab
-            status = "Loading vocab…"
             let vocabFile = model.configString("vocab_file")
                 ?? model.files.first { ($0.kind ?? "") == "vocab" }?.name
-            var reverseVocab: [Int: String] = [:]
             if let vf = vocabFile {
                 let url = ModelLoader.auxFileURL(modelId: model.id, fileName: vf)
                 if let data = try? Data(contentsOf: url),
@@ -133,146 +172,162 @@ struct ImageToTextDemoView: View {
                 }
             }
 
-            // Load models
-            status = "Loading vision encoder…"
-            let veFile = model.configString("vision_encoder")
-                ?? model.files.first { $0.name.lowercased().contains("vision") }?.name ?? model.files[0].name
-            let visionEncoder = try await ModelLoader.load(for: model, named: veFile)
+            await MainActor.run { isModelLoaded = true; status = "" }
+        } catch {
+            await MainActor.run { status = "Load failed: \(error.localizedDescription)" }
+        }
+    }
 
-            status = "Loading text encoder…"
-            let teFile = model.configString("text_encoder")
-                ?? model.files.first { $0.name.lowercased().contains("textencoder") }?.name
-            let textEncoder = teFile != nil ? try await ModelLoader.load(for: model, named: teFile!) : nil
+    // MARK: - Photo Caption
 
-            status = "Loading decoder…"
-            let decFile = model.configString("decoder")
-                ?? model.files.first { $0.name.lowercased().contains("decoder") }?.name
-            let decoder = decFile != nil ? try await ModelLoader.load(for: model, named: decFile!) : nil
-
-            let imageSize = model.configInt("image_size") ?? 768
-            let maxTokens = model.configInt("max_tokens") ?? 256
-
-            guard let pb = ImageUtils.pixelBuffer(from: image, width: imageSize, height: imageSize) else {
-                isProcessing = false; status = "Image prep failed"; return
+    private func loadPhoto() {
+        guard let item else { return }
+        Task {
+            if let data = try? await item.loadTransferable(type: Data.self),
+               let img = UIImage(data: data) {
+                await MainActor.run { inputImage = img; resultText = "" }
             }
+        }
+    }
 
-            let start = CFAbsoluteTimeGetCurrent()
-
-            // 1. Vision encode
-            status = "Encoding image…"
-            let veInputName = visionEncoder.modelDescription.inputDescriptionsByName.first {
-                $0.value.type == .image
-            }?.key ?? "image"
-            let veOutput = try await visionEncoder.prediction(from:
-                MLDictionaryFeatureProvider(dictionary: [veInputName: pb]))
-            let imageFeatures = veOutput.featureNames.compactMap {
-                veOutput.featureValue(for: $0)?.multiArrayValue
-            }.first
-
-            // Get task input_ids from config
-            let taskIds: [Int]
-            if let tasks = model.demo.config?["tasks"]?.value as? [String: Any],
-               let ids = tasks[selectedTask] as? [Int] {
-                taskIds = ids
-            } else {
-                taskIds = [0, 2]  // BOS + EOS fallback
-            }
-
-            // 2. Text encode (if separate text encoder)
-            var encoderHiddenStates: MLMultiArray?
-            if let textEncoder, let imgFeat = imageFeatures {
-                status = "Encoding text…"
-                let inputIds = try MLMultiArray(shape: [1, NSNumber(value: taskIds.count)], dataType: .int32)
-                for (i, tok) in taskIds.enumerated() { inputIds[i] = NSNumber(value: tok) }
-
-                var teDict: [String: Any] = ["input_ids": inputIds]
-                let teNames = textEncoder.modelDescription.inputDescriptionsByName
-                for (key, _) in teNames {
-                    if key.contains("image") || key.contains("feature") { teDict[key] = imgFeat }
-                }
-
-                let teOutput = try await textEncoder.prediction(from: MLDictionaryFeatureProvider(dictionary: teDict))
-                encoderHiddenStates = teOutput.featureNames.compactMap {
-                    teOutput.featureValue(for: $0)?.multiArrayValue
-                }.first
-            } else if let imgFeat = imageFeatures {
-                encoderHiddenStates = imgFeat
-            }
-
-            // 3. Autoregressive decode
-            guard let decoder, let encHS = encoderHiddenStates else {
-                // Single model — try to get text output directly
-                if let textOut = veOutput.featureNames.compactMap({
-                    veOutput.featureValue(for: $0)?.stringValue
-                }).first {
-                    await MainActor.run {
-                        generatedText = textOut
-                        processingTime = CFAbsoluteTimeGetCurrent() - start
-                        isProcessing = false; status = ""
-                    }
-                    return
-                }
-                isProcessing = false; status = "Missing decoder model"; return
-            }
-
-            status = "Generating text…"
-            let decoderStartTokenId: Int32 = 2  // </s> for Florence-2
-            let eosTokenId: Int32 = 2
-            var generatedIds: [Int32] = [decoderStartTokenId]
-
-            for _ in 0..<maxTokens {
-                let decInputIds = try MLMultiArray(shape: [1, NSNumber(value: generatedIds.count)], dataType: .int32)
-                for (i, tok) in generatedIds.enumerated() { decInputIds[i] = NSNumber(value: tok) }
-
-                let decNames = decoder.modelDescription.inputDescriptionsByName
-                var decDict: [String: Any] = [:]
-                for (key, _) in decNames {
-                    if key.contains("decoder") && key.contains("input") { decDict[key] = decInputIds }
-                    else if key.contains("encoder") || key.contains("hidden") { decDict[key] = encHS }
-                }
-                if decDict.isEmpty { decDict = ["decoder_input_ids": decInputIds, "encoder_hidden_states": encHS] }
-
-                let decOutput = try await decoder.prediction(from: MLDictionaryFeatureProvider(dictionary: decDict))
-
-                // Argmax on last token logits
-                guard let logits = decOutput.featureNames.compactMap({
-                    decOutput.featureValue(for: $0)?.multiArrayValue
-                }).first else { break }
-
-                let shape = logits.shape.map { $0.intValue }
-                let vocabSize = shape.last ?? 0
-                let seqLen = shape.count == 3 ? shape[1] : 1
-                let lastTokenOffset = (seqLen - 1) * vocabSize
-
-                var maxVal: Float = -.greatestFiniteMagnitude
-                var maxIdx: Int32 = 0
-                for v in 0..<vocabSize {
-                    let val = ImageUtils.readFloat(logits, at: lastTokenOffset + v)
-                    if val > maxVal { maxVal = val; maxIdx = Int32(v) }
-                }
-
-                if maxIdx == eosTokenId { break }
-                generatedIds.append(maxIdx)
-            }
-
-            // Decode tokens to text
-            let text = generatedIds.dropFirst().compactMap { id -> String? in
-                guard let piece = reverseVocab[Int(id)] else { return nil }
-                if [0, 1, 2].contains(Int(id)) { return nil }  // Skip special tokens
-                return piece
-            }.joined()
-                .replacingOccurrences(of: "\u{0120}", with: " ")  // GPT-2 space encoding
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-
-            let elapsed = CFAbsoluteTimeGetCurrent() - start
-
-            await MainActor.run {
-                generatedText = text
-                processingTime = elapsed
-                isProcessing = false; status = ""
-            }
+    private func runCaption(on image: UIImage) async {
+        isProcessing = true; resultText = ""
+        do {
+            let text = try await runPipeline(image: image, task: selectedTask)
+            let elapsed = processingTime  // set inside pipeline
+            await MainActor.run { resultText = text; isProcessing = false }
         } catch {
             await MainActor.run { isProcessing = false; status = "Error: \(error.localizedDescription)" }
         }
+    }
+
+    // MARK: - Camera Caption
+
+    @State private var cameraFrameSkip = 0
+
+    private func captionFrame(_ pixelBuffer: CVPixelBuffer) {
+        cameraFrameSkip += 1
+        guard cameraFrameSkip % 30 == 0 else { return }  // ~1 FPS for captioning
+
+        isCameraProcessing = true
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+        guard let cgImage = CIContext().createCGImage(ciImage, from: ciImage.extent) else {
+            isCameraProcessing = false; return
+        }
+
+        Task {
+            do {
+                let text = try await runPipeline(image: UIImage(cgImage: cgImage), task: .caption)
+                await MainActor.run { liveCaptionText = text; isCameraProcessing = false }
+            } catch {
+                await MainActor.run { isCameraProcessing = false }
+            }
+        }
+    }
+
+    // MARK: - Inference Pipeline
+
+    private func runPipeline(image: UIImage, task: CaptionTask) async throws -> String {
+        guard let visionEncoder else { throw NSError(domain: "F2", code: 1) }
+
+        let imageSize = model.configInt("image_size") ?? 768
+        let maxTokens = model.configInt("max_tokens") ?? 256
+
+        guard let pb = ImageUtils.pixelBuffer(from: image, width: imageSize, height: imageSize) else {
+            throw NSError(domain: "F2", code: 2)
+        }
+
+        let start = CFAbsoluteTimeGetCurrent()
+
+        // Vision encode
+        await MainActor.run { status = "Encoding image…" }
+        let veInputName = visionEncoder.modelDescription.inputDescriptionsByName.first {
+            $0.value.type == .image
+        }?.key ?? "image"
+        let veOutput = try await visionEncoder.prediction(from:
+            MLDictionaryFeatureProvider(dictionary: [veInputName: pb]))
+        let imageFeatures = veOutput.featureNames.compactMap {
+            veOutput.featureValue(for: $0)?.multiArrayValue
+        }.first
+
+        // Task input IDs
+        let taskIds: [Int]
+        if let tasks = model.demo.config?["tasks"]?.value as? [String: Any],
+           let ids = tasks[task.rawValue.lowercased()] as? [Int] {
+            taskIds = ids
+        } else if let tasks = model.demo.config?["tasks"]?.value as? [String: Any],
+                  let ids = tasks[task.rawValue.lowercased().replacingOccurrences(of: " ", with: "_")] as? [Int] {
+            taskIds = ids
+        } else {
+            taskIds = [0, 2]
+        }
+
+        // Text encode
+        var encoderHiddenStates: MLMultiArray?
+        if let textEncoder, let imgFeat = imageFeatures {
+            await MainActor.run { status = "Encoding text…" }
+            let inputIds = try MLMultiArray(shape: [1, NSNumber(value: taskIds.count)], dataType: .int32)
+            for (i, tok) in taskIds.enumerated() { inputIds[i] = NSNumber(value: tok) }
+            var teDict: [String: Any] = ["input_ids": inputIds]
+            for (key, _) in textEncoder.modelDescription.inputDescriptionsByName {
+                if key.contains("image") || key.contains("feature") { teDict[key] = imgFeat }
+            }
+            let teOutput = try await textEncoder.prediction(from: MLDictionaryFeatureProvider(dictionary: teDict))
+            encoderHiddenStates = teOutput.featureNames.compactMap { teOutput.featureValue(for: $0)?.multiArrayValue }.first
+        } else {
+            encoderHiddenStates = imageFeatures
+        }
+
+        // Autoregressive decode
+        guard let decoder, let encHS = encoderHiddenStates else {
+            // Single model — try text output directly
+            if let text = veOutput.featureNames.compactMap({ veOutput.featureValue(for: $0)?.stringValue }).first {
+                await MainActor.run { processingTime = CFAbsoluteTimeGetCurrent() - start }
+                return text
+            }
+            throw NSError(domain: "F2", code: 3)
+        }
+
+        await MainActor.run { status = "Generating…" }
+        let eosTokenId: Int32 = 2
+        var generatedIds: [Int32] = [2]
+
+        for _ in 0..<maxTokens {
+            let decInputIds = try MLMultiArray(shape: [1, NSNumber(value: generatedIds.count)], dataType: .int32)
+            for (i, tok) in generatedIds.enumerated() { decInputIds[i] = NSNumber(value: tok) }
+
+            var decDict: [String: Any] = [:]
+            for (key, _) in decoder.modelDescription.inputDescriptionsByName {
+                if key.contains("decoder") && key.contains("input") { decDict[key] = decInputIds }
+                else if key.contains("encoder") || key.contains("hidden") { decDict[key] = encHS }
+            }
+            if decDict.isEmpty { decDict = ["decoder_input_ids": decInputIds, "encoder_hidden_states": encHS] }
+
+            let decOutput = try await decoder.prediction(from: MLDictionaryFeatureProvider(dictionary: decDict))
+            guard let logits = decOutput.featureNames.compactMap({ decOutput.featureValue(for: $0)?.multiArrayValue }).first else { break }
+
+            let shape = logits.shape.map { $0.intValue }
+            let vocabSize = shape.last ?? 0
+            let seqLen = shape.count == 3 ? shape[1] : 1
+            let lastOffset = (seqLen - 1) * vocabSize
+
+            var maxVal: Float = -.greatestFiniteMagnitude; var maxIdx: Int32 = 0
+            for v in 0..<vocabSize {
+                let val = ImageUtils.readFloat(logits, at: lastOffset + v)
+                if val > maxVal { maxVal = val; maxIdx = Int32(v) }
+            }
+            if maxIdx == eosTokenId { break }
+            generatedIds.append(maxIdx)
+        }
+
+        let elapsed = CFAbsoluteTimeGetCurrent() - start
+        await MainActor.run { processingTime = elapsed }
+
+        return generatedIds.dropFirst().compactMap { id -> String? in
+            guard let piece = reverseVocab[Int(id)], ![0,1,2].contains(Int(id)) else { return nil }
+            return piece
+        }.joined()
+            .replacingOccurrences(of: "\u{0120}", with: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
