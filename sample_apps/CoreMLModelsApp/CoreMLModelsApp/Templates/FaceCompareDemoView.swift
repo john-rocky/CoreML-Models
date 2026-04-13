@@ -28,6 +28,10 @@ struct FaceCompareDemoView: View {
             }
         }
         .task { await loadModel() }
+        .onDisappear {
+            mlModel = nil
+            registeredFaces.removeAll()
+        }
     }
 
     private var threshold: Float { Float(model.configDouble("match_threshold") ?? 0.6) }

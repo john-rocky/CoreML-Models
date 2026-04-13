@@ -78,6 +78,10 @@ struct ImageDetectionDemoView: View {
         }
         .task { await loadModel() }
         .onChange(of: item) { _, _ in loadAndDetectPhoto() }
+        .onDisappear {
+            vnModel = nil
+            mlModel = nil
+        }
     }
 
     // MARK: - Camera View

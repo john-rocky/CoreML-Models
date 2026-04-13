@@ -96,6 +96,11 @@ struct ChatDemoView: View {
             }
         }
         .task { await loadModel() }
+        .onDisappear {
+            llm?.reset()
+            llm = nil
+            messages.removeAll()
+        }
     }
 
     // MARK: - Model Loading

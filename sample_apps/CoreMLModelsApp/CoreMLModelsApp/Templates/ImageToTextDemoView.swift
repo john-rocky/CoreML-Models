@@ -50,6 +50,12 @@ struct ImageToTextDemoView: View {
         }
         .task { await loadModels() }
         .onChange(of: item) { _, _ in loadPhoto() }
+        .onDisappear {
+            visionEncoder = nil
+            textEncoder = nil
+            decoder = nil
+            reverseVocab.removeAll()
+        }
     }
 
     // MARK: - Photo Tab

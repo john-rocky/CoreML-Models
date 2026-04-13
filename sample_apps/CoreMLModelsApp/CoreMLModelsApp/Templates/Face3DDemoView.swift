@@ -70,6 +70,10 @@ struct Face3DDemoView: View {
         }
         .task { await loadModel() }
         .onChange(of: item) { _, _ in loadAndRun() }
+        .onDisappear {
+            mlModel = nil
+            sceneNode = nil
+        }
     }
 
     @ViewBuilder
