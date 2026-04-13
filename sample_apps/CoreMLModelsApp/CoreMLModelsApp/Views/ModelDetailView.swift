@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreMLLLM
 
 struct ModelDetailView: View {
     @EnvironmentObject var catalog: ModelCatalog
@@ -77,12 +78,23 @@ struct ModelDetailView: View {
 
 /// Section that observes the per-model downloader directly via @ObservedObject.
 /// Split out from ModelDetailView so SwiftUI re-renders when downloader.state changes.
+/// For LLM models (chat template), delegates to LLMDownloadSection which observes
+/// the CoreMLLLM.ModelDownloader instead.
 struct DownloadSection: View {
     let model: ModelEntry
     @ObservedObject var downloader: ModelDownloader
     @EnvironmentObject var catalog: ModelCatalog
 
     var body: some View {
+        if catalog.llmModelInfo(for: model) != nil {
+            LLMDownloadSection(model: model)
+        } else {
+            regularBody
+        }
+    }
+
+    @ViewBuilder
+    private var regularBody: some View {
         Group {
             if catalog.isInstalled(model) {
                 installedControls
@@ -131,6 +143,76 @@ struct DownloadSection: View {
     private var downloadButton: some View {
         Button {
             print("[DL] tap → startDownload \(model.id)")
+            catalog.startDownload(for: model)
+        } label: {
+            Label("Download \(formatBytes(model.downloadSize))", systemImage: "icloud.and.arrow.down")
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.borderedProminent)
+    }
+}
+
+/// Download section for LLM models that uses CoreMLLLM.ModelDownloader.
+/// The package downloader is @Observable so SwiftUI tracks property reads automatically.
+struct LLMDownloadSection: View {
+    let model: ModelEntry
+    @EnvironmentObject var catalog: ModelCatalog
+    private var llmDL: CoreMLLLM.ModelDownloader { .shared }
+
+    var body: some View {
+        Group {
+            if catalog.isInstalled(model) {
+                installedControls
+            } else if llmDL.isDownloading,
+                      llmDL.downloadingModelId == catalog.llmModelInfo(for: model)?.id {
+                progressView
+            } else {
+                downloadButton
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var installedControls: some View {
+        HStack(spacing: 12) {
+            NavigationLink {
+                DemoLauncherView(model: model)
+            } label: {
+                Label("Try It", systemImage: "play.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            Button(role: .destructive) {
+                catalog.deleteInstall(of: model)
+            } label: {
+                Image(systemName: "trash")
+            }
+            .buttonStyle(.bordered)
+        }
+    }
+
+    @ViewBuilder
+    private var progressView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ProgressView(value: llmDL.progress) {
+                Text(llmDL.status.isEmpty ? "Downloading…" : llmDL.status)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if llmDL.isPaused {
+                HStack {
+                    Button("Resume") { llmDL.resumeDownload() }
+                        .buttonStyle(.borderedProminent).controlSize(.small)
+                    Button("Cancel", role: .destructive) { llmDL.cancelDownload() }
+                        .buttonStyle(.bordered).controlSize(.small)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var downloadButton: some View {
+        Button {
             catalog.startDownload(for: model)
         } label: {
             Label("Download \(formatBytes(model.downloadSize))", systemImage: "icloud.and.arrow.down")

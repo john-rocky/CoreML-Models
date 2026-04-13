@@ -102,16 +102,16 @@ struct ChatDemoView: View {
 
     private func loadModel() async {
         isLoading = true
-        status = "Compiling model…"
+        status = "Loading model…"
 
         do {
-            let modelDir = Paths.modelDir(id: model.id)
-
-            // Find the model directory (may be nested after zip extraction)
-            let dir = findModelDir(in: modelDir) ?? modelDir
-
-            print("[Chat] Loading from: \(dir.path)")
-            let loaded = try await CoreMLLLM.load(from: dir, computeUnits: .cpuAndNeuralEngine)
+            let llmInfo = llmModelInfoForEntry()
+            let loaded = try await CoreMLLLM.load(
+                model: llmInfo,
+                computeUnits: .cpuAndNeuralEngine
+            ) { s in
+                Task { @MainActor in status = s }
+            }
 
             await MainActor.run {
                 llm = loaded
@@ -127,20 +127,12 @@ struct ChatDemoView: View {
         }
     }
 
-    /// Find a directory containing model_config.json (CoreML-LLM layout).
-    private func findModelDir(in dir: URL) -> URL? {
-        let fm = FileManager.default
-        let configPath = dir.appendingPathComponent("model_config.json").path
-        if fm.fileExists(atPath: configPath) { return dir }
-
-        guard let enumerator = fm.enumerator(at: dir, includingPropertiesForKeys: [.isDirectoryKey],
-                                              options: [.skipsHiddenFiles]) else { return nil }
-        for case let url as URL in enumerator {
-            if url.lastPathComponent == "model_config.json" {
-                return url.deletingLastPathComponent()
-            }
-        }
-        return nil
+    /// Map this manifest model entry to a CoreMLLLM.ModelDownloader.ModelInfo.
+    private func llmModelInfoForEntry() -> CoreMLLLM.ModelDownloader.ModelInfo {
+        let normalized = model.id.replacingOccurrences(of: "_", with: "-")
+        return CoreMLLLM.ModelDownloader.ModelInfo.defaults.first {
+            $0.folderName == normalized || $0.id == normalized
+        } ?? .gemma4e2b
     }
 
     // MARK: - Chat
@@ -150,11 +142,12 @@ struct ChatDemoView: View {
         guard !text.isEmpty, let llm, !isGenerating else { return }
 
         let image = selectedImage?.cgImage
+        let displayImage = selectedImage
         inputText = ""
         selectedImage = nil
         photoItem = nil
 
-        messages.append(ChatMessage(role: .user, content: text, image: selectedImage))
+        messages.append(ChatMessage(role: .user, content: text, image: displayImage))
         messages.append(ChatMessage(role: .assistant, content: ""))
 
         isGenerating = true
