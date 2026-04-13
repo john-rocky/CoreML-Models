@@ -12,3 +12,9 @@ models_draft.json
 
 # Vendored upstream repos (clone from README link, do not commit)
 conversion_scripts/MoGe/
+
+# Boxer large files
+conversion_scripts/boxer/ckpts/
+converted_models/Boxer.mlpackage
+sample_apps/BoxerDemo/BoxerDemo/Boxer.mlpackage
+*.ckpt
