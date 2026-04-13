@@ -129,15 +129,10 @@ struct ImageDetectionDemoView: View {
     @ViewBuilder
     private var videoView: some View {
         if let frame = videoFrame {
-            GeometryReader { geo in
-                ZStack {
-                    Image(uiImage: frame)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    BoundingBoxOverlay(detections: videoDetections)
-                }
-            }
+            Image(uiImage: frame)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .overlay { BoundingBoxOverlay(detections: videoDetections) }
         } else {
             VStack(spacing: 12) {
                 Image(systemName: "video.badge.plus").font(.system(size: 60)).foregroundStyle(.secondary)
