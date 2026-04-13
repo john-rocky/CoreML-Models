@@ -35,7 +35,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     ) {
         print("[App] Background session event for: \(identifier)")
         if identifier == "com.coreml-llm.model-download" {
-            CoreMLLLM.ModelDownloader.shared.backgroundCompletionHandler = completionHandler
+            ModelDownloader.shared.backgroundCompletionHandler = completionHandler
         } else {
             AppDelegate.backgroundCompletionHandler = completionHandler
         }

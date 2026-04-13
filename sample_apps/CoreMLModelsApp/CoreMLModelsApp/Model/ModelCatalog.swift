@@ -15,16 +15,16 @@ final class ModelCatalog: ObservableObject {
     @Published private(set) var isLoading = false
     @Published private(set) var installedIds: Set<String> = []
 
-    private var downloaders: [String: ModelDownloader] = [:]
+    private var downloaders: [String: ModelFileDownloader] = [:]
 
     // MARK: - LLM Model Routing
 
-    /// Maps a manifest model entry to a CoreMLLLM.ModelDownloader.ModelInfo
+    /// Maps a manifest model entry to a ModelDownloader.ModelInfo
     /// if it's an LLM model (chat template). Returns nil for non-LLM models.
-    func llmModelInfo(for model: ModelEntry) -> CoreMLLLM.ModelDownloader.ModelInfo? {
+    func llmModelInfo(for model: ModelEntry) -> ModelDownloader.ModelInfo? {
         guard model.demo.template == "chat" else { return nil }
         let normalized = model.id.replacingOccurrences(of: "_", with: "-")
-        return CoreMLLLM.ModelDownloader.ModelInfo.defaults.first {
+        return ModelDownloader.ModelInfo.defaults.first {
             $0.folderName == normalized || $0.id == normalized
         }
     }
@@ -59,9 +59,9 @@ final class ModelCatalog: ObservableObject {
 
     // MARK: - Downloaders
 
-    func downloader(for model: ModelEntry) -> ModelDownloader {
+    func downloader(for model: ModelEntry) -> ModelFileDownloader {
         if let existing = downloaders[model.id] { return existing }
-        let new = ModelDownloader(modelId: model.id)
+        let new = ModelFileDownloader(modelId: model.id)
         downloaders[model.id] = new
         return new
     }
@@ -70,7 +70,7 @@ final class ModelCatalog: ObservableObject {
         if let llmInfo = llmModelInfo(for: model) {
             Task {
                 do {
-                    _ = try await CoreMLLLM.ModelDownloader.shared.download(llmInfo)
+                    _ = try await ModelDownloader.shared.download(llmInfo)
                     installedIds.insert(model.id)
                 } catch {
                     print("[Catalog] LLM download failed: \(error)")
@@ -87,7 +87,7 @@ final class ModelCatalog: ObservableObject {
 
     func deleteInstall(of model: ModelEntry) {
         if let llmInfo = llmModelInfo(for: model) {
-            try? CoreMLLLM.ModelDownloader.shared.delete(llmInfo)
+            try? ModelDownloader.shared.delete(llmInfo)
             installedIds.remove(model.id)
             return
         }
@@ -99,7 +99,7 @@ final class ModelCatalog: ObservableObject {
 
     func isInstalled(_ model: ModelEntry) -> Bool {
         if let llmInfo = llmModelInfo(for: model) {
-            return CoreMLLLM.ModelDownloader.shared.isDownloaded(llmInfo)
+            return ModelDownloader.shared.isDownloaded(llmInfo)
         }
         return installedIds.contains(model.id)
     }

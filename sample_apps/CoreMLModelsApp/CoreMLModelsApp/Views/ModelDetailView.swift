@@ -79,10 +79,10 @@ struct ModelDetailView: View {
 /// Section that observes the per-model downloader directly via @ObservedObject.
 /// Split out from ModelDetailView so SwiftUI re-renders when downloader.state changes.
 /// For LLM models (chat template), delegates to LLMDownloadSection which observes
-/// the CoreMLLLM.ModelDownloader instead.
+/// the ModelDownloader instead.
 struct DownloadSection: View {
     let model: ModelEntry
-    @ObservedObject var downloader: ModelDownloader
+    @ObservedObject var downloader: ModelFileDownloader
     @EnvironmentObject var catalog: ModelCatalog
 
     var body: some View {
@@ -152,12 +152,12 @@ struct DownloadSection: View {
     }
 }
 
-/// Download section for LLM models that uses CoreMLLLM.ModelDownloader.
+/// Download section for LLM models that uses ModelDownloader.
 /// The package downloader is @Observable so SwiftUI tracks property reads automatically.
 struct LLMDownloadSection: View {
     let model: ModelEntry
     @EnvironmentObject var catalog: ModelCatalog
-    private var llmDL: CoreMLLLM.ModelDownloader { .shared }
+    private var llmDL: ModelDownloader { .shared }
 
     var body: some View {
         Group {

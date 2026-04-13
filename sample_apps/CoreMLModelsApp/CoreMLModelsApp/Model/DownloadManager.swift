@@ -48,7 +48,7 @@ struct ModelDownloadState: Equatable {
 /// - ZIP unpacking
 /// - `.meta.json` marker on completion
 @MainActor
-final class ModelDownloader: NSObject, ObservableObject {
+final class ModelFileDownloader: NSObject, ObservableObject {
     @Published private(set) var state = ModelDownloadState()
     let modelId: String
 
@@ -246,7 +246,7 @@ final class ModelDownloader: NSObject, ObservableObject {
 
 // MARK: - URLSessionDownloadDelegate (background download callbacks)
 
-extension ModelDownloader: URLSessionDownloadDelegate {
+extension ModelFileDownloader: URLSessionDownloadDelegate {
     nonisolated func urlSession(
         _ session: URLSession,
         downloadTask: URLSessionDownloadTask,

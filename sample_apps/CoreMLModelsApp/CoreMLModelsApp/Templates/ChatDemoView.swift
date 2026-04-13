@@ -127,10 +127,10 @@ struct ChatDemoView: View {
         }
     }
 
-    /// Map this manifest model entry to a CoreMLLLM.ModelDownloader.ModelInfo.
-    private func llmModelInfoForEntry() -> CoreMLLLM.ModelDownloader.ModelInfo {
+    /// Map this manifest model entry to a ModelDownloader.ModelInfo.
+    private func llmModelInfoForEntry() -> ModelDownloader.ModelInfo {
         let normalized = model.id.replacingOccurrences(of: "_", with: "-")
-        return CoreMLLLM.ModelDownloader.ModelInfo.defaults.first {
+        return ModelDownloader.ModelInfo.defaults.first {
             $0.folderName == normalized || $0.id == normalized
         } ?? .gemma4e2b
     }
