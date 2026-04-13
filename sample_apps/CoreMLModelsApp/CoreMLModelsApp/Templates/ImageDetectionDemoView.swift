@@ -2,14 +2,15 @@ import SwiftUI
 import PhotosUI
 import CoreML
 import Vision
+import AVFoundation
 
-/// Object detection with real-time camera + photo picker.
+/// Object detection with real-time camera, photo picker, and video processing.
 /// Matches YOLO26Demo / YOLOv9Demo UX: live camera feed with bounding box overlays,
-/// photo mode with annotated results, FPS/latency display.
+/// photo mode with annotated results, video mode with frame-by-frame detection.
 struct ImageDetectionDemoView: View {
     let model: ModelEntry
 
-    enum Mode: String, CaseIterable { case camera = "Camera", photo = "Photo" }
+    enum Mode: String, CaseIterable { case camera = "Camera", video = "Video", photo = "Photo" }
 
     @State private var mode: Mode = .camera
     @State private var inputImage: UIImage?
@@ -24,6 +25,14 @@ struct ImageDetectionDemoView: View {
     @State private var vnModel: VNCoreMLModel?
     @State private var mlModel: MLModel?
     @State private var isModelLoaded = false
+
+    // Video state
+    @State private var videoItem: PhotosPickerItem?
+    @State private var videoFrame: UIImage?
+    @State private var videoDetections: [BoundingBoxOverlay.DetectionBox] = []
+    @State private var videoProgress: Double = 0
+    @State private var videoFps: Double = 0
+    @State private var videoTask: Task<Void, Never>?
 
     private var labels: [String] { model.configStringArray("labels") ?? Self.cocoLabels }
     private var inputSize: Int { model.configInt("input_size") ?? 640 }
@@ -41,6 +50,8 @@ struct ImageDetectionDemoView: View {
                 switch mode {
                 case .camera:
                     cameraView
+                case .video:
+                    videoView
                 case .photo:
                     photoView
                 }
@@ -51,6 +62,8 @@ struct ImageDetectionDemoView: View {
             HStack {
                 if mode == .camera {
                     Text(String(format: "%.1f FPS", fps)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                } else if mode == .video && videoFrame != nil {
+                    Text(String(format: "%.1f FPS", videoFps)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                 } else if let t = processingTime {
                     Text(String(format: "%.2fs", t)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                 }
@@ -74,11 +87,25 @@ struct ImageDetectionDemoView: View {
                         Label("Select Photo", systemImage: "photo.badge.plus").frame(maxWidth: .infinity)
                     }.buttonStyle(.bordered).disabled(isProcessing)
                 }.padding(.horizontal).padding(.bottom, 8)
+            } else if mode == .video {
+                VStack(spacing: 8) {
+                    if videoFrame != nil {
+                        ProgressView(value: videoProgress).tint(.blue).padding(.horizontal)
+                    }
+                    PhotosPicker(selection: $videoItem, matching: .videos) {
+                        Label("Select Video", systemImage: "video.badge.plus").frame(maxWidth: .infinity)
+                    }.buttonStyle(.bordered).disabled(isProcessing)
+                }.padding(.horizontal).padding(.bottom, 8)
             }
         }
         .task { await loadModel() }
         .onChange(of: item) { _, _ in loadAndDetectPhoto() }
+        .onChange(of: videoItem) { _, _ in loadAndProcessVideo() }
+        .onChange(of: mode) { _, newMode in
+            if newMode != .video { videoTask?.cancel() }
+        }
         .onDisappear {
+            videoTask?.cancel()
             vnModel = nil
             mlModel = nil
         }
@@ -94,6 +121,107 @@ struct ImageDetectionDemoView: View {
                 detectOnFrame(pixelBuffer)
             }
             BoundingBoxOverlay(detections: liveDetections)
+        }
+    }
+
+    // MARK: - Video View
+
+    @ViewBuilder
+    private var videoView: some View {
+        if let frame = videoFrame {
+            GeometryReader { geo in
+                ZStack {
+                    Image(uiImage: frame)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    BoundingBoxOverlay(detections: videoDetections)
+                }
+            }
+        } else {
+            VStack(spacing: 12) {
+                Image(systemName: "video.badge.plus").font(.system(size: 60)).foregroundStyle(.secondary)
+                Text("Select a video for detection").foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    // MARK: - Video Processing
+
+    private func loadAndProcessVideo() {
+        videoTask?.cancel()
+        guard let videoItem else { return }
+        isProcessing = true; status = "Loading video…"
+        Task {
+            guard let transferable = try? await videoItem.loadTransferable(type: DetectionVideoTransferable.self) else {
+                await MainActor.run { isProcessing = false; status = "Failed to load video" }
+                return
+            }
+            let url = transferable.url
+            await MainActor.run { isProcessing = false; status = "" }
+            videoTask = Task.detached(priority: .userInitiated) {
+                await processVideo(url: url)
+            }
+        }
+    }
+
+    private func processVideo(url: URL) async {
+        let asset = AVURLAsset(url: url)
+        guard let track = try? await asset.loadTracks(withMediaType: .video).first else { return }
+        let duration = try? await asset.load(.duration)
+        let totalSeconds = duration.map { CMTimeGetSeconds($0) } ?? 1
+        let nominalFPS = (try? await track.load(.nominalFrameRate)) ?? 30
+        let frameInterval = 1.0 / Double(nominalFPS)
+
+        guard let reader = try? AVAssetReader(asset: asset) else { return }
+        let outputSettings: [String: Any] = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
+        let trackOutput = AVAssetReaderTrackOutput(track: track, outputSettings: outputSettings)
+        reader.add(trackOutput)
+        reader.startReading()
+
+        let ciContext = CIContext()
+
+        while !Task.isCancelled, let sampleBuffer = trackOutput.copyNextSampleBuffer() {
+            let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            let currentSec = CMTimeGetSeconds(pts)
+
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { continue }
+            guard let vnModel else { continue }
+
+            let start = CFAbsoluteTimeGetCurrent()
+
+            // Run detection synchronously
+            let request = VNCoreMLRequest(model: vnModel)
+            request.imageCropAndScaleOption = .scaleFill
+            try? VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up).perform([request])
+            let dets = parseResults(request.results, imageWidth: CVPixelBufferGetWidth(pixelBuffer),
+                                    imageHeight: CVPixelBufferGetHeight(pixelBuffer))
+
+            let elapsed = CFAbsoluteTimeGetCurrent() - start
+
+            // Convert pixel buffer to UIImage
+            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+            guard let cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent) else { continue }
+            let frame = UIImage(cgImage: cgImage)
+            let currentFPS = 1.0 / max(elapsed, 0.001)
+
+            await MainActor.run {
+                videoFrame = frame
+                videoDetections = dets
+                videoProgress = min(currentSec / totalSeconds, 1.0)
+                videoFps = videoFps == 0 ? currentFPS : videoFps * 0.9 + currentFPS * 0.1
+            }
+
+            // Pace playback to match original frame rate
+            let sleepTime = max(frameInterval - elapsed, 0)
+            if sleepTime > 0 {
+                try? await Task.sleep(for: .seconds(sleepTime))
+            }
+        }
+
+        await MainActor.run {
+            videoProgress = 1.0
+            status = ""
         }
     }
 
@@ -286,4 +414,20 @@ struct ImageDetectionDemoView: View {
         "remote","keyboard","cell phone","microwave","oven","toaster","sink",
         "refrigerator","book","clock","vase","scissors","teddy bear","hair drier","toothbrush"
     ]
+}
+
+// MARK: - Video Transferable
+
+struct DetectionVideoTransferable: Transferable {
+    let url: URL
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(contentType: .movie) { movie in
+            SentTransferredFile(movie.url)
+        } importing: { received in
+            let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(
+                UUID().uuidString + "." + received.file.pathExtension)
+            try FileManager.default.copyItem(at: received.file, to: tmp)
+            return Self(url: tmp)
+        }
+    }
 }
