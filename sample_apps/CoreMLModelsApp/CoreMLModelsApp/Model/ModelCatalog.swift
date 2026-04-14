@@ -12,7 +12,10 @@ import CoreMLLLM
 final class ModelCatalog: ObservableObject {
     @Published private(set) var manifest: Manifest?
     @Published private(set) var loadingError: String?
-    @Published private(set) var isLoading = false
+    // Defaults to true so the first render shows the loading spinner
+    // instead of briefly flashing the empty-state error before `.task`
+    // fires `loadInitial()`.
+    @Published private(set) var isLoading = true
     @Published private(set) var installedIds: Set<String> = []
 
     private var downloaders: [String: ModelFileDownloader] = [:]
