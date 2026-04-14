@@ -15,7 +15,7 @@ struct RootView: View {
                     catalogList
                 }
             }
-            .navigationTitle("CoreML-Models")
+            .navigationTitle("Model Zoo")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
