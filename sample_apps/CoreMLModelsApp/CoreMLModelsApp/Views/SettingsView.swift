@@ -18,7 +18,6 @@ struct SettingsView: View {
 
             Section("About") {
                 LabeledContent("App version", value: appVersion())
-                Link("Source on GitHub", destination: URL(string: "https://github.com/john-rocky/CoreML-Models")!)
             }
 
             Section("Open-source models") {
