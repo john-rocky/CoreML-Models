@@ -6,6 +6,10 @@ Converted Core ML Model Zoo.
 Core ML is a machine learning framework by Apple.
 If you are iOS developer, you can easly use machine learning models in your Xcode project. 
 
+Try the iOS sample-app collection (`sample_apps/CoreMLModelsApp`) on the App Store:
+
+[<img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us?releaseDate=1735689600" alt="Download on the App Store" height="48">](https://apps.apple.com/jp/app/models-zoo/id6762083207)
+
 # How to use
 
 Take a look this model zoo, and if you found the CoreML model you want,
