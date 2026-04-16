@@ -6,6 +6,10 @@ Converted Core ML Model Zoo.
 Core ML is a machine learning framework by Apple.
 If you are iOS developer, you can easly use machine learning models in your Xcode project. 
 
+Try the iOS sample-app collection (`sample_apps/CoreMLModelsApp`) on the App Store:
+
+[<img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us?releaseDate=1735689600" alt="Download on the App Store" height="48">](https://apps.apple.com/jp/app/models-zoo/id6762083207)
+
 # How to use
 
 Take a look this model zoo, and if you found the CoreML model you want,
@@ -147,6 +151,9 @@ You are free to do or not.
 
 - [**Vision-Language**](#vision-language)
   - [Florence-2-base](#florence-2-base)
+
+- [**Language Model**](#language-model)
+  - [Gemma 4 E2B (CoreML-LLM)](#gemma-4-e2b-coreml-llm)
 
 - [**Zero-Shot Image Classification**](#zero-shot-image-classification)
   - [SigLIP ViT-B/16](#siglip-vit-b16)
@@ -1056,6 +1063,20 @@ Microsoft Florence-2 — a unified vision-language model supporting image captio
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | [Florence2VisionEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2VisionEncoder.mlpackage.zip) / [TextEncoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2TextEncoder.mlpackage.zip) / [Decoder](https://github.com/john-rocky/CoreML-Models/releases/download/florence2-v1/Florence2Decoder.mlpackage.zip) | 260 MB (INT8, 3 models total) | 768x768 RGB image + task prompt | Generated text (caption, OCR, etc.) | [microsoft/Florence-2-base](https://huggingface.co/microsoft/Florence-2-base) | [MIT](https://huggingface.co/microsoft/Florence-2-base/blob/main/LICENSE) | 2024 | [Florence2Demo](sample_apps/Florence2Demo) | [convert_florence2.py](conversion_scripts/convert_florence2.py) |
+
+# Language Model
+
+### Gemma 4 E2B (CoreML-LLM)
+
+**[john-rocky/CoreML-LLM](https://github.com/john-rocky/CoreML-LLM)** — Companion repository for running LLMs on the **Apple Neural Engine**. Unlike MLX Swift (GPU-only), CoreML-LLM targets ANE for ~10x lower power draw, making always-on on-device LLMs practical on iPhone.
+
+Google Gemma 4 E2B (2B params) running on iPhone 15 Pro at ~11 tok/s decode and ~175 tok/s effective prefill throughput (seq=64 batched prefill → 188 ms TTFT for a 33-token prompt). INT4 palettized, 2048 context length, Sliding Window Attention (28/35 layers are O(W)), Per-Layer Embedding computed inside the ANE graph.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Swift Package |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [mlboydaisuke/gemma-4-E2B-coreml](https://huggingface.co/mlboydaisuke/gemma-4-E2B-coreml) | 2.7 GB (INT4, 4 decode + 4 prefill chunks) | Text prompt (up to 2048 tokens) | Generated text (streaming) | [google/gemma-3n-E2B-it](https://huggingface.co/google/gemma-3n-E2B-it) | [Gemma ToU](https://ai.google.dev/gemma/terms) | 2025 | [CoreMLLLMChat](https://github.com/john-rocky/CoreML-LLM/tree/main/Examples/CoreMLLLMChat) | [CoreML-LLM](https://github.com/john-rocky/CoreML-LLM) |
+
+See [CoreML-LLM](https://github.com/john-rocky/CoreML-LLM) for the full conversion pipeline, ANE optimization techniques (cat-trick RMSNorm, Conv2d Linear, pre-computed RoPE, stateless KV with explicit I/O), and the Swift sample app.
 
 # Zero-Shot Image Classification
 
