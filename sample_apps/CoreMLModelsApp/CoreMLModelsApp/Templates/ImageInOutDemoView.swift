@@ -178,6 +178,8 @@ struct ImageInOutDemoView: View {
                 result = processMaskOutput(output: output, originalImage: cgImage, origW: origW, origH: origH, modelSize: inputSize)
             case "lab_ab":
                 result = processLABABOutput(output: output, originalImage: cgImage, origW: origW, origH: origH, modelSize: inputSize)
+            case "segmap":
+                result = processSegmapOutput(output: output, originalImage: cgImage, origW: origW, origH: origH, modelSize: inputSize)
             default:
                 result = processImageOutput(output: output)
             }
@@ -321,6 +323,95 @@ struct ImageInOutDemoView: View {
               let cgImg = outCtx.makeImage() else { return nil }
         return UIImage(cgImage: cgImg)
     }
+
+    // MARK: - Output: segmap (face-parsing)
+
+    private func processSegmapOutput(output: MLFeatureProvider, originalImage: CGImage, origW: Int, origH: Int, modelSize: Int) -> UIImage? {
+        guard let arr = output.featureNames.compactMap({ output.featureValue(for: $0)?.multiArrayValue }).first else { return nil }
+        let shape = arr.shape.map { $0.intValue }
+        // Expected [1, H, W] or [1, C, H, W] (argmax already done or need to do)
+        let h: Int, w: Int
+        let isArgmaxed: Bool
+        if shape.count == 3 {
+            h = shape[1]; w = shape[2]; isArgmaxed = true
+        } else if shape.count == 4 && shape[1] > 1 {
+            h = shape[2]; w = shape[3]; isArgmaxed = false
+        } else {
+            return nil
+        }
+
+        // Get class index per pixel
+        var classMap = [Int](repeating: 0, count: h * w)
+        if isArgmaxed {
+            let strides = arr.strides.map { $0.intValue }
+            for y in 0..<h {
+                for x in 0..<w {
+                    classMap[y * w + x] = Int(ImageUtils.readFloat(arr, at: y * strides[1] + x * strides[2]))
+                }
+            }
+        } else {
+            let c = shape[1]
+            let strides = arr.strides.map { $0.intValue }
+            for y in 0..<h {
+                for x in 0..<w {
+                    var maxVal: Float = -.greatestFiniteMagnitude
+                    var maxIdx = 0
+                    for ci in 0..<c {
+                        let v = ImageUtils.readFloat(arr, at: ci * strides[1] + y * strides[2] + x * strides[3])
+                        if v > maxVal { maxVal = v; maxIdx = ci }
+                    }
+                    classMap[y * w + x] = maxIdx
+                }
+            }
+        }
+
+        // Blend segmap over original image
+        var origPixels = [UInt8](repeating: 0, count: origW * origH * 4)
+        guard let ctx = CGContext(data: &origPixels, width: origW, height: origH, bitsPerComponent: 8,
+                                  bytesPerRow: origW * 4, space: CGColorSpaceCreateDeviceRGB(),
+                                  bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return nil }
+        ctx.draw(originalImage, in: CGRect(x: 0, y: 0, width: origW, height: origH))
+
+        var result = [UInt8](repeating: 255, count: origW * origH * 4)
+        let alpha: Float = 0.5
+        for y in 0..<origH {
+            let sy = min(Int(Float(y) * Float(h) / Float(origH)), h - 1)
+            for x in 0..<origW {
+                let sx = min(Int(Float(x) * Float(w) / Float(origW)), w - 1)
+                let cls = classMap[sy * w + sx]
+                let (cr, cg, cb) = Self.segmapPalette[cls % Self.segmapPalette.count]
+                let idx = (y * origW + x) * 4
+                result[idx]   = UInt8(Float(origPixels[idx])   * (1 - alpha) + Float(cr) * alpha)
+                result[idx+1] = UInt8(Float(origPixels[idx+1]) * (1 - alpha) + Float(cg) * alpha)
+                result[idx+2] = UInt8(Float(origPixels[idx+2]) * (1 - alpha) + Float(cb) * alpha)
+            }
+        }
+        return ImageUtils.makeRGBA(pixels: result, width: origW, height: origH)
+    }
+
+    // Face-parsing palette: background, skin, l_brow, r_brow, l_eye, r_eye, eyeglass,
+    // l_ear, r_ear, earring, nose, mouth, u_lip, l_lip, neck, necklace, cloth, hair, hat
+    private static let segmapPalette: [(UInt8, UInt8, UInt8)] = [
+        (0, 0, 0),       // 0  background
+        (255, 224, 189), // 1  skin
+        (139, 90, 43),   // 2  left brow
+        (139, 90, 43),   // 3  right brow
+        (72, 118, 255),  // 4  left eye
+        (72, 118, 255),  // 5  right eye
+        (180, 180, 255), // 6  eyeglass
+        (255, 182, 108), // 7  left ear
+        (255, 182, 108), // 8  right ear
+        (255, 215, 0),   // 9  earring
+        (255, 127, 80),  // 10 nose
+        (220, 20, 60),   // 11 mouth
+        (199, 21, 133),  // 12 upper lip
+        (199, 21, 133),  // 13 lower lip
+        (210, 180, 140), // 14 neck
+        (255, 215, 0),   // 15 necklace
+        (100, 149, 237), // 16 cloth
+        (139, 69, 19),   // 17 hair
+        (160, 82, 45),   // 18 hat
+    ]
 
     // MARK: - SinSR Pipeline
 

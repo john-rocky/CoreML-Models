@@ -336,31 +336,70 @@ struct ImageDetectionDemoView: View {
             return dets
         }
 
-        // Path 2: Raw MLMultiArray [1, N, 6] (NMS-free YOLO)
-        if let observations = results as? [VNCoreMLFeatureValueObservation],
-           let arr = observations.first?.featureValue.multiArrayValue {
-            let shape = arr.shape.map { $0.intValue }
-            guard shape.count == 3 && shape[2] >= 5 else { return dets }
-            let n = shape[1]
-            let strides = arr.strides.map { $0.intValue }
-            let sz = Float(inputSize)
+        // Path 2: Raw MLMultiArray — NMS-free YOLO [1,N,6] or DETR [N,91]+[N,4]
+        if let observations = results as? [VNCoreMLFeatureValueObservation] {
+            let arrays = observations.compactMap { $0.featureValue.multiArrayValue }
+            let outputFormat = model.configString("output_format") ?? "yolo"
 
-            for i in 0..<n {
-                let conf = ImageUtils.readFloat(arr, at: i * strides[1] + 4 * strides[2])
-                guard conf >= threshold else { continue }
-                let x1 = ImageUtils.readFloat(arr, at: i * strides[1] + 0) / sz
-                let y1 = ImageUtils.readFloat(arr, at: i * strides[1] + 1 * strides[2]) / sz
-                let x2 = ImageUtils.readFloat(arr, at: i * strides[1] + 2 * strides[2]) / sz
-                let y2 = ImageUtils.readFloat(arr, at: i * strides[1] + 3 * strides[2]) / sz
-                let clsId = shape[2] > 5 ? Int(ImageUtils.readFloat(arr, at: i * strides[1] + 5 * strides[2])) : 0
-                let label = clsId < labels.count ? labels[clsId] : "\(clsId)"
+            if outputFormat == "detr" {
+                // DETR: two arrays — confidence [N, num_classes] and coordinates [N, 4] (cxcywh normalized)
+                guard let confArr = arrays.first(where: { $0.shape.count == 2 && $0.shape[1].intValue > 4 }),
+                      let boxArr = arrays.first(where: { $0.shape.count == 2 && $0.shape[1].intValue == 4 }) else { return dets }
+                let n = confArr.shape[0].intValue
+                let numClasses = confArr.shape[1].intValue
+                let bgClass = model.configInt("background_class") ?? 0
+                let confStrides = confArr.strides.map { $0.intValue }
+                let boxStrides = boxArr.strides.map { $0.intValue }
 
-                // NMS-free output: coordinates already in image space (0..inputSize), normalize to 0..1
-                dets.append(.init(
-                    label: label, confidence: conf,
-                    rect: CGRect(x: CGFloat(x1), y: CGFloat(y1), width: CGFloat(x2 - x1), height: CGFloat(y2 - y1)),
-                    classIndex: clsId
-                ))
+                for i in 0..<n {
+                    // Find best non-background class
+                    var bestConf: Float = 0; var bestCls = 0
+                    for c in 0..<numClasses where c != bgClass {
+                        let v = ImageUtils.readFloat(confArr, at: i * confStrides[0] + c * confStrides[1])
+                        if v > bestConf { bestConf = v; bestCls = c }
+                    }
+                    guard bestConf >= threshold else { continue }
+
+                    let cx = ImageUtils.readFloat(boxArr, at: i * boxStrides[0] + 0)
+                    let cy = ImageUtils.readFloat(boxArr, at: i * boxStrides[0] + 1 * boxStrides[1])
+                    let bw = ImageUtils.readFloat(boxArr, at: i * boxStrides[0] + 2 * boxStrides[1])
+                    let bh = ImageUtils.readFloat(boxArr, at: i * boxStrides[0] + 3 * boxStrides[1])
+
+                    // Map DETR class (1-90) to COCO label index (0-79)
+                    let labelIdx = bestCls - 1
+                    let label = labelIdx >= 0 && labelIdx < labels.count ? labels[labelIdx] : "\(bestCls)"
+
+                    dets.append(.init(
+                        label: label, confidence: bestConf,
+                        rect: CGRect(x: CGFloat(cx - bw / 2), y: CGFloat(cy - bh / 2),
+                                     width: CGFloat(bw), height: CGFloat(bh)),
+                        classIndex: max(0, labelIdx)
+                    ))
+                }
+            } else if let arr = arrays.first {
+                // NMS-free YOLO [1, N, 6]
+                let shape = arr.shape.map { $0.intValue }
+                guard shape.count == 3 && shape[2] >= 5 else { return dets }
+                let n = shape[1]
+                let strides = arr.strides.map { $0.intValue }
+                let sz = Float(inputSize)
+
+                for i in 0..<n {
+                    let conf = ImageUtils.readFloat(arr, at: i * strides[1] + 4 * strides[2])
+                    guard conf >= threshold else { continue }
+                    let x1 = ImageUtils.readFloat(arr, at: i * strides[1] + 0) / sz
+                    let y1 = ImageUtils.readFloat(arr, at: i * strides[1] + 1 * strides[2]) / sz
+                    let x2 = ImageUtils.readFloat(arr, at: i * strides[1] + 2 * strides[2]) / sz
+                    let y2 = ImageUtils.readFloat(arr, at: i * strides[1] + 3 * strides[2]) / sz
+                    let clsId = shape[2] > 5 ? Int(ImageUtils.readFloat(arr, at: i * strides[1] + 5 * strides[2])) : 0
+                    let label = clsId < labels.count ? labels[clsId] : "\(clsId)"
+
+                    dets.append(.init(
+                        label: label, confidence: conf,
+                        rect: CGRect(x: CGFloat(x1), y: CGFloat(y1), width: CGFloat(x2 - x1), height: CGFloat(y2 - y1)),
+                        classIndex: clsId
+                    ))
+                }
             }
         }
         return dets

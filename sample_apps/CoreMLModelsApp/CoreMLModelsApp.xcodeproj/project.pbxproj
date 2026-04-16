@@ -39,6 +39,8 @@
 		F00000010000000000000021 /* BenchmarkRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000021 /* BenchmarkRunner.swift */; };
 		F00000010000000000000022 /* ModelInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000022 /* ModelInspectorView.swift */; };
 		F00000010000000000000023 /* BenchmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000023 /* BenchmarkView.swift */; };
+		F00000010000000000000024 /* InpaintingDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000024 /* InpaintingDemoView.swift */; };
+		F00000010000000000000025 /* SegmentAnythingDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000025 /* SegmentAnythingDemoView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -75,6 +77,8 @@
 		F00000020000000000000021 /* BenchmarkRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkRunner.swift; sourceTree = "<group>"; };
 		F00000020000000000000022 /* ModelInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInspectorView.swift; sourceTree = "<group>"; };
 		F00000020000000000000023 /* BenchmarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkView.swift; sourceTree = "<group>"; };
+		F00000020000000000000024 /* InpaintingDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InpaintingDemoView.swift; sourceTree = "<group>"; };
+		F00000020000000000000025 /* SegmentAnythingDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentAnythingDemoView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,6 +168,8 @@
 				F0000002000000000000001B /* TextToAudioDemoView.swift */,
 				F0000002000000000000001C /* AudioToScoreDemoView.swift */,
 				F0000002000000000000001D /* ChatDemoView.swift */,
+				F00000020000000000000024 /* InpaintingDemoView.swift */,
+				F00000020000000000000025 /* SegmentAnythingDemoView.swift */,
 			);
 			path = Templates;
 			sourceTree = "<group>";
@@ -273,6 +279,8 @@
 				F00000010000000000000021 /* BenchmarkRunner.swift in Sources */,
 				F00000010000000000000022 /* ModelInspectorView.swift in Sources */,
 				F00000010000000000000023 /* BenchmarkView.swift in Sources */,
+				F00000010000000000000024 /* InpaintingDemoView.swift in Sources */,
+				F00000010000000000000025 /* SegmentAnythingDemoView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
