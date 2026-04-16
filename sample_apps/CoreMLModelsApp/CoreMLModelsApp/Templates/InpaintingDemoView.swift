@@ -207,7 +207,8 @@ struct InpaintingDemoView: View {
                     } label: {
                         Image(systemName: "slider.horizontal.below.rectangle")
                     }
-                    .buttonStyle(compareMode ? .borderedProminent : .bordered)
+                    .buttonStyle(.bordered)
+                    .tint(compareMode ? .accentColor : nil)
                 }
 
                 Spacer()
