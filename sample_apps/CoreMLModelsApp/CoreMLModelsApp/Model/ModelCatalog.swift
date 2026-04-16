@@ -1,5 +1,7 @@
 import Foundation
 import CoreMLLLM
+import StoreKit
+import UIKit
 
 /// Top-level state holder. Owns the manifest, knows which models are
 /// installed locally, and vends downloaders on demand.
@@ -72,6 +74,7 @@ final class ModelCatalog: ObservableObject {
     }
 
     func startDownload(for model: ModelEntry) {
+        Self.noteDownloadStartedForReviewPrompt()
         if let llmInfo = llmModelInfo(for: model) {
             Task {
                 do {
@@ -87,6 +90,35 @@ final class ModelCatalog: ObservableObject {
         Task {
             await dl.run(files: model.files)
             installedIds = scanInstalled()
+        }
+    }
+
+    // MARK: - App Store Review Prompt
+
+    private static let reviewCountKey = "com.coreml-models.zoo.download_session_count"
+    private static let reviewPromptedKey = "com.coreml-models.zoo.review_prompted"
+
+    /// Increment the download-session counter and, on the second ever
+    /// download, ask SKStoreReviewController for a rating prompt. The
+    /// system still gates this to at most 3 requests per 365 days, so
+    /// this only nudges the first qualifying window.
+    private static func noteDownloadStartedForReviewPrompt() {
+        let defaults = UserDefaults.standard
+        guard !defaults.bool(forKey: reviewPromptedKey) else { return }
+
+        let count = defaults.integer(forKey: reviewCountKey) + 1
+        defaults.set(count, forKey: reviewCountKey)
+        guard count == 2 else { return }
+
+        defaults.set(true, forKey: reviewPromptedKey)
+        // Delay slightly so the download UI is visible before the prompt.
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_500_000_000)
+            let scene = UIApplication.shared.connectedScenes
+                .first { $0.activationState == .foregroundActive } as? UIWindowScene
+            if let scene {
+                SKStoreReviewController.requestReview(in: scene)
+            }
         }
     }
 
