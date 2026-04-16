@@ -450,7 +450,7 @@ struct SegmentAnythingDemoView: View {
                 }
 
                 let input = try MLDictionaryFeatureProvider(dictionary: inputDict)
-                let output = try decoderModel.prediction(from: input)
+                let output = try await decoderModel.prediction(from: input)
 
                 var maskArr: MLMultiArray?
                 for name in output.featureNames {
