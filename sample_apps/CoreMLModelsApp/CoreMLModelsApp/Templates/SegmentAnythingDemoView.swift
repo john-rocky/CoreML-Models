@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 import CoreML
 import UniformTypeIdentifiers
+import Accelerate
 
 /// Segment Anything demo ported from SamKit.
 /// Features: tap-to-segment, subject lifting (long press), glowing outline,
@@ -14,10 +15,15 @@ struct SegmentAnythingDemoView: View {
     @State private var isProcessing = false
     @State private var status = ""
     @State private var item: PhotosPickerItem?
-    @State private var encoderModel: MLModel?
     @State private var decoderModel: MLModel?
     @State private var imageEmbedding: MLMultiArray?
+    @State private var promptEncoder: SAMPromptEncoder?
     @State private var isEncoderLoaded = false
+
+    // Letterbox transform parameters
+    @State private var transformScale: Float = 1.0
+    @State private var transformPadX: Float = 0.0
+    @State private var transformPadY: Float = 0.0
 
     // Mask state
     @State private var maskCGImage: CGImage?
@@ -37,6 +43,10 @@ struct SegmentAnythingDemoView: View {
     @State private var lastGestureTranslation: CGSize = .zero
 
     private var inputSize: Int { model.configInt("input_size") ?? 1024 }
+
+    // SAM normalization constants (ImageNet in 0-255 range)
+    private static let samMean: [Float] = [123.675, 116.28, 103.53]
+    private static let samStd: [Float] = [58.395, 57.12, 57.375]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -314,17 +324,14 @@ struct SegmentAnythingDemoView: View {
         guard let inputImage, let mask = maskCGImage,
               let cgImage = ImageUtils.normalizeOrientation(inputImage) else { return }
 
-        // Extract masked object as PNG with transparency
         let w = cgImage.width, h = cgImage.height
         guard let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8,
                                   bytesPerRow: w * 4, space: CGColorSpaceCreateDeviceRGB(),
                                   bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return }
-        // Draw original
         ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: w, height: h))
         guard let imageData = ctx.data else { return }
         let pixels = imageData.bindMemory(to: UInt8.self, capacity: w * h * 4)
 
-        // Apply mask as alpha
         guard let maskCtx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8,
                                       bytesPerRow: w * 4, space: CGColorSpaceCreateDeviceRGB(),
                                       bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return }
@@ -378,40 +385,128 @@ struct SegmentAnythingDemoView: View {
 
     private func encodeImage(_ image: UIImage) async {
         do {
-            let encName = model.configString("encoder") ?? model.files.first?.name ?? ""
-            let enc = try await ModelLoader.load(for: model, named: encName)
-            let decName = model.configString("decoder")
-                ?? model.files.dropFirst().first?.name ?? model.files.last?.name ?? ""
-            let dec = try await ModelLoader.load(for: model, named: decName)
+            let cu = ModelLoader.parseComputeUnits(model.files.first?.computeUnits)
+
+            // Load encoder and decoder.
+            // Config may specify actual model file names (e.g. "mobile_sam_encoder") or
+            // an archive name (e.g. "MobileSAM.zip") when both models come from one zip.
+            let rawEnc = model.configString("encoder") ?? ""
+            let rawDec = model.configString("decoder") ?? ""
+            let sameArchive = rawEnc == rawDec || rawEnc.hasSuffix(".zip")
+
+            let enc: MLModel
+            let dec: MLModel
+            if sameArchive {
+                // Both point to the same archive → search by substring pattern
+                enc = try await ModelLoader.loadBySubstring(modelId: model.id, substring: "encoder", computeUnits: cu)
+                dec = try await ModelLoader.loadBySubstring(modelId: model.id, substring: "decoder", computeUnits: cu)
+            } else {
+                enc = try await ModelLoader.load(modelId: model.id, fileName: rawEnc, computeUnits: cu)
+                dec = try await ModelLoader.load(modelId: model.id, fileName: rawDec, computeUnits: cu)
+            }
+
+            // Load prompt encoder weights if available
+            let weightsName = model.configString("prompt_weights") ?? "mobile_sam_prompt_encoder_weights.json"
+            let weightsURL = ModelLoader.auxFileURL(modelId: model.id, fileName: weightsName)
+            var pe: SAMPromptEncoder?
+            if FileManager.default.fileExists(atPath: weightsURL.path) {
+                pe = try SAMPromptEncoder(weightsURL: weightsURL)
+            }
 
             await MainActor.run { status = "Encoding image…" }
-            guard let cgImage = ImageUtils.normalizeOrientation(image),
-                  let pb = ImageUtils.pixelBuffer(from: cgImage, width: inputSize, height: inputSize) else {
+
+            guard let cgImage = ImageUtils.normalizeOrientation(image) else {
                 await MainActor.run { isProcessing = false; status = "Image error" }; return
             }
 
-            let inputName = enc.modelDescription.inputDescriptionsByName.keys.first ?? "image"
-            let input = try MLDictionaryFeatureProvider(dictionary: [inputName: pb])
-            let encOutput = try await enc.prediction(from: input)
+            // Compute letterbox transform
+            let origW = cgImage.width, origH = cgImage.height
+            let longSide = max(origW, origH)
+            let scale = Float(inputSize) / Float(longSide)
+            let scaledW = Int(Float(origW) * scale)
+            let scaledH = Int(Float(origH) * scale)
+            let padX = Float(inputSize - scaledW) / 2.0
+            let padY = Float(inputSize - scaledH) / 2.0
 
-            var embedding: MLMultiArray?
-            for name in encOutput.featureNames {
-                if let arr = encOutput.featureValue(for: name)?.multiArrayValue {
-                    embedding = arr; break
+            // Build [1, 3, inputSize, inputSize] MLMultiArray with SAM normalization
+            let imageArray = try buildSAMInput(cgImage: cgImage, scaledW: scaledW, scaledH: scaledH,
+                                               padX: Int(padX), padY: Int(padY))
+
+            let encInput = try MLDictionaryFeatureProvider(dictionary: ["image": imageArray])
+            let encOutput = try await enc.prediction(from: encInput)
+
+            guard let emb = encOutput.featureValue(for: "image_embeddings")?.multiArrayValue else {
+                // Fallback: try first multiarray output
+                var fallbackEmb: MLMultiArray?
+                for name in encOutput.featureNames {
+                    if let arr = encOutput.featureValue(for: name)?.multiArrayValue {
+                        fallbackEmb = arr; break
+                    }
                 }
-            }
-
-            guard let emb = embedding else {
-                await MainActor.run { isProcessing = false; status = "Encoding failed" }; return
+                guard let emb2 = fallbackEmb else {
+                    await MainActor.run { isProcessing = false; status = "Encoding failed" }; return
+                }
+                await MainActor.run {
+                    decoderModel = dec; imageEmbedding = emb2; promptEncoder = pe
+                    transformScale = scale; transformPadX = padX; transformPadY = padY
+                    isEncoderLoaded = true; isProcessing = false; status = ""
+                }
+                return
             }
 
             await MainActor.run {
-                encoderModel = enc; decoderModel = dec; imageEmbedding = emb
+                decoderModel = dec; imageEmbedding = emb; promptEncoder = pe
+                transformScale = scale; transformPadX = padX; transformPadY = padY
                 isEncoderLoaded = true; isProcessing = false; status = ""
             }
         } catch {
             await MainActor.run { isProcessing = false; status = "Error: \(error.localizedDescription)" }
         }
+    }
+
+    /// Build a [1, 3, H, W] MLMultiArray from a CGImage with letterbox padding and SAM normalization.
+    private func buildSAMInput(cgImage: CGImage, scaledW: Int, scaledH: Int,
+                               padX: Int, padY: Int) throws -> MLMultiArray {
+        let size = inputSize
+        let array = try MLMultiArray(shape: [1, 3, size as NSNumber, size as NSNumber], dataType: .float32)
+        let ptr = array.dataPointer.bindMemory(to: Float32.self, capacity: array.count)
+        let channelSize = size * size
+
+        // Initialize to zero (black padding)
+        memset(ptr, 0, array.count * MemoryLayout<Float32>.size)
+
+        // Draw the scaled image into a temporary pixel buffer
+        let bytesPerRow = scaledW * 4
+        var pixelData = [UInt8](repeating: 0, count: scaledH * bytesPerRow)
+        guard let ctx = CGContext(
+            data: &pixelData, width: scaledW, height: scaledH,
+            bitsPerComponent: 8, bytesPerRow: bytesPerRow,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
+        ) else { throw NSError(domain: "SAM", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to create CGContext"]) }
+        ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: scaledW, height: scaledH))
+
+        // Write normalized pixel values into planar CHW array at the padded offset
+        let mean = Self.samMean
+        let std = Self.samStd
+        for y in 0..<scaledH {
+            let destY = y + padY
+            guard destY < size else { continue }
+            for x in 0..<scaledW {
+                let destX = x + padX
+                guard destX < size else { continue }
+                let srcIdx = y * bytesPerRow + x * 4
+                let dstOffset = destY * size + destX
+                let r = Float(pixelData[srcIdx])
+                let g = Float(pixelData[srcIdx + 1])
+                let b = Float(pixelData[srcIdx + 2])
+                ptr[0 * channelSize + dstOffset] = (r - mean[0]) / std[0]
+                ptr[1 * channelSize + dstOffset] = (g - mean[1]) / std[1]
+                ptr[2 * channelSize + dstOffset] = (b - mean[2]) / std[2]
+            }
+        }
+
+        return array
     }
 
     // MARK: - Decode mask
@@ -423,48 +518,90 @@ struct SegmentAnythingDemoView: View {
 
         Task {
             do {
-                let n = tapPoints.count
-                let coords = try MLMultiArray(shape: [1, NSNumber(value: n), 2], dataType: .float32)
-                let labels = try MLMultiArray(shape: [1, NSNumber(value: n)], dataType: .float32)
-                let ptr = coords.dataPointer.assumingMemoryBound(to: Float.self)
-                let lptr = labels.dataPointer.assumingMemoryBound(to: Float.self)
-                for i in 0..<n {
-                    ptr[i * 2] = Float(tapPoints[i].x) / Float(inputImage.size.width) * Float(inputSize)
-                    ptr[i * 2 + 1] = Float(tapPoints[i].y) / Float(inputImage.size.height) * Float(inputSize)
-                    lptr[i] = 1.0
-                }
+                let decoderInput: MLDictionaryFeatureProvider
 
-                let desc = decoderModel.modelDescription.inputDescriptionsByName
-                var inputDict: [String: MLFeatureValue] = [:]
-                for (name, fd) in desc {
-                    if fd.type == .multiArray {
-                        let shape = fd.multiArrayConstraint?.shape.map { $0.intValue } ?? []
-                        if shape.last == 2 || name.lowercased().contains("point") || name.lowercased().contains("coord") {
-                            inputDict[name] = MLFeatureValue(multiArray: coords)
-                        } else if name.lowercased().contains("label") {
-                            inputDict[name] = MLFeatureValue(multiArray: labels)
-                        } else {
-                            inputDict[name] = MLFeatureValue(multiArray: imageEmbedding)
+                if let pe = promptEncoder {
+                    // MobileSAM path: use PromptEncoder to build sparse/dense embeddings
+                    let modelPoints = tapPoints.map { p -> (x: Float, y: Float) in
+                        (x: Float(p.x) * transformScale + transformPadX,
+                         y: Float(p.y) * transformScale + transformPadY)
+                    }
+                    let labels = [Float](repeating: 1.0, count: tapPoints.count)
+                    let (sparse, dense) = try pe.encode(points: modelPoints, labels: labels)
+
+                    decoderInput = try MLDictionaryFeatureProvider(dictionary: [
+                        "image_embeddings": imageEmbedding,
+                        "sparse_embeddings": sparse,
+                        "dense_embeddings": dense,
+                    ])
+                } else {
+                    // Standard SAM path: pass point_coords/point_labels directly
+                    let n = tapPoints.count
+                    let coords = try MLMultiArray(shape: [1, NSNumber(value: n), 2], dataType: .float32)
+                    let labels = try MLMultiArray(shape: [1, NSNumber(value: n)], dataType: .float32)
+                    let cPtr = coords.dataPointer.assumingMemoryBound(to: Float.self)
+                    let lPtr = labels.dataPointer.assumingMemoryBound(to: Float.self)
+                    for i in 0..<n {
+                        cPtr[i * 2] = Float(tapPoints[i].x) * transformScale + transformPadX
+                        cPtr[i * 2 + 1] = Float(tapPoints[i].y) * transformScale + transformPadY
+                        lPtr[i] = 1.0
+                    }
+
+                    let desc = decoderModel.modelDescription.inputDescriptionsByName
+                    var inputDict: [String: MLFeatureValue] = [:]
+                    for (name, fd) in desc {
+                        if fd.type == .multiArray {
+                            if name.contains("coord") || name.contains("point") {
+                                inputDict[name] = MLFeatureValue(multiArray: coords)
+                            } else if name.contains("label") {
+                                inputDict[name] = MLFeatureValue(multiArray: labels)
+                            } else if name.contains("mask_input") {
+                                let maskIn = try MLMultiArray(shape: [1, 1, 256, 256], dataType: .float32)
+                                inputDict[name] = MLFeatureValue(multiArray: maskIn)
+                            } else if name.contains("has_mask") {
+                                let hasMask = try MLMultiArray(shape: [1], dataType: .float32)
+                                inputDict[name] = MLFeatureValue(multiArray: hasMask)
+                            } else {
+                                inputDict[name] = MLFeatureValue(multiArray: imageEmbedding)
+                            }
                         }
                     }
+                    decoderInput = try MLDictionaryFeatureProvider(dictionary: inputDict)
                 }
 
-                let input = try MLDictionaryFeatureProvider(dictionary: inputDict)
-                let output = try await decoderModel.prediction(from: input)
+                let output = try await decoderModel.prediction(from: decoderInput)
 
-                var maskArr: MLMultiArray?
-                for name in output.featureNames {
-                    if let arr = output.featureValue(for: name)?.multiArrayValue {
-                        maskArr = arr; break
+                // Extract masks and IoU predictions
+                let maskArr = output.featureValue(for: "masks")?.multiArrayValue
+                let iouArr = output.featureValue(for: "iou_predictions")?.multiArrayValue
+
+                guard let masks = maskArr else {
+                    // Fallback: take first multiarray output
+                    var fallback: MLMultiArray?
+                    for name in output.featureNames {
+                        if let arr = output.featureValue(for: name)?.multiArrayValue {
+                            fallback = arr; break
+                        }
                     }
+                    guard let m = fallback else {
+                        await MainActor.run { isProcessing = false; status = "No mask" }; return
+                    }
+                    let bm = buildBinaryMask(from: m, maskIndex: 0,
+                                             width: Int(inputImage.size.width),
+                                             height: Int(inputImage.size.height))
+                    let ol = bm.flatMap { generateOutline(from: $0) }
+                    await MainActor.run {
+                        maskCGImage = bm; outlineImage = ol
+                        isProcessing = false; status = ""
+                    }
+                    return
                 }
 
-                guard let mask = maskArr else {
-                    await MainActor.run { isProcessing = false; status = "No mask" }; return
-                }
+                // Select best mask by IoU score
+                let bestIdx = selectBestMask(masks: masks, iou: iouArr)
 
-                // Build binary mask CGImage
-                let binaryMask = buildBinaryMask(from: mask, width: Int(inputImage.size.width),
+                let binaryMask = buildBinaryMask(from: masks, maskIndex: bestIdx,
+                                                  width: Int(inputImage.size.width),
                                                   height: Int(inputImage.size.height))
                 let outline = binaryMask.flatMap { generateOutline(from: $0) }
 
@@ -479,14 +616,39 @@ struct SegmentAnythingDemoView: View {
         }
     }
 
+    /// Select the mask index with the highest IoU prediction.
+    private func selectBestMask(masks: MLMultiArray, iou: MLMultiArray?) -> Int {
+        guard let iou else { return 0 }
+        let numMasks = iou.shape.last?.intValue ?? 1
+        var bestIdx = 0
+        var bestScore: Float = -.greatestFiniteMagnitude
+        for i in 0..<numMasks {
+            let score = ImageUtils.readFloat(iou, at: i)
+            if score > bestScore {
+                bestScore = score; bestIdx = i
+            }
+        }
+        return bestIdx
+    }
+
     // MARK: - Mask processing
 
-    private func buildBinaryMask(from arr: MLMultiArray, width: Int, height: Int) -> CGImage? {
+    private func buildBinaryMask(from arr: MLMultiArray, maskIndex: Int,
+                                  width: Int, height: Int) -> CGImage? {
         let shape = arr.shape.map { $0.intValue }
+        // Expected shape: [1, numMasks, mH, mW]
         let mH = shape[shape.count - 2]
         let mW = shape[shape.count - 1]
-        let total = arr.count
-        let offset = total - mH * mW
+
+        // Offset to the selected mask plane
+        let maskPlaneSize = mH * mW
+        let offset: Int
+        if shape.count == 4 {
+            offset = maskIndex * maskPlaneSize
+        } else {
+            let total = arr.count
+            offset = total - mH * mW
+        }
 
         guard let ctx = CGContext(data: nil, width: width, height: height,
                                   bitsPerComponent: 8, bytesPerRow: width * 4,
@@ -495,14 +657,32 @@ struct SegmentAnythingDemoView: View {
         guard let data = ctx.data else { return nil }
         let pixels = data.bindMemory(to: UInt8.self, capacity: width * height * 4)
 
+        // The mask is in model space (256x256 with letterbox padding).
+        // Map each pixel in the output image back through the letterbox transform.
+        let maskScaleX = Float(mW) / Float(inputSize)
+        let maskScaleY = Float(mH) / Float(inputSize)
+
         for y in 0..<height {
-            let my = min(y * mH / height, mH - 1)
+            // Image coord → model coord → mask coord
+            let modelY = Float(y) * transformScale + transformPadY
+            let my = Int(modelY * maskScaleY)
+            guard my >= 0 && my < mH else {
+                // Outside letterbox → background
+                let rowStart = y * width * 4
+                memset(pixels + rowStart, 0, width * 4)
+                continue
+            }
             for x in 0..<width {
-                let mx = min(x * mW / width, mW - 1)
-                let val = ImageUtils.readFloat(arr, at: offset + my * mW + mx)
+                let modelX = Float(x) * transformScale + transformPadX
+                let mx = Int(modelX * maskScaleX)
                 let o = (y * width + x) * 4
-                if val > 0 {
-                    pixels[o] = 255; pixels[o + 1] = 255; pixels[o + 2] = 255; pixels[o + 3] = 255
+                if mx >= 0 && mx < mW {
+                    let val = ImageUtils.readFloat(arr, at: offset + my * mW + mx)
+                    if val > 0 {
+                        pixels[o] = 255; pixels[o + 1] = 255; pixels[o + 2] = 255; pixels[o + 3] = 255
+                    } else {
+                        pixels[o] = 0; pixels[o + 1] = 0; pixels[o + 2] = 0; pixels[o + 3] = 0
+                    }
                 } else {
                     pixels[o] = 0; pixels[o + 1] = 0; pixels[o + 2] = 0; pixels[o + 3] = 0
                 }
@@ -516,7 +696,6 @@ struct SegmentAnythingDemoView: View {
         let rect = CGRect(x: 0, y: 0, width: w, height: h)
         let glowRadius = CGFloat(min(30, max(4, min(w, h) / 100)))
 
-        // White silhouette from mask
         guard let silCtx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8,
                                      bytesPerRow: w * 4, space: CGColorSpaceCreateDeviceRGB(),
                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
@@ -526,7 +705,6 @@ struct SegmentAnythingDemoView: View {
         silCtx.fill(rect)
         guard let whiteSil = silCtx.makeImage() else { return nil }
 
-        // Glow outline = shadow of silhouette minus the silhouette itself
         guard let outCtx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8,
                                      bytesPerRow: w * 4, space: CGColorSpaceCreateDeviceRGB(),
                                      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
