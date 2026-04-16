@@ -108,20 +108,38 @@ struct DownloadSection: View {
 
     @ViewBuilder
     private var installedControls: some View {
-        HStack(spacing: 12) {
-            NavigationLink {
-                DemoLauncherView(model: model)
-            } label: {
-                Label("Try It", systemImage: "play.fill")
-                    .frame(maxWidth: .infinity)
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                NavigationLink {
+                    DemoLauncherView(model: model)
+                } label: {
+                    Label("Try It", systemImage: "play.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                Button(role: .destructive) {
+                    catalog.deleteInstall(of: model)
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.borderedProminent)
-            Button(role: .destructive) {
-                catalog.deleteInstall(of: model)
-            } label: {
-                Image(systemName: "trash")
+            HStack(spacing: 12) {
+                NavigationLink {
+                    ModelInspectorView(model: model)
+                } label: {
+                    Label("Inspect", systemImage: "info.circle")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                NavigationLink {
+                    BenchmarkView(model: model)
+                } label: {
+                    Label("Benchmark", systemImage: "timer")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.bordered)
         }
     }
 

@@ -70,7 +70,8 @@ struct DemoSpec: Codable, Hashable {
 
 // MARK: - File
 
-struct FileSpec: Codable, Hashable {
+struct FileSpec: Codable, Hashable, Identifiable {
+    var id: String { name }
     let name: String
     let url: String
     let archive: String?
