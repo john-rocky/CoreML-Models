@@ -52,7 +52,9 @@ final class ModelCatalog: ObservableObject {
             installedIds = scanInstalled()
             loadingError = nil
         } catch {
+            // If decode failed, clear stale cache so next launch retries cleanly.
             if manifest == nil {
+                try? FileManager.default.removeItem(at: Paths.manifestCache)
                 loadingError = (error as? LocalizedError)?.errorDescription ?? "\(error)"
             }
         }
