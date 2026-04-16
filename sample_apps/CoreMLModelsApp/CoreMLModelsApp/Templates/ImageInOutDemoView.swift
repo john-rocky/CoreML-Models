@@ -169,7 +169,20 @@ struct ImageInOutDemoView: View {
 
             let start = CFAbsoluteTimeGetCurrent()
             let input = try MLDictionaryFeatureProvider(dictionary: inputDict)
-            let output = try await mlModel.prediction(from: input)
+            let output: MLFeatureProvider
+            do {
+                output = try await mlModel.prediction(from: input)
+            } catch {
+                // ANE inference can fail on certain device/model combinations;
+                // reload the model restricted to CPU+GPU and retry.
+                print("[ImageInOut] Prediction failed, retrying with cpuAndGPU: \(error.localizedDescription)")
+                await MainActor.run { status = "Retrying without ANE…" }
+                let file = model.files.first { ($0.kind ?? "model") == "model" } ?? model.files[0]
+                let fallbackModel = try await ModelLoader.load(
+                    modelId: model.id, fileName: file.name, computeUnits: .cpuAndGPU
+                )
+                output = try await fallbackModel.prediction(from: input)
+            }
             let elapsed = CFAbsoluteTimeGetCurrent() - start
 
             let result: UIImage?
