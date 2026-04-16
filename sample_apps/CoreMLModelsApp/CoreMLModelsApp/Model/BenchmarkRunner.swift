@@ -53,7 +53,7 @@ enum BenchmarkRunner {
         for i in 1...warmupIterations {
             try Task.checkCancellation()
             await onPhase(.warmup(current: i, total: warmupIterations))
-            _ = try mlModel.prediction(from: dummyInput)
+            _ = try await mlModel.prediction(from: dummyInput)
         }
 
         // Measure
@@ -65,9 +65,9 @@ enum BenchmarkRunner {
         for i in 1...iterations {
             try Task.checkCancellation()
             await onPhase(.measuring(current: i, total: iterations))
-            let elapsed = try clock.measure {
-                _ = try mlModel.prediction(from: dummyInput)
-            }
+            let start = clock.now
+            _ = try await mlModel.prediction(from: dummyInput)
+            let elapsed = clock.now - start
             let ms = Double(elapsed.components.seconds) * 1000.0
                 + Double(elapsed.components.attoseconds) / 1_000_000_000_000_000.0
             latencies.append(ms)
