@@ -247,10 +247,18 @@ enum ImageUtils {
         return (buf, CGRect(x: padX, y: padY, width: dstW, height: dstH))
     }
 
-    /// Normalize EXIF orientation.
+    /// Return a CGImage oriented for display. iPhone camera photos carry
+    /// EXIF orientation metadata so the pixel buffer is stored in sensor
+    /// orientation; for anything other than `.up` we redraw the image with
+    /// the orientation baked in. Already-upright images (web, screenshots,
+    /// `UIImagePNGRepresentation` output) are returned as-is to avoid a
+    /// pointless re-render that would also drop the alpha channel.
     static func normalizeOrientation(_ image: UIImage) -> CGImage? {
+        if image.imageOrientation == .up, let cg = image.cgImage {
+            return cg
+        }
         let size = image.size
-        UIGraphicsBeginImageContextWithOptions(size, true, 1.0)
+        UIGraphicsBeginImageContextWithOptions(size, true, image.scale)
         image.draw(in: CGRect(origin: .zero, size: size))
         let result = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
