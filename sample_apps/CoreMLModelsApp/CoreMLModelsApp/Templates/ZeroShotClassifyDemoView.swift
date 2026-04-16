@@ -231,6 +231,9 @@ struct ZeroShotClassifyDemoView: View {
             if bestLen == 0 { i = processed.index(after: i) }
             else { tokens.append(bestId); i = processed.index(i, offsetBy: bestLen) }
         }
+        // SigLIP / SentencePiece models require EOS at the end of the sequence;
+        // without it the text embedding is offset and ranking is wrong.
+        if let eosID = vocab["</s>"] { tokens.append(Int32(eosID)) }
         return tokens
     }
 
