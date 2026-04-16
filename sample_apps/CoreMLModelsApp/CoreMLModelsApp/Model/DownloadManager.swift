@@ -54,7 +54,7 @@ final class ModelFileDownloader: NSObject, ObservableObject {
 
     private var bgSession: URLSession!
     private var activeTask: URLSessionDownloadTask?
-    private var progressObserver: NSKeyValueObservation?
+    private var lastProgressReport: TimeInterval = 0
 
     // Resume data persisted to disk so we can resume after app termination
     private var resumeDataURL: URL {
@@ -172,32 +172,21 @@ final class ModelFileDownloader: NSObject, ObservableObject {
             self.downloadContinuation = cont
 
             // Try to resume from saved data
+            self.lastProgressReport = 0
             if let resumeData = self.loadResumeData() {
                 print("[DL] Resuming \(spec.name) from saved data (\(resumeData.count) bytes)")
                 let task = self.bgSession.downloadTask(withResumeData: resumeData)
                 self.activeTask = task
-                self.observeProgress(task, fileName: spec.name)
                 task.resume()
             } else {
                 let task = self.bgSession.downloadTask(with: remote)
                 self.activeTask = task
-                self.observeProgress(task, fileName: spec.name)
                 task.resume()
             }
         }
     }
 
     private var downloadContinuation: CheckedContinuation<URL, Error>?
-
-    private func observeProgress(_ task: URLSessionDownloadTask, fileName: String) {
-        progressObserver?.invalidate()
-        progressObserver = task.progress.observe(\.fractionCompleted) { [weak self] p, _ in
-            let value = p.fractionCompleted
-            Task { @MainActor in
-                self?.state.byFile[fileName] = .downloading(progress: value)
-            }
-        }
-    }
 
     // MARK: - Resume Data Persistence
 
@@ -314,9 +303,24 @@ extension ModelFileDownloader: URLSessionDownloadDelegate {
         guard totalBytesExpectedToWrite > 0 else { return }
         let progress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
         Task { @MainActor in
-            if let name = self.currentSpec?.name {
-                self.state.byFile[name] = .downloading(progress: progress)
+            guard let name = self.currentSpec?.name else { return }
+            // Drop updates arriving after the file already finished (delegate
+            // callbacks can land on MainActor out of order after .verified).
+            switch self.state.byFile[name] {
+            case .unpacking, .verified, .failed:
+                return
+            case .downloading(let current) where progress < current:
+                // Monotonic: ignore out-of-order smaller values.
+                return
+            default:
+                break
             }
+            // Throttle to ~10 Hz so SwiftUI re-renders don't thrash and the
+            // animated bar moves smoothly instead of jittering.
+            let now = CFAbsoluteTimeGetCurrent()
+            if progress < 1.0, now - self.lastProgressReport < 0.1 { return }
+            self.lastProgressReport = now
+            self.state.byFile[name] = .downloading(progress: progress)
         }
     }
 
