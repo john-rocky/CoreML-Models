@@ -569,7 +569,28 @@ struct SegmentAnythingDemoView: View {
                     decoderInput = try MLDictionaryFeatureProvider(dictionary: inputDict)
                 }
 
-                let output = try await decoderModel.prediction(from: decoderInput)
+                let output: MLFeatureProvider
+                do {
+                    output = try await decoderModel.prediction(from: decoderInput)
+                } catch {
+                    // ANE can fail to compile the decoder (e.g. conv_transpose with
+                    // explicit output_shape on MobileSAM). Reload on cpuAndGPU and retry.
+                    print("[SAM] Decoder prediction failed, retrying with cpuAndGPU: \(error.localizedDescription)")
+                    await MainActor.run { status = "Retrying without ANE…" }
+                    let rawEnc = model.configString("encoder") ?? ""
+                    let rawDec = model.configString("decoder") ?? ""
+                    let sameArchive = rawEnc == rawDec || rawEnc.hasSuffix(".zip")
+                    let fallback: MLModel
+                    if sameArchive {
+                        fallback = try await ModelLoader.loadBySubstring(
+                            modelId: model.id, substring: "decoder", computeUnits: .cpuAndGPU)
+                    } else {
+                        fallback = try await ModelLoader.load(
+                            modelId: model.id, fileName: rawDec, computeUnits: .cpuAndGPU)
+                    }
+                    output = try await fallback.prediction(from: decoderInput)
+                    await MainActor.run { self.decoderModel = fallback }
+                }
 
                 // Extract masks and IoU predictions
                 let maskArr = output.featureValue(for: "masks")?.multiArrayValue

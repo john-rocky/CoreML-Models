@@ -41,6 +41,7 @@
 		F00000010000000000000023 /* BenchmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000023 /* BenchmarkView.swift */; };
 		F00000010000000000000024 /* InpaintingDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000024 /* InpaintingDemoView.swift */; };
 		F00000010000000000000025 /* SegmentAnythingDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000025 /* SegmentAnythingDemoView.swift */; };
+		F00000010000000000000026 /* SAMPromptEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000026 /* SAMPromptEncoder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -79,6 +80,7 @@
 		F00000020000000000000023 /* BenchmarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkView.swift; sourceTree = "<group>"; };
 		F00000020000000000000024 /* InpaintingDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InpaintingDemoView.swift; sourceTree = "<group>"; };
 		F00000020000000000000025 /* SegmentAnythingDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentAnythingDemoView.swift; sourceTree = "<group>"; };
+		F00000020000000000000026 /* SAMPromptEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAMPromptEncoder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -133,6 +135,7 @@
 				F0000002000000000000000E /* ModelLoader.swift */,
 				F00000020000000000000020 /* ModelInspector.swift */,
 				F00000020000000000000021 /* BenchmarkRunner.swift */,
+				F00000020000000000000026 /* SAMPromptEncoder.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -281,6 +284,7 @@
 				F00000010000000000000023 /* BenchmarkView.swift in Sources */,
 				F00000010000000000000024 /* InpaintingDemoView.swift in Sources */,
 				F00000010000000000000025 /* SegmentAnythingDemoView.swift in Sources */,
+				F00000010000000000000026 /* SAMPromptEncoder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
