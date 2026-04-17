@@ -54,7 +54,17 @@ struct DetectionOverlay: View {
         let transform = aspectFitTransform()
         ForEach(detections) { det in
             let r = scaledRect(det.normRect, transform: transform)
-            let color = Color(colors[det.classIndex % colors.count])
+            // Color by trackId when present so each tracked object keeps
+            // its own color across frames; otherwise color by class.
+            let colorIdx = det.trackId ?? det.classIndex
+            let color = Color(colors[colorIdx % colors.count])
+            let labelText: String = {
+                if let tid = det.trackId {
+                    return "  #\(tid) \(det.label) \(Int(det.confidence * 100))%  "
+                } else {
+                    return "  \(det.label) \(Int(det.confidence * 100))%  "
+                }
+            }()
 
             RoundedRectangle(cornerRadius: 10)
                 .stroke(color, lineWidth: 2)
@@ -62,7 +72,7 @@ struct DetectionOverlay: View {
                 .frame(width: r.width, height: r.height)
                 .position(x: r.midX, y: r.midY)
 
-            Text("  \(det.label) \(Int(det.confidence * 100))%  ")
+            Text(labelText)
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundColor(.white)
                 .padding(.horizontal, 4)
@@ -210,6 +220,7 @@ struct VideoDetectionView: View {
     @State private var progress: Double = 0
     @State private var fps: Double = 0
     @State private var playbackTask: Task<Void, Never>?
+    @State private var trackingEnabled: Bool = true
 
     var body: some View {
         ZStack {
@@ -247,12 +258,27 @@ struct VideoDetectionView: View {
                         ProgressView(value: progress)
                             .tint(Color(detector.colors[0]))
                     }
-                    HStack {
+                    HStack(spacing: 12) {
                         if !detections.isEmpty {
                             Text("\(detections.count) objects")
                                 .font(.caption)
                         }
                         Spacer()
+                        Button {
+                            trackingEnabled.toggle()
+                            loadAndProcess()
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: trackingEnabled ? "scope" : "circle.dashed")
+                                Text(trackingEnabled ? "Track" : "Raw")
+                            }
+                            .font(.caption.weight(.semibold))
+                            .foregroundColor(trackingEnabled ? .black : .white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(trackingEnabled ? Color.white : Color.white.opacity(0.15))
+                            .cornerRadius(6)
+                        }
                         if fps > 0 {
                             Text(String(format: "%.1f FPS", fps))
                                 .font(.caption)
@@ -282,14 +308,15 @@ struct VideoDetectionView: View {
         Task {
             guard let videoData = try? await selectedItem.loadTransferable(type: VideoTransferable.self) else { return }
             let url = videoData.url
+            let tracking = trackingEnabled
             await MainActor.run { isPlaying = true }
             playbackTask = Task.detached(priority: .userInitiated) {
-                await processVideo(url: url)
+                await processVideo(url: url, tracking: tracking)
             }
         }
     }
 
-    private func processVideo(url: URL) async {
+    private func processVideo(url: URL, tracking: Bool) async {
         let asset = AVURLAsset(url: url)
         guard let track = try? await asset.loadTracks(withMediaType: .video).first else { return }
         let duration = try? await asset.load(.duration)
@@ -305,6 +332,7 @@ struct VideoDetectionView: View {
 
         let ciContext = CIContext()
         var frameCount = 0
+        let tracker = ByteTracker()
 
         while !Task.isCancelled, let sb = trackOutput.copyNextSampleBuffer() {
             let pts = CMSampleBufferGetPresentationTimeStamp(sb)
@@ -312,7 +340,8 @@ struct VideoDetectionView: View {
 
             guard let pb = CMSampleBufferGetImageBuffer(sb) else { continue }
             let start = CFAbsoluteTimeGetCurrent()
-            let dets = detector.detect(pixelBuffer: pb)
+            let rawDets = detector.detect(pixelBuffer: pb)
+            let dets = tracking ? tracker.update(detections: rawDets) : rawDets
             let elapsed = CFAbsoluteTimeGetCurrent() - start
 
             // Convert pixel buffer to UIImage
@@ -361,23 +390,52 @@ struct VideoTransferable: Transferable {
 
 struct CameraDetectionView: View {
     let detector: Detector
+    @State private var trackingEnabled: Bool = true
 
     var body: some View {
-        CameraVCWrapper(detector: detector)
-            .ignoresSafeArea()
+        ZStack(alignment: .topTrailing) {
+            CameraVCWrapper(detector: detector, trackingEnabled: trackingEnabled)
+                .ignoresSafeArea()
+
+            Button {
+                trackingEnabled.toggle()
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: trackingEnabled ? "scope" : "circle.dashed")
+                    Text(trackingEnabled ? "Track" : "Raw")
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundColor(trackingEnabled ? .black : .white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(trackingEnabled ? Color.white : Color.black.opacity(0.4))
+                .cornerRadius(8)
+            }
+            .padding(.top, 60)
+            .padding(.trailing, 16)
+        }
     }
 }
 
 struct CameraVCWrapper: UIViewControllerRepresentable {
     let detector: Detector
-    func makeUIViewController(context: Context) -> CameraVC { CameraVC(detector: detector) }
-    func updateUIViewController(_ vc: CameraVC, context: Context) {}
+    let trackingEnabled: Bool
+    func makeUIViewController(context: Context) -> CameraVC {
+        let vc = CameraVC(detector: detector)
+        vc.setTracking(enabled: trackingEnabled)
+        return vc
+    }
+    func updateUIViewController(_ vc: CameraVC, context: Context) {
+        vc.setTracking(enabled: trackingEnabled)
+    }
 }
 
 // MARK: - Camera ViewController
 
 class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
     private let detector: Detector
+    private let tracker = ByteTracker()
+    private var trackingEnabled: Bool = true
     private let session = AVCaptureSession()
     private let sessionQueue = DispatchQueue(label: "session")
     private let inferenceQueue = DispatchQueue(label: "inference")
@@ -398,6 +456,18 @@ class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
         super.init(nibName: nil, bundle: nil)
     }
     required init?(coder: NSCoder) { fatalError() }
+
+    /// Called from SwiftUI when the Track toggle changes. Resets the
+    /// tracker so IDs restart cleanly whenever tracking is toggled.
+    func setTracking(enabled: Bool) {
+        inferenceQueue.async { [weak self] in
+            guard let self else { return }
+            if self.trackingEnabled != enabled {
+                self.trackingEnabled = enabled
+                self.tracker.reset()
+            }
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -437,6 +507,7 @@ class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        inferenceQueue.async { [weak self] in self?.tracker.reset() }
         sessionQueue.async { if !self.session.isRunning { self.session.startRunning() } }
     }
 
@@ -473,7 +544,8 @@ class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
         }
         isProcessing = true
         let start = CACurrentMediaTime()
-        let dets = detector.detect(pixelBuffer: pb)
+        let rawDets = detector.detect(pixelBuffer: pb)
+        let dets = trackingEnabled ? tracker.update(detections: rawDets) : rawDets
         let ms = (CACurrentMediaTime() - start) * 1000
         isProcessing = false
 
@@ -482,7 +554,7 @@ class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
         smoothedFps = smoothedFps == 0 ? 1000/ms : smoothedFps * 0.8 + (1000/ms) * 0.2
 
         let visionDets = dets.map { d in
-            (d.label, d.confidence, d.classIndex,
+            (d.label, d.confidence, d.classIndex, d.trackId,
              CGRect(x: d.normRect.minX, y: 1 - d.normRect.maxY,
                     width: d.normRect.width, height: d.normRect.height))
         }
@@ -496,14 +568,14 @@ class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
         }
     }
 
-    private func showBoxes(_ dets: [(String, Float, Int, CGRect)]) {
+    private func showBoxes(_ dets: [(String, Float, Int, Int?, CGRect)]) {
         let width = view.bounds.width
         let height = view.bounds.height
         let ratio = (height / width) / (longSide / shortSide)
 
         for i in 0..<boxViews.count {
             guard i < dets.count && i < 50 else { boxViews[i].hide(); continue }
-            let (label, conf, cid, nr) = dets[i]
+            let (label, conf, cid, tid, nr) = dets[i]
             var displayRect = nr
 
             if ratio >= 1 {
@@ -520,8 +592,10 @@ class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
             }
 
             let screenRect = VNImageRectForNormalizedRect(displayRect, Int(width), Int(height))
-            let color = detector.colors[cid % detector.colors.count]
-            let text = String(format: "%@ %.0f%%", label, conf * 100)
+            let colorIdx = tid ?? cid
+            let color = detector.colors[colorIdx % detector.colors.count]
+            let text: String = tid.map { String(format: "#%d %@ %.0f%%", $0, label, conf * 100) }
+                ?? String(format: "%@ %.0f%%", label, conf * 100)
             let alpha = CGFloat(max(conf - 0.2, 0.1) / 0.8 * 0.9)
             boxViews[i].show(frame: screenRect, label: text, color: color, alpha: alpha)
         }

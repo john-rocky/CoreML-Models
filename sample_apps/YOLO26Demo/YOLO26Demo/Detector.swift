@@ -10,6 +10,7 @@ struct Detection: Identifiable {
     let confidence: Float
     let classIndex: Int
     let normRect: CGRect // [0,1], top-left origin (x, y, w, h)
+    var trackId: Int? = nil
 }
 
 // MARK: - Shared Detector

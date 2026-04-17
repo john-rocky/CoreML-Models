@@ -44,6 +44,9 @@ You are free to do or not.
   - [YOLO26](#yolo26)
   - [YOLO-World](#yolo-world)
 
+- [**Multi-Object Tracking**](#multi-object-tracking)
+  - [ByteTrack](#bytetrack)
+
 - [**Segmentation**](#segmentation)
   - [U2Net](#u2net)
   - [IS-Net](#is-net)
@@ -336,6 +339,16 @@ YOLO-World: Real-Time Open-Vocabulary Object Detection. Type any text query and 
 | [yoloworld_detector.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/yoloworld_detector.mlpackage.zip) | 25 MB | YOLO-World V2-S visual detector | [AILab-CVC/YOLO-World](https://github.com/AILab-CVC/YOLO-World) | [GPL-3.0](https://github.com/AILab-CVC/YOLO-World/blob/master/LICENSE) | 2024 | [YOLOWorldDemo](sample_apps/YOLOWorldDemo) |
 | [clip_text_encoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/clip_text_encoder.mlpackage.zip) | 121 MB | CLIP ViT-B/32 text encoder | [openai/CLIP](https://github.com/openai/CLIP) | [MIT](https://github.com/openai/CLIP/blob/main/LICENSE) | 2021 | — |
 | [clip_vocab.json.zip](https://github.com/john-rocky/CoreML-Models/releases/download/yolo-models-v1/clip_vocab.json.zip) | 1.6 MB | BPE vocabulary for tokenizer | — | — | — | — |
+
+# Multi-Object Tracking
+
+### ByteTrack
+
+ByteTrack: Multi-Object Tracking by Associating Every Detection Box. Pure-Swift on-device tracker that adds persistent IDs to any of the object detectors above. Pairs a per-track 8D constant-velocity Kalman filter with a two-stage IoU association — high-confidence detections are matched first, then low-confidence detections are used to rescue tracks about to be lost through motion blur and brief occlusions. No appearance / ReID network, so it runs for free on top of an existing detector.
+
+| Implementation | Source | Paper | License | Year | Note | Sample Project |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| Pure Swift (no download) | [Tracker.swift](sample_apps/YOLO26Demo/YOLO26Demo/Tracker.swift) | [ByteTrack (arXiv 2110.06864)](https://arxiv.org/abs/2110.06864) | MIT (this port) / [Original](https://github.com/ifzhang/ByteTrack/blob/main/LICENSE) | 2022 | 8D Kalman + two-stage IoU association, class-aware, greedy matching, lost-track buffer of 30 frames. Drop-in on top of any `[Detection]` stream. | [YOLO26Demo](sample_apps/YOLO26Demo) |
 
 # Segmentation
 
