@@ -20,6 +20,7 @@ struct OpenVocabDetectionDemoView: View {
     @State private var processingTime: Double?
     @State private var item: PhotosPickerItem?
     @State private var confidenceThreshold: Float = 0.15
+    @StateObject private var session = ModelSession<(detector: MLModel, textEncoder: MLModel?)>()
 
     struct Detection: Identifiable {
         let id = UUID()
@@ -31,6 +32,11 @@ struct OpenVocabDetectionDemoView: View {
     private let inputSize = 640
     private let maxClasses = 80
     private let embedDim = 512
+
+    private static let tokenizer: CLIPTokenizer? = {
+        guard let url = Bundle.main.url(forResource: "clip_vocab", withExtension: "json") else { return nil }
+        return try? CLIPTokenizer(vocabularyURL: url)
+    }()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -72,9 +78,9 @@ struct OpenVocabDetectionDemoView: View {
                 }
 
                 HStack {
-                    if let t = processingTime {
-                        Text(String(format: "%.2fs • %d", t, detections.count))
-                            .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                    TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
+                    if !detections.isEmpty {
+                        Text("· \(detections.count)").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                     }
                     Spacer()
                     if isProcessing { ProgressView().controlSize(.small) }
@@ -96,6 +102,22 @@ struct OpenVocabDetectionDemoView: View {
             }
             .padding()
         }
+        .task {
+            session.ensure {
+                let detectorFile = model.files.first {
+                    $0.name.lowercased().contains("detector") || $0.name.lowercased().contains("yoloworld")
+                }?.name ?? model.files[0].name
+                let textEncFile = model.files.first {
+                    $0.name.lowercased().contains("clip") || $0.name.lowercased().contains("text")
+                }?.name
+                let det = try await ModelLoader.load(for: model, named: detectorFile)
+                let txt = try await { () async throws -> MLModel? in
+                    guard let n = textEncFile else { return nil }
+                    return try await ModelLoader.load(for: model, named: n)
+                }()
+                return (detector: det, textEncoder: txt)
+            }
+        }
         .onChange(of: item) { _, _ in loadPhoto() }
     }
 
@@ -115,19 +137,8 @@ struct OpenVocabDetectionDemoView: View {
 
         isProcessing = true
         do {
-            // Load detector
-            status = "Loading detector…"
-            let detectorFile = model.files.first { $0.name.lowercased().contains("detector") || $0.name.lowercased().contains("yoloworld") }?.name ?? model.files[0].name
-            let detector = try await ModelLoader.load(for: model, named: detectorFile)
-
-            // Load text encoder
-            status = "Loading text encoder…"
-            let textEncFile = model.files.first { $0.name.lowercased().contains("clip") || $0.name.lowercased().contains("text") }?.name
-            let textEncoder = textEncFile != nil ? try await ModelLoader.load(for: model, named: textEncFile!) : nil
-
-            // Load CLIP vocab
-            let vocabFile = model.files.first { ($0.kind ?? "") == "vocab" }?.name
-            let vocab = vocabFile.flatMap { loadCLIPVocab(modelId: model.id, fileName: $0) }
+            status = session.loadTimeSec == nil ? "Loading models…" : "Preparing…"
+            let (detector, textEncoder) = try await session.get()
 
             guard let cgImage = ImageUtils.normalizeOrientation(image) else {
                 isProcessing = false; status = "Image error"; return
@@ -137,7 +148,7 @@ struct OpenVocabDetectionDemoView: View {
 
             // 1. Encode text queries → txt_feats [1,80,512]
             status = "Encoding text…"
-            let txtFeats = try encodeTextQueries(classes, textEncoder: textEncoder, vocab: vocab)
+            let txtFeats = try encodeTextQueries(classes, textEncoder: textEncoder)
 
             // 2. Preprocess image → MLMultiArray [1,3,640,640] with letterbox
             status = "Detecting…"
@@ -227,22 +238,20 @@ struct OpenVocabDetectionDemoView: View {
 
     // MARK: - CLIP Text Encoding
 
-    private func encodeTextQueries(_ queries: [String], textEncoder: MLModel?, vocab: [String: Int]?) throws -> MLMultiArray {
+    private func encodeTextQueries(_ queries: [String], textEncoder: MLModel?) throws -> MLMultiArray {
         let txtFeats = try MLMultiArray(shape: [1, maxClasses as NSNumber, embedDim as NSNumber], dataType: .float32)
         let ptr = txtFeats.dataPointer.assumingMemoryBound(to: Float.self)
         memset(ptr, 0, maxClasses * embedDim * MemoryLayout<Float>.size)
 
-        guard let textEncoder else { return txtFeats }
+        guard let textEncoder, let tokenizer = Self.tokenizer else { return txtFeats }
+        let contextLength = tokenizer.contextLength
 
-        let contextLength = 77
         for (i, query) in queries.prefix(maxClasses).enumerated() {
-            // Tokenize with CLIP BPE
-            let tokens = clipTokenize(query, vocab: vocab, contextLength: contextLength)
-
             let tokenArr = try MLMultiArray(shape: [maxClasses as NSNumber, contextLength as NSNumber], dataType: .int32)
             let tPtr = tokenArr.dataPointer.assumingMemoryBound(to: Int32.self)
             memset(tPtr, 0, maxClasses * contextLength * MemoryLayout<Int32>.size)
-            for j in 0..<contextLength { tPtr[j] = tokens[j] }
+            let tokens = tokenizer.tokenize(query)
+            for j in 0..<contextLength { tPtr[j] = Int32(tokens[j]) }
 
             let input = try MLDictionaryFeatureProvider(dictionary: ["text_tokens": tokenArr])
             let output = try textEncoder.prediction(from: input)
@@ -263,28 +272,6 @@ struct OpenVocabDetectionDemoView: View {
             for j in 0..<embedDim { ptr[i * embedDim + j] = embedding[j] }
         }
         return txtFeats
-    }
-
-    private func clipTokenize(_ text: String, vocab: [String: Int]?, contextLength: Int) -> [Int32] {
-        let sotToken: Int32 = 49406
-        let eotToken: Int32 = 49407
-
-        var tokens: [Int32] = [sotToken]
-        let words = text.lowercased().split(separator: " ")
-        for word in words {
-            let w = String(word) + "</w>"
-            if let vocab, let id = vocab[w] { tokens.append(Int32(id)) }
-            else {
-                // Character-level fallback
-                for ch in word { if let vocab, let id = vocab[String(ch)] { tokens.append(Int32(id)) } }
-                if let vocab, let id = vocab["</w>"] { tokens.append(Int32(id)) }
-            }
-        }
-        tokens.append(eotToken)
-
-        var result = [Int32](repeating: 0, count: contextLength)
-        for i in 0..<min(tokens.count, contextLength) { result[i] = tokens[i] }
-        return result
     }
 
     // MARK: - Image Preprocessing (letterbox 0.5 gray)
@@ -318,13 +305,6 @@ struct OpenVocabDetectionDemoView: View {
 
     // MARK: - Helpers
 
-    private func loadCLIPVocab(modelId: String, fileName: String) -> [String: Int]? {
-        let url = ModelLoader.auxFileURL(modelId: modelId, fileName: fileName)
-        guard let data = try? Data(contentsOf: url),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Int] else { return nil }
-        return json
-    }
-
     private func iou(_ a: CGRect, _ b: CGRect) -> Float {
         let interX = max(0, min(a.maxX, b.maxX) - max(a.minX, b.minX))
         let interY = max(0, min(a.maxY, b.maxY) - max(a.minY, b.minY))
@@ -338,7 +318,9 @@ struct OpenVocabDetectionDemoView: View {
         let w = CGFloat(cgImage.width), h = CGFloat(cgImage.height)
         let renderer = UIGraphicsImageRenderer(size: CGSize(width: w, height: h))
         return renderer.image { ctx in
-            ctx.cgContext.draw(cgImage, in: CGRect(x: 0, y: 0, width: w, height: h))
+            // UIGraphicsImageRenderer uses UIKit coordinates (origin top-left) —
+            // cgContext.draw(_:in:) would flip the image, so draw via UIImage.
+            UIImage(cgImage: cgImage).draw(in: CGRect(x: 0, y: 0, width: w, height: h))
             let colors: [UIColor] = [.systemRed, .systemBlue, .systemGreen, .systemOrange, .systemPurple]
             for (i, det) in dets.enumerated() {
                 let color = colors[i % colors.count]

@@ -48,6 +48,8 @@
 		F00000010000000000000034 /* SamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000034 /* SamView.swift */; };
 		F00000010000000000000035 /* SubjectLiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000035 /* SubjectLiftHelpers.swift */; };
 		F00000010000000000000040 /* ModelSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000040 /* ModelSession.swift */; };
+		F00000010000000000000050 /* CLIPTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000050 /* CLIPTokenizer.swift */; };
+		F00000010000000000000051 /* clip_vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000051 /* clip_vocab.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -93,6 +95,8 @@
 		F00000020000000000000034 /* SamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SamView.swift; sourceTree = "<group>"; };
 		F00000020000000000000035 /* SubjectLiftHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubjectLiftHelpers.swift; sourceTree = "<group>"; };
 		F00000020000000000000040 /* ModelSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSession.swift; sourceTree = "<group>"; };
+		F00000020000000000000050 /* CLIPTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIPTokenizer.swift; sourceTree = "<group>"; };
+		F00000020000000000000051 /* clip_vocab.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = clip_vocab.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +129,7 @@
 				F00000040000000000000012 /* Templates */,
 				F0000002000000000000000C /* Assets.xcassets */,
 				F0000002000000000000000D /* Info.plist */,
+				F00000020000000000000051 /* clip_vocab.json */,
 			);
 			path = CoreMLModelsApp;
 			sourceTree = "<group>";
@@ -187,6 +192,7 @@
 				F0000002000000000000000F /* ImageInOutDemoView.swift */,
 				F00000020000000000000011 /* ImageDetectionDemoView.swift */,
 				F00000020000000000000013 /* OpenVocabDetectionDemoView.swift */,
+				F00000020000000000000050 /* CLIPTokenizer.swift */,
 				F00000020000000000000014 /* ZeroShotClassifyDemoView.swift */,
 				F00000020000000000000015 /* FaceCompareDemoView.swift */,
 				F00000020000000000000016 /* Face3DDemoView.swift */,
@@ -268,6 +274,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F0000001000000000000000C /* Assets.xcassets in Resources */,
+				F00000010000000000000051 /* clip_vocab.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,6 +324,7 @@
 				F00000010000000000000034 /* SamView.swift in Sources */,
 				F00000010000000000000035 /* SubjectLiftHelpers.swift in Sources */,
 				F00000010000000000000040 /* ModelSession.swift in Sources */,
+				F00000010000000000000050 /* CLIPTokenizer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
