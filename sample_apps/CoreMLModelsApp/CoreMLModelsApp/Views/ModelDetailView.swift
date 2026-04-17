@@ -58,6 +58,12 @@ struct ModelDetailView: View {
             }
             metaRow("Min iOS", model.requirements.minIos)
             metaRow("Min RAM", "\(model.requirements.minRamMb) MB")
+            if let hf = model.derivedHfRepoUrl {
+                metaRow("Hugging Face", "View files", link: hf)
+            }
+            if let conv = model.conversionScriptUrl {
+                metaRow("Conversion script", "View source", link: conv)
+            }
         }
     }
 

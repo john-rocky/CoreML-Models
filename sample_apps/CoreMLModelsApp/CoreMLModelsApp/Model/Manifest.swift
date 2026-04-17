@@ -42,6 +42,8 @@ struct ModelEntry: Codable, Identifiable, Hashable {
     let license: LicenseInfo
     let upstream: UpstreamInfo
     let creditsMd: String?
+    let hfRepoUrl: String?
+    let conversionScriptUrl: String?
 
     enum CodingKeys: String, CodingKey {
         case id, name, subtitle
@@ -50,6 +52,22 @@ struct ModelEntry: Codable, Identifiable, Hashable {
         case thumbnailUrl = "thumbnail_url"
         case demo, files, requirements, license, upstream
         case creditsMd = "credits_md"
+        case hfRepoUrl = "hf_repo_url"
+        case conversionScriptUrl = "conversion_script_url"
+    }
+
+    /// Best-effort fallback: derive HF tree URL from the first file's download URL
+    /// (e.g. `.../resolve/main/dir/file.zip` → `.../tree/main/dir`).
+    var derivedHfRepoUrl: String? {
+        if let explicit = hfRepoUrl { return explicit }
+        guard let url = files.first?.url,
+              let range = url.range(of: "/resolve/") else { return nil }
+        var tree = url
+        tree.replaceSubrange(range, with: "/tree/")
+        if let slash = tree.range(of: "/", options: .backwards) {
+            tree.removeSubrange(slash.lowerBound..<tree.endIndex)
+        }
+        return tree
     }
 
     /// Sum of all (non-optional) file sizes in bytes.
