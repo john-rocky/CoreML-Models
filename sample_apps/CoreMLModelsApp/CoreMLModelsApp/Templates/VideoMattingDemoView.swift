@@ -6,6 +6,7 @@ import AVKit
 import Accelerate
 import CoreImage
 import UIKit
+import UniformTypeIdentifiers
 import Vision
 
 /// Video matting: video clip → alpha-composited video with an automatically
@@ -43,7 +44,7 @@ struct VideoMattingDemoView: View {
     @State private var progress: Double = 0
     @State private var status = ""
     @State private var processingTime: Double?
-    @State private var showingVideoPicker = false
+    @State private var videoPickerItem: PhotosPickerItem?
     @State private var overrideMaskItem: PhotosPickerItem?
     @State private var backgroundColorChoice: Int = 0
     @StateObject private var session = ModelSession<MatAnyoneHubEngine>()
@@ -128,9 +129,7 @@ struct VideoMattingDemoView: View {
                 .pickerStyle(.segmented)
 
                 HStack(spacing: 12) {
-                    Button {
-                        showingVideoPicker = true
-                    } label: {
+                    PhotosPicker(selection: $videoPickerItem, matching: .videos) {
                         Label("Video", systemImage: "film")
                     }.buttonStyle(.bordered)
 
@@ -149,22 +148,28 @@ struct VideoMattingDemoView: View {
             }
             .padding()
         }
-        .sheet(isPresented: $showingVideoPicker) {
-            VideoPickerView { url in
-                inputVideoURL = url
-                outputVideoURL = nil
-                processingTime = nil
-                maskPreview = nil
-                extractThumbnail(from: url)
-                // Auto-run as soon as a video is picked — the whole point
-                // of the Vision bootstrap is that the user should not need
-                // to fiddle with an initial mask.
-                Task { await runMatting() }
-            }
-        }
+        .onChange(of: videoPickerItem) { _, _ in loadPickedVideo() }
         .onChange(of: overrideMaskItem) { _, _ in loadOverrideMask() }
         .task {
             session.ensure { try await MatAnyoneHubEngine(model: model) }
+        }
+    }
+
+    private func loadPickedVideo() {
+        guard let videoPickerItem else { return }
+        Task {
+            guard let movie = try? await videoPickerItem.loadTransferable(type: PickedMovie.self) else { return }
+            await MainActor.run {
+                inputVideoURL = movie.url
+                outputVideoURL = nil
+                processingTime = nil
+                maskPreview = nil
+                extractThumbnail(from: movie.url)
+            }
+            // Auto-run as soon as a video is picked — the whole point
+            // of the Vision bootstrap is that the user should not need
+            // to fiddle with an initial mask.
+            await runMatting()
         }
     }
 
@@ -1109,26 +1114,22 @@ final class MatAnyoneHubMatter: @unchecked Sendable {
     }
 }
 
-// MARK: - Video Picker (UIDocumentPicker wrapper)
+// MARK: - Photo library video transferable
 
-struct VideoPickerView: UIViewControllerRepresentable {
-    let onPick: (URL) -> Void
+/// PhotosPicker only hands back a short-lived file URL, so we copy the movie
+/// into the app's temporary directory and keep the copy's URL around.
+struct PickedMovie: Transferable {
+    let url: URL
 
-    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.movie, .video])
-        picker.delegate = context.coordinator
-        return picker
-    }
-
-    func updateUIViewController(_ vc: UIDocumentPickerViewController, context: Context) {}
-
-    func makeCoordinator() -> Coordinator { Coordinator(onPick: onPick) }
-
-    class Coordinator: NSObject, UIDocumentPickerDelegate {
-        let onPick: (URL) -> Void
-        init(onPick: @escaping (URL) -> Void) { self.onPick = onPick }
-        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            if let url = urls.first { onPick(url) }
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(contentType: .movie) { movie in
+            SentTransferredFile(movie.url)
+        } importing: { received in
+            let copy = FileManager.default.temporaryDirectory
+                .appendingPathComponent("picked_\(UUID().uuidString).mov")
+            try? FileManager.default.removeItem(at: copy)
+            try FileManager.default.copyItem(at: received.file, to: copy)
+            return Self(url: copy)
         }
     }
 }
