@@ -118,6 +118,40 @@ enum ModelLoader {
         )
     }
 
+    /// Search for a model file whose base name contains `substring` (case-insensitive).
+    /// Useful for finding e.g. "*_encoder*" or "*_decoder*" inside an extracted archive.
+    static func loadBySubstring(modelId: String, substring: String, computeUnits: MLComputeUnits = .all) async throws -> MLModel {
+        let dir = Paths.modelDir(id: modelId)
+        guard let url = findModelFileBySubstring(in: dir, substring: substring) else {
+            throw LoadError.fileNotFound(substring)
+        }
+        let compiledName = (url.lastPathComponent as NSString).deletingPathExtension + ".mlmodelc"
+        let compiledURL = dir.appendingPathComponent(compiledName)
+        let config = MLModelConfiguration()
+        config.computeUnits = computeUnits
+        if url.pathExtension == "mlmodelc" {
+            return try MLModel(contentsOf: url, configuration: config)
+        }
+        if FileManager.default.fileExists(atPath: compiledURL.path) {
+            return try MLModel(contentsOf: compiledURL, configuration: config)
+        }
+        return try await compileAndCache(url, compiledURL: compiledURL, config: config)
+    }
+
+    private static func findModelFileBySubstring(in dir: URL, substring: String) -> URL? {
+        let fm = FileManager.default
+        let modelExts = Set(["mlpackage", "mlmodelc", "mlmodel"])
+        let lower = substring.lowercased()
+        guard let enumerator = fm.enumerator(at: dir, includingPropertiesForKeys: [.isDirectoryKey],
+                                              options: [.skipsHiddenFiles]) else { return nil }
+        for case let url as URL in enumerator {
+            guard modelExts.contains(url.pathExtension) else { continue }
+            let name = (url.lastPathComponent as NSString).deletingPathExtension.lowercased()
+            if name.contains(lower) { return url }
+        }
+        return nil
+    }
+
     /// URL for a non-model file (vocab, merges, voices, etc.) in the model directory.
     static func auxFileURL(modelId: String, fileName: String) -> URL {
         Paths.modelDir(id: modelId).appendingPathComponent(fileName)
@@ -213,10 +247,18 @@ enum ImageUtils {
         return (buf, CGRect(x: padX, y: padY, width: dstW, height: dstH))
     }
 
-    /// Normalize EXIF orientation.
+    /// Return a CGImage oriented for display. iPhone camera photos carry
+    /// EXIF orientation metadata so the pixel buffer is stored in sensor
+    /// orientation; for anything other than `.up` we redraw the image with
+    /// the orientation baked in. Already-upright images (web, screenshots,
+    /// `UIImagePNGRepresentation` output) are returned as-is to avoid a
+    /// pointless re-render that would also drop the alpha channel.
     static func normalizeOrientation(_ image: UIImage) -> CGImage? {
+        if image.imageOrientation == .up, let cg = image.cgImage {
+            return cg
+        }
         let size = image.size
-        UIGraphicsBeginImageContextWithOptions(size, true, 1.0)
+        UIGraphicsBeginImageContextWithOptions(size, true, image.scale)
         image.draw(in: CGRect(origin: .zero, size: size))
         let result = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()

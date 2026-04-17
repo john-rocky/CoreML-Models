@@ -82,12 +82,24 @@ class ImageColorizer: ObservableObject {
         let pixels = extractRGBPixels(cgImage: cgImage)
 
         var lab = [Float](repeating: 0, count: w * h * 3)
-        for i in 0..<(w * h) {
-            let r = pixels[i * 3], g = pixels[i * 3 + 1], b = pixels[i * 3 + 2]
-            let (l, a, bv) = srgbToLab(r: r, g: g, b: b)
-            lab[i * 3] = l
-            lab[i * 3 + 1] = a
-            lab[i * 3 + 2] = bv
+        // Parallelize rows — LAB conversion is ~4 pow() calls per pixel, serial
+        // Swift on 12MP photos takes seconds.
+        lab.withUnsafeMutableBufferPointer { dst in
+            pixels.withUnsafeBufferPointer { src in
+                let dstPtr = dst.baseAddress!
+                let srcPtr = src.baseAddress!
+                DispatchQueue.concurrentPerform(iterations: h) { y in
+                    let rowBase = y * w
+                    for x in 0..<w {
+                        let i = rowBase + x
+                        let r = srcPtr[i * 3], g = srcPtr[i * 3 + 1], b = srcPtr[i * 3 + 2]
+                        let (l, a, bv) = srgbToLab(r: r, g: g, b: b)
+                        dstPtr[i * 3] = l
+                        dstPtr[i * 3 + 1] = a
+                        dstPtr[i * 3 + 2] = bv
+                    }
+                }
+            }
         }
         return lab
     }
@@ -123,15 +135,25 @@ class ImageColorizer: ObservableObject {
         let count = width * height
         var pixelData = [UInt8](repeating: 255, count: count * 4)
 
-        for i in 0..<count {
-            let lv = l[i]
-            let a = ab[i]
-            let b = ab[count + i]
-            let (r, g, bv) = labToSrgb(l: lv, a: a, b: b)
-            pixelData[i * 4] = UInt8(clamping: Int(r * 255))
-            pixelData[i * 4 + 1] = UInt8(clamping: Int(g * 255))
-            pixelData[i * 4 + 2] = UInt8(clamping: Int(bv * 255))
-            pixelData[i * 4 + 3] = 255
+        // Parallelize rows — LAB→sRGB is ~3 pow() calls per pixel.
+        pixelData.withUnsafeMutableBufferPointer { dst in
+            l.withUnsafeBufferPointer { lBuf in
+                ab.withUnsafeBufferPointer { abBuf in
+                    let dstPtr = dst.baseAddress!
+                    let lPtr = lBuf.baseAddress!
+                    let abPtr = abBuf.baseAddress!
+                    DispatchQueue.concurrentPerform(iterations: height) { y in
+                        let rowBase = y * width
+                        for x in 0..<width {
+                            let i = rowBase + x
+                            let (r, g, bv) = labToSrgb(l: lPtr[i], a: abPtr[i], b: abPtr[count + i])
+                            dstPtr[i * 4]     = UInt8(clamping: Int(r * 255))
+                            dstPtr[i * 4 + 1] = UInt8(clamping: Int(g * 255))
+                            dstPtr[i * 4 + 2] = UInt8(clamping: Int(bv * 255))
+                        }
+                    }
+                }
+            }
         }
 
         let colorSpace = CGColorSpaceCreateDeviceRGB()
@@ -231,33 +253,32 @@ class ImageColorizer: ObservableObject {
     }
 
     private func resizeAB(_ ab: [Float], fromW: Int, fromH: Int, toW: Int, toH: Int) -> [Float] {
-        // ab is [2, fromH, fromW], resize each channel with bilinear interpolation
+        // ab is [2, fromH, fromW] planar. Use vImage for SIMD bilinear resampling
+        // of each channel — orders of magnitude faster than the serial Swift
+        // double-loop on a 12MP output.
         let fromCount = fromW * fromH
         let toCount = toW * toH
         var result = [Float](repeating: 0, count: 2 * toCount)
 
-        for ch in 0..<2 {
-            let srcOffset = ch * fromCount
-            let dstOffset = ch * toCount
-            for y in 0..<toH {
-                let srcY = Float(y) * Float(fromH) / Float(toH)
-                let y0 = min(Int(srcY), fromH - 1)
-                let y1 = min(y0 + 1, fromH - 1)
-                let fy = srcY - Float(y0)
-                for x in 0..<toW {
-                    let srcX = Float(x) * Float(fromW) / Float(toW)
-                    let x0 = min(Int(srcX), fromW - 1)
-                    let x1 = min(x0 + 1, fromW - 1)
-                    let fx = srcX - Float(x0)
-
-                    let v00 = ab[srcOffset + y0 * fromW + x0]
-                    let v10 = ab[srcOffset + y0 * fromW + x1]
-                    let v01 = ab[srcOffset + y1 * fromW + x0]
-                    let v11 = ab[srcOffset + y1 * fromW + x1]
-
-                    let v = v00 * (1 - fx) * (1 - fy) + v10 * fx * (1 - fy) +
-                            v01 * (1 - fx) * fy + v11 * fx * fy
-                    result[dstOffset + y * toW + x] = v
+        result.withUnsafeMutableBufferPointer { dstBuf in
+            ab.withUnsafeBufferPointer { srcBuf in
+                let srcBase = UnsafeMutablePointer(mutating: srcBuf.baseAddress!)
+                let dstBase = dstBuf.baseAddress!
+                for ch in 0..<2 {
+                    var srcImg = vImage_Buffer(
+                        data: srcBase.advanced(by: ch * fromCount),
+                        height: vImagePixelCount(fromH),
+                        width: vImagePixelCount(fromW),
+                        rowBytes: fromW * MemoryLayout<Float>.stride
+                    )
+                    var dstImg = vImage_Buffer(
+                        data: dstBase.advanced(by: ch * toCount),
+                        height: vImagePixelCount(toH),
+                        width: vImagePixelCount(toW),
+                        rowBytes: toW * MemoryLayout<Float>.stride
+                    )
+                    vImageScale_PlanarF(&srcImg, &dstImg, nil,
+                                        vImage_Flags(kvImageHighQualityResampling))
                 }
             }
         }

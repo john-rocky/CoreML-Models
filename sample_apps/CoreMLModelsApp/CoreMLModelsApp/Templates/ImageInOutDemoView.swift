@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 import CoreML
+import CoreImage
 
 /// Image → image processing with model-specific UX.
 /// - RMBG (mask): checkerboard transparency, Save PNG, Share
@@ -17,6 +18,7 @@ struct ImageInOutDemoView: View {
     @State private var processingTime: Double?
     @State private var item: PhotosPickerItem?
     @State private var showOriginal = false
+    @StateObject private var session = ModelSession<MLModel>()
 
     private var outputType: String { model.configString("output_type") ?? "image" }
 
@@ -78,9 +80,7 @@ struct ImageInOutDemoView: View {
                 }
 
                 HStack {
-                    if let t = processingTime {
-                        Text(String(format: "%.2fs", t)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                    }
+                    TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
                     Spacer()
                     if isProcessing { ProgressView().controlSize(.small); Text(status).font(.caption).foregroundStyle(.secondary) }
                 }
@@ -104,6 +104,13 @@ struct ImageInOutDemoView: View {
                 }
             }
             .padding()
+        }
+        .task {
+            // Eagerly start primary-model load. SinSR is a 3-model pipeline
+            // where the primary file is the encoder (first `kind: model`
+            // entry), so this warms the first step while the user picks
+            // a photo.
+            session.ensure { try await ModelLoader.loadPrimary(for: model) }
         }
         .onChange(of: item) { _, _ in loadAndRun() }
     }
@@ -135,8 +142,8 @@ struct ImageInOutDemoView: View {
                 return
             }
 
-            await MainActor.run { status = "Compiling model…" }
-            let mlModel = try await ModelLoader.loadPrimary(for: model)
+            await MainActor.run { status = session.loadTimeSec == nil ? "Loading model…" : "Processing…" }
+            let mlModel = try await session.get()
             await MainActor.run { status = "Processing…" }
 
             let inputSize = model.configInt("input_size") ?? 512
@@ -169,8 +176,20 @@ struct ImageInOutDemoView: View {
 
             let start = CFAbsoluteTimeGetCurrent()
             let input = try MLDictionaryFeatureProvider(dictionary: inputDict)
-            let output = try await mlModel.prediction(from: input)
-            let elapsed = CFAbsoluteTimeGetCurrent() - start
+            let output: MLFeatureProvider
+            do {
+                output = try await mlModel.prediction(from: input)
+            } catch {
+                // ANE inference can fail on certain device/model combinations;
+                // reload the model restricted to CPU+GPU and retry.
+                print("[ImageInOut] Prediction failed, retrying with cpuAndGPU: \(error.localizedDescription)")
+                await MainActor.run { status = "Retrying without ANE…" }
+                let file = model.files.first { ($0.kind ?? "model") == "model" } ?? model.files[0]
+                let fallbackModel = try await ModelLoader.load(
+                    modelId: model.id, fileName: file.name, computeUnits: .cpuAndGPU
+                )
+                output = try await fallbackModel.prediction(from: input)
+            }
 
             let result: UIImage?
             switch outputType {
@@ -178,9 +197,15 @@ struct ImageInOutDemoView: View {
                 result = processMaskOutput(output: output, originalImage: cgImage, origW: origW, origH: origH, modelSize: inputSize)
             case "lab_ab":
                 result = processLABABOutput(output: output, originalImage: cgImage, origW: origW, origH: origH, modelSize: inputSize)
+            case "segmap":
+                result = processSegmapOutput(output: output, originalImage: cgImage, origW: origW, origH: origH, modelSize: inputSize)
             default:
                 result = processImageOutput(output: output)
             }
+            // Measure inference + post-processing together — post-processing
+            // is a meaningful fraction of wall time on large photos (RMBG mask
+            // upsample, DDColor LAB→sRGB), and the user waits for both.
+            let elapsed = CFAbsoluteTimeGetCurrent() - start
 
             await MainActor.run { outputImage = result ?? image; processingTime = elapsed; isProcessing = false; status = "" }
         } catch {
@@ -241,37 +266,35 @@ struct ImageInOutDemoView: View {
         let mi = raw.min() ?? 0, ma = raw.max() ?? 1, range = ma - mi
         if range > 1e-6 { for i in raw.indices { raw[i] = (raw[i] - mi) / range } }
 
-        var pixelData = [UInt8](repeating: 0, count: origW * origH * 4)
-        guard let ctx = CGContext(data: &pixelData, width: origW, height: origH, bitsPerComponent: 8,
-                                  bytesPerRow: origW * 4, space: CGColorSpaceCreateDeviceRGB(),
-                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
-        ctx.draw(originalImage, in: CGRect(x: 0, y: 0, width: origW, height: origH))
+        // Pack the model-resolution mask into an 8-bit grayscale CGImage, then
+        // let CoreImage upscale it and blend against a transparent background.
+        // GPU-accelerated bilinear upsample + composite replaces what used to
+        // be a per-pixel Swift loop over the full photo (seconds on 12MP input).
+        var mask8 = [UInt8](repeating: 0, count: modelSize * modelSize)
+        for i in 0..<mask8.count { mask8[i] = UInt8(clamping: Int(raw[i] * 255)) }
+        guard let provider = CGDataProvider(data: Data(mask8) as CFData),
+              let maskCG = CGImage(
+                  width: modelSize, height: modelSize,
+                  bitsPerComponent: 8, bitsPerPixel: 8,
+                  bytesPerRow: modelSize,
+                  space: CGColorSpaceCreateDeviceGray(),
+                  bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
+                  provider: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent
+              ) else { return nil }
 
-        var result = [UInt8](repeating: 0, count: origW * origH * 4)
-        for y in 0..<origH {
-            let srcY = Float(y) * Float(modelSize) / Float(origH)
-            let y0 = min(Int(srcY), modelSize - 1), y1 = min(y0 + 1, modelSize - 1)
-            let fy = srcY - Float(y0)
-            for x in 0..<origW {
-                let srcX = Float(x) * Float(modelSize) / Float(origW)
-                let x0 = min(Int(srcX), modelSize - 1), x1 = min(x0 + 1, modelSize - 1)
-                let fx = srcX - Float(x0)
-                let alpha = raw[y0*modelSize+x0]*(1-fx)*(1-fy) + raw[y0*modelSize+x1]*fx*(1-fy)
-                    + raw[y1*modelSize+x0]*(1-fx)*fy + raw[y1*modelSize+x1]*fx*fy
-                let a = UInt8(clamping: Int(alpha * 255))
-                let idx = (y * origW + x) * 4
-                let af = Float(a) / 255.0
-                result[idx] = UInt8(clamping: Int(Float(pixelData[idx]) * af))
-                result[idx+1] = UInt8(clamping: Int(Float(pixelData[idx+1]) * af))
-                result[idx+2] = UInt8(clamping: Int(Float(pixelData[idx+2]) * af))
-                result[idx+3] = a
-            }
-        }
-        guard let outCtx = CGContext(data: &result, width: origW, height: origH, bitsPerComponent: 8,
-                                     bytesPerRow: origW * 4, space: CGColorSpaceCreateDeviceRGB(),
-                                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue),
-              let cgImg = outCtx.makeImage() else { return nil }
-        return UIImage(cgImage: cgImg)
+        let origCI = CIImage(cgImage: originalImage)
+        let extent = origCI.extent
+        let maskCI = CIImage(cgImage: maskCG).transformed(by:
+            CGAffineTransform(scaleX: extent.width / CGFloat(modelSize),
+                              y: extent.height / CGFloat(modelSize)))
+        let transparent = CIImage.empty().cropped(to: extent)
+        let blended = origCI.applyingFilter("CIBlendWithMask", parameters: [
+            kCIInputBackgroundImageKey: transparent,
+            kCIInputMaskImageKey: maskCI,
+        ])
+        let ciCtx = CIContext(options: [.useSoftwareRenderer: false])
+        guard let outCG = ciCtx.createCGImage(blended, from: extent) else { return nil }
+        return UIImage(cgImage: outCG)
     }
 
     // MARK: - Output: LAB AB (DDColor)
@@ -287,33 +310,45 @@ struct ImageInOutDemoView: View {
                                   bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return nil }
         ctx.draw(originalImage, in: CGRect(x: 0, y: 0, width: origW, height: origH))
 
-        var origL = [Float](repeating: 0, count: origW * origH)
-        for i in 0..<(origW * origH) {
-            origL[i] = srgbToL(r: Float(origPixels[i*4])/255, g: Float(origPixels[i*4+1])/255, b: Float(origPixels[i*4+2])/255)
-        }
+        var resultPixels = [UInt8](repeating: 255, count: origW * origH * 4)
+        // Fan each row out to the concurrent pool — the LAB↔sRGB math is ~6
+        // pow() calls per pixel, and serial Swift on a 12MP photo takes seconds.
+        origPixels.withUnsafeBufferPointer { srcBuf in
+            resultPixels.withUnsafeMutableBufferPointer { dstBuf in
+                ab.withUnsafeBufferPointer { abBuf in
+                    let src = srcBuf.baseAddress!
+                    let dst = dstBuf.baseAddress!
+                    let abPtr = abBuf.baseAddress!
+                    DispatchQueue.concurrentPerform(iterations: origH) { y in
+                        let sy = Float(y) * Float(modelSize) / Float(origH)
+                        let y0 = min(Int(sy), modelSize-1), y1 = min(y0+1, modelSize-1)
+                        let fy = sy - Float(y0)
+                        let rowBase = y * origW
+                        for x in 0..<origW {
+                            let sx = Float(x) * Float(modelSize) / Float(origW)
+                            let x0 = min(Int(sx), modelSize-1), x1 = min(x0+1, modelSize-1)
+                            let fx = sx - Float(x0)
+                            let w00 = (1-fx)*(1-fy), w10 = fx*(1-fy), w01 = (1-fx)*fy, w11 = fx*fy
+                            let aOff = y0*modelSize+x0
+                            let bOff = y0*modelSize+x1
+                            let cOff = y1*modelSize+x0
+                            let dOff = y1*modelSize+x1
+                            let aVal = abPtr[aOff]*w00 + abPtr[bOff]*w10 + abPtr[cOff]*w01 + abPtr[dOff]*w11
+                            let bVal = abPtr[chSize+aOff]*w00 + abPtr[chSize+bOff]*w10 + abPtr[chSize+cOff]*w01 + abPtr[chSize+dOff]*w11
 
-        var abOrig = [Float](repeating: 0, count: 2 * origW * origH)
-        for ch in 0..<2 {
-            let srcOff = ch * chSize, dstOff = ch * origW * origH
-            for y in 0..<origH {
-                let sy = Float(y) * Float(modelSize) / Float(origH)
-                let y0 = min(Int(sy), modelSize-1), y1 = min(y0+1, modelSize-1), fy = sy - Float(y0)
-                for x in 0..<origW {
-                    let sx = Float(x) * Float(modelSize) / Float(origW)
-                    let x0 = min(Int(sx), modelSize-1), x1 = min(x0+1, modelSize-1), fx = sx - Float(x0)
-                    abOrig[dstOff + y*origW + x] = ab[srcOff+y0*modelSize+x0]*(1-fx)*(1-fy) + ab[srcOff+y0*modelSize+x1]*fx*(1-fy)
-                        + ab[srcOff+y1*modelSize+x0]*(1-fx)*fy + ab[srcOff+y1*modelSize+x1]*fx*fy
+                            let pi = (rowBase + x) * 4
+                            let r = Float(src[pi]) / 255
+                            let g = Float(src[pi+1]) / 255
+                            let b = Float(src[pi+2]) / 255
+                            let l = srgbToL(r: r, g: g, b: b)
+                            let (rOut, gOut, bOut) = labToSrgb(l: l, a: aVal, b: bVal)
+                            dst[pi]   = UInt8(clamping: Int(rOut * 255))
+                            dst[pi+1] = UInt8(clamping: Int(gOut * 255))
+                            dst[pi+2] = UInt8(clamping: Int(bOut * 255))
+                        }
+                    }
                 }
             }
-        }
-
-        let count = origW * origH
-        var resultPixels = [UInt8](repeating: 255, count: count * 4)
-        for i in 0..<count {
-            let (r, g, b) = labToSrgb(l: origL[i], a: abOrig[i], b: abOrig[count + i])
-            resultPixels[i*4] = UInt8(clamping: Int(r * 255))
-            resultPixels[i*4+1] = UInt8(clamping: Int(g * 255))
-            resultPixels[i*4+2] = UInt8(clamping: Int(b * 255))
         }
         guard let outCtx = CGContext(data: &resultPixels, width: origW, height: origH, bitsPerComponent: 8,
                                      bytesPerRow: origW * 4, space: CGColorSpaceCreateDeviceRGB(),
@@ -321,6 +356,105 @@ struct ImageInOutDemoView: View {
               let cgImg = outCtx.makeImage() else { return nil }
         return UIImage(cgImage: cgImg)
     }
+
+    // MARK: - Output: segmap (face-parsing)
+
+    private func processSegmapOutput(output: MLFeatureProvider, originalImage: CGImage, origW: Int, origH: Int, modelSize: Int) -> UIImage? {
+        guard let arr = output.featureNames.compactMap({ output.featureValue(for: $0)?.multiArrayValue }).first else { return nil }
+        let shape = arr.shape.map { $0.intValue }
+        // Expected [1, H, W] or [1, C, H, W] (argmax already done or need to do)
+        let h: Int, w: Int
+        let isArgmaxed: Bool
+        if shape.count == 3 {
+            h = shape[1]; w = shape[2]; isArgmaxed = true
+        } else if shape.count == 4 && shape[1] > 1 {
+            h = shape[2]; w = shape[3]; isArgmaxed = false
+        } else {
+            return nil
+        }
+
+        // Get class index per pixel
+        var classMap = [Int](repeating: 0, count: h * w)
+        if isArgmaxed {
+            let strides = arr.strides.map { $0.intValue }
+            for y in 0..<h {
+                for x in 0..<w {
+                    classMap[y * w + x] = Int(ImageUtils.readFloat(arr, at: y * strides[1] + x * strides[2]))
+                }
+            }
+        } else {
+            let c = shape[1]
+            let strides = arr.strides.map { $0.intValue }
+            for y in 0..<h {
+                for x in 0..<w {
+                    var maxVal: Float = -.greatestFiniteMagnitude
+                    var maxIdx = 0
+                    for ci in 0..<c {
+                        let v = ImageUtils.readFloat(arr, at: ci * strides[1] + y * strides[2] + x * strides[3])
+                        if v > maxVal { maxVal = v; maxIdx = ci }
+                    }
+                    classMap[y * w + x] = maxIdx
+                }
+            }
+        }
+
+        // Blend segmap over original image
+        var origPixels = [UInt8](repeating: 0, count: origW * origH * 4)
+        guard let ctx = CGContext(data: &origPixels, width: origW, height: origH, bitsPerComponent: 8,
+                                  bytesPerRow: origW * 4, space: CGColorSpaceCreateDeviceRGB(),
+                                  bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else { return nil }
+        ctx.draw(originalImage, in: CGRect(x: 0, y: 0, width: origW, height: origH))
+
+        var result = [UInt8](repeating: 255, count: origW * origH * 4)
+        let alpha: Float = 0.5
+        let paletteCount = Self.segmapPalette.count
+        origPixels.withUnsafeBufferPointer { srcBuf in
+            result.withUnsafeMutableBufferPointer { dstBuf in
+                classMap.withUnsafeBufferPointer { clsBuf in
+                    let src = srcBuf.baseAddress!
+                    let dst = dstBuf.baseAddress!
+                    let cls = clsBuf.baseAddress!
+                    DispatchQueue.concurrentPerform(iterations: origH) { y in
+                        let sy = min(Int(Float(y) * Float(h) / Float(origH)), h - 1)
+                        for x in 0..<origW {
+                            let sx = min(Int(Float(x) * Float(w) / Float(origW)), w - 1)
+                            let c = cls[sy * w + sx]
+                            let (cr, cg, cb) = Self.segmapPalette[c % paletteCount]
+                            let idx = (y * origW + x) * 4
+                            dst[idx]   = UInt8(Float(src[idx])   * (1 - alpha) + Float(cr) * alpha)
+                            dst[idx+1] = UInt8(Float(src[idx+1]) * (1 - alpha) + Float(cg) * alpha)
+                            dst[idx+2] = UInt8(Float(src[idx+2]) * (1 - alpha) + Float(cb) * alpha)
+                        }
+                    }
+                }
+            }
+        }
+        return ImageUtils.makeRGBA(pixels: result, width: origW, height: origH)
+    }
+
+    // Face-parsing palette: background, skin, l_brow, r_brow, l_eye, r_eye, eyeglass,
+    // l_ear, r_ear, earring, nose, mouth, u_lip, l_lip, neck, necklace, cloth, hair, hat
+    private static let segmapPalette: [(UInt8, UInt8, UInt8)] = [
+        (0, 0, 0),       // 0  background
+        (255, 224, 189), // 1  skin
+        (139, 90, 43),   // 2  left brow
+        (139, 90, 43),   // 3  right brow
+        (72, 118, 255),  // 4  left eye
+        (72, 118, 255),  // 5  right eye
+        (180, 180, 255), // 6  eyeglass
+        (255, 182, 108), // 7  left ear
+        (255, 182, 108), // 8  right ear
+        (255, 215, 0),   // 9  earring
+        (255, 127, 80),  // 10 nose
+        (220, 20, 60),   // 11 mouth
+        (199, 21, 133),  // 12 upper lip
+        (199, 21, 133),  // 13 lower lip
+        (210, 180, 140), // 14 neck
+        (255, 215, 0),   // 15 necklace
+        (100, 149, 237), // 16 cloth
+        (139, 69, 19),   // 17 hair
+        (160, 82, 45),   // 18 hat
+    ]
 
     // MARK: - SinSR Pipeline
 

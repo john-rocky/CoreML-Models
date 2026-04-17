@@ -728,11 +728,8 @@ struct AudioInOutDemoView: View {
 
     private func runSourceSeparation(inputURL: URL, sampleRate: Int, fullTrack: Bool = true) async throws {
         status = "Loading audio..."
-        let audioFile = try AVAudioFile(forReading: inputURL)
-        let format = AVAudioFormat(standardFormatWithSampleRate: Double(sampleRate), channels: 2)!
-        let frameCount = AVAudioFrameCount(audioFile.length)
-        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount)!
-        try audioFile.read(into: buffer)
+        // Resample + channel-match to model's expected format (mirrors DemucsDemo).
+        let buffer = try AudioUtils.loadResampled(url: inputURL, targetSampleRate: Double(sampleRate), targetChannels: 2)
         guard let floatData = buffer.floatChannelData else { throw NSError(domain: "Audio", code: 1) }
         let totalSamples = Int(buffer.frameLength)
 
@@ -791,11 +788,8 @@ struct AudioInOutDemoView: View {
 
     private func runDiarization(inputURL: URL) async throws {
         status = "Loading audio..."
-        let audioFile = try AVAudioFile(forReading: inputURL)
-        let format = AVAudioFormat(standardFormatWithSampleRate: 16000, channels: 1)!
-        let frameCount = AVAudioFrameCount(audioFile.length * 16000 / Int64(audioFile.fileFormat.sampleRate))
-        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: max(frameCount, 1))!
-        try audioFile.read(into: buffer)
+        // Pyannote expects 16 kHz mono. Use AVAudioConverter so rate/channel mismatches are handled.
+        let buffer = try AudioUtils.loadResampled(url: inputURL, targetSampleRate: 16000, targetChannels: 1)
         guard let samples = buffer.floatChannelData?[0] else { throw NSError(domain: "Audio", code: 1) }
         let totalSamples = Int(buffer.frameLength)
 
@@ -894,11 +888,8 @@ struct AudioInOutDemoView: View {
     private func runVoiceConversion(inputURL: URL, sampleRate: Int) async throws {
         status = "Loading audio..."
         let rate = 22050
-        let audioFile = try AVAudioFile(forReading: inputURL)
-        let format = AVAudioFormat(standardFormatWithSampleRate: Double(rate), channels: 1)!
-        let frameCount = AVAudioFrameCount(audioFile.length * Int64(rate) / Int64(audioFile.fileFormat.sampleRate))
-        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: max(frameCount, 1))!
-        try audioFile.read(into: buffer)
+        // OpenVoice expects 22050 Hz mono. Resample if needed.
+        let buffer = try AudioUtils.loadResampled(url: inputURL, targetSampleRate: Double(rate), targetChannels: 1)
         guard let samples = buffer.floatChannelData?[0] else { throw NSError(domain: "Audio", code: 1) }
         let totalSamples = Int(buffer.frameLength)
 
@@ -983,13 +974,9 @@ struct AudioInOutDemoView: View {
         await MainActor.run { status = "Extracting target voice profile..." }
         let tgtEmb = try await extractSpeakerEmbedding(audioURL: targetURL, rate: rate, nFFT: nFFT, hopLen: hopLen, winLen: winLen, freqBins: freqBins, encoder: se)
 
-        // Load source audio for conversion
+        // Load source audio for conversion (resampled to OpenVoice rate).
         await MainActor.run { status = "Computing STFT..." }
-        let audioFile = try AVAudioFile(forReading: sourceURL)
-        let format = AVAudioFormat(standardFormatWithSampleRate: Double(rate), channels: 1)!
-        let frameCount = AVAudioFrameCount(audioFile.length * Int64(rate) / Int64(audioFile.fileFormat.sampleRate))
-        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: max(frameCount, 1))!
-        try audioFile.read(into: buffer)
+        let buffer = try AudioUtils.loadResampled(url: sourceURL, targetSampleRate: Double(rate), targetChannels: 1)
         guard let samples = buffer.floatChannelData?[0] else { throw NSError(domain: "Audio", code: 1) }
         let totalSamples = Int(buffer.frameLength)
 
@@ -1033,11 +1020,7 @@ struct AudioInOutDemoView: View {
     }
 
     private func extractSpeakerEmbedding(audioURL: URL, rate: Int, nFFT: Int, hopLen: Int, winLen: Int, freqBins: Int, encoder: MLModel) async throws -> [Float] {
-        let audioFile = try AVAudioFile(forReading: audioURL)
-        let format = AVAudioFormat(standardFormatWithSampleRate: Double(rate), channels: 1)!
-        let frameCount = AVAudioFrameCount(audioFile.length * Int64(rate) / Int64(audioFile.fileFormat.sampleRate))
-        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: max(frameCount, 1))!
-        try audioFile.read(into: buffer)
+        let buffer = try AudioUtils.loadResampled(url: audioURL, targetSampleRate: Double(rate), targetChannels: 1)
         guard let samples = buffer.floatChannelData?[0] else { throw NSError(domain: "Audio", code: 1) }
         let totalSamples = Int(buffer.frameLength)
 
@@ -1128,6 +1111,83 @@ struct AudioInOutDemoView: View {
         let file = try AVAudioFile(forWriting: url, settings: format.settings)
         try file.write(from: buffer)
         return url
+    }
+}
+
+// MARK: - Audio Loading Utilities
+
+/// Shared audio preprocessing helpers. Mirrors DemucsDemo's AVAudioConverter-based
+/// loader so templates always feed the model the sample rate / channel count it expects
+/// regardless of the source file.
+enum AudioUtils {
+    /// Decode an audio file and resample / remix it to the requested format.
+    /// - Parameter targetSampleRate: sample rate the model expects (e.g. 44100 for HTDemucs, 16000 for pyannote, 22050 for OpenVoice / BasicPitch).
+    /// - Parameter targetChannels: 1 for mono, 2 for stereo.
+    /// Returns a Float32, non-interleaved AVAudioPCMBuffer whose frameLength is the resampled length.
+    static func loadResampled(url: URL, targetSampleRate: Double, targetChannels: AVAudioChannelCount) throws -> AVAudioPCMBuffer {
+        let accessing = url.startAccessingSecurityScopedResource()
+        defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+
+        let sourceFile = try AVAudioFile(forReading: url)
+        let sourceFormat = sourceFile.processingFormat
+        guard let targetFormat = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: targetSampleRate,
+            channels: targetChannels,
+            interleaved: false
+        ) else {
+            throw NSError(domain: "AudioUtils", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "Unsupported target audio format"])
+        }
+
+        // Compute output capacity from the sample-rate ratio plus a small padding for the resampler tail.
+        let ratio = targetSampleRate / sourceFormat.sampleRate
+        let estimatedFrames = AVAudioFrameCount(ceil(Double(sourceFile.length) * ratio)) + 1024
+        guard let outputBuffer = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: max(estimatedFrames, 1)) else {
+            throw NSError(domain: "AudioUtils", code: 2,
+                          userInfo: [NSLocalizedDescriptionKey: "Failed to allocate output buffer"])
+        }
+
+        // Fast path: source already matches target format and channel count.
+        if sourceFormat.sampleRate == targetSampleRate && sourceFormat.channelCount == targetChannels {
+            try sourceFile.read(into: outputBuffer)
+            return outputBuffer
+        }
+
+        guard let converter = AVAudioConverter(from: sourceFormat, to: targetFormat) else {
+            throw NSError(domain: "AudioUtils", code: 3,
+                          userInfo: [NSLocalizedDescriptionKey: "Cannot create AVAudioConverter"])
+        }
+
+        // Pull-model conversion handles any sample-rate and channel-layout mismatch.
+        let readChunk: AVAudioFrameCount = 4096
+        let inputBlock: AVAudioConverterInputBlock = { _, outStatus in
+            guard let readBuffer = AVAudioPCMBuffer(pcmFormat: sourceFormat, frameCapacity: readChunk) else {
+                outStatus.pointee = .endOfStream
+                return nil
+            }
+            do {
+                try sourceFile.read(into: readBuffer)
+            } catch {
+                outStatus.pointee = .endOfStream
+                return nil
+            }
+            if readBuffer.frameLength == 0 {
+                outStatus.pointee = .endOfStream
+                return nil
+            }
+            outStatus.pointee = .haveData
+            return readBuffer
+        }
+
+        var convertError: NSError?
+        let status = converter.convert(to: outputBuffer, error: &convertError, withInputFrom: inputBlock)
+        if let convertError { throw convertError }
+        if status == .error {
+            throw NSError(domain: "AudioUtils", code: 4,
+                          userInfo: [NSLocalizedDescriptionKey: "Audio conversion failed"])
+        }
+        return outputBuffer
     }
 }
 

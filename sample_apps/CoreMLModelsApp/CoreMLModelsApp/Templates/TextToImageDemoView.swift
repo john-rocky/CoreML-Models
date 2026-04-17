@@ -133,8 +133,37 @@ struct TextToImageDemoView: View {
 
             let latentSize = model.configInt("latent_size") ?? 64
             let latentChannels = model.configInt("latent_channels") ?? 4
-            let steps = model.configInt("steps") ?? 1
+            let steps = max(1, model.configInt("steps") ?? 1)
             let guidanceScale = model.configDouble("guidance_scale").map { Float($0) } ?? 1.0
+            let scaleFactor: Float = Float(model.configDouble("vae_scale_factor") ?? 0.18215)
+
+            // Precompute SD1.5 cumulative alpha products (scaled_linear beta schedule 0.00085 -> 0.012 over 1000 steps)
+            // Matches TCDScheduler in HyperSDDemo.
+            let trainSteps = 1000
+            let betaStart: Float = 0.00085
+            let betaEnd: Float = 0.012
+            var alphasCumProd = [Float](repeating: 1.0, count: trainSteps)
+            do {
+                let sqrtStart = sqrt(betaStart)
+                let sqrtEnd = sqrt(betaEnd)
+                var running: Float = 1.0
+                for i in 0..<trainSteps {
+                    let frac = trainSteps > 1 ? Float(i) / Float(trainSteps - 1) : 0
+                    let sqrtBeta = sqrtStart + (sqrtEnd - sqrtStart) * frac
+                    let beta = sqrtBeta * sqrtBeta
+                    running *= (1.0 - beta)
+                    alphasCumProd[i] = running
+                }
+            }
+
+            // TCD trailing timestep schedule (matches diffusers TCDScheduler).
+            let stepRatio = Float(trainSteps) / Float(steps)
+            var timesteps: [Int] = []
+            var fi = Float(steps)
+            while fi >= 1 {
+                timesteps.append(Int((fi * stepRatio).rounded()) - 1)
+                fi -= 1
+            }
 
             let start = CFAbsoluteTimeGetCurrent()
 
@@ -154,7 +183,8 @@ struct TextToImageDemoView: View {
             let teOutput = try await textEncoder.prediction(from: teInput)
             let hiddenStates = teOutput.featureValue(for: teOutput.featureNames.first ?? "encoder_hidden_states")?.multiArrayValue
 
-            // 3. Generate noise (seeded)
+            // 3. Generate noise (seeded). Single-sample latent [1, C, H, W]; we duplicate into a
+            // batched sample [2, C, H, W] at each UNet call so CFG can subtract uncond from cond.
             status = "Generating latent…"
             let latent = try MLMultiArray(shape: [1, NSNumber(value: latentChannels),
                                                   NSNumber(value: latentSize), NSNumber(value: latentSize)],
@@ -169,22 +199,30 @@ struct TextToImageDemoView: View {
             }
 
             // 4. UNet denoising loop (TCD scheduler)
-            for step in 0..<steps {
-                status = "Denoising step \(step + 1)/\(steps)…"
+            for (stepIdx, t) in timesteps.enumerated() {
+                status = "Denoising step \(stepIdx + 1)/\(timesteps.count)…"
 
-                let tcdTimestep: Float = steps == 1 ? 999.0 : Float(999 - step * (999 / steps))
-                let timestepArr = try MLMultiArray(shape: [1], dataType: .float16)
-                timestepArr.dataPointer.assumingMemoryBound(to: Float16.self)[0] = Float16(tcdTimestep)
+                // Build batched latent [2, C, H, W] by duplicating the current single-sample latent.
+                let batchedLatent = try MLMultiArray(shape: [2, NSNumber(value: latentChannels),
+                                                             NSNumber(value: latentSize), NSNumber(value: latentSize)],
+                                                    dataType: .float16)
+                let bPtr = batchedLatent.dataPointer.assumingMemoryBound(to: Float16.self)
+                let lPtr = latent.dataPointer.assumingMemoryBound(to: Float16.self)
+                for i in 0..<count { bPtr[i] = lPtr[i]; bPtr[count + i] = lPtr[i] }
 
-                // Build UNet input with text hidden states
+                // Timestep tensor shape [2] for the batched UNet (matches HyperSDDemo Unet.swift).
+                let timestepArr = try MLMultiArray(shape: [2], dataType: .float16)
+                let tsPtr = timestepArr.dataPointer.assumingMemoryBound(to: Float16.self)
+                tsPtr[0] = Float16(Float(t)); tsPtr[1] = Float16(Float(t))
+
                 var noiseResidual: MLMultiArray?
 
                 if let c1 = unetChunk1, let c2 = unetChunk2, let hs = hiddenStates {
                     // Chunked UNet
                     let c1Names = c1.modelDescription.inputDescriptionsByName
                     var c1Dict: [String: Any] = [:]
-                    for (key, desc) in c1Names {
-                        if key.contains("sample") || key.contains("latent") { c1Dict[key] = latent }
+                    for (key, _) in c1Names {
+                        if key.contains("sample") || key.contains("latent") { c1Dict[key] = batchedLatent }
                         else if key.contains("timestep") || key.contains("t_emb") { c1Dict[key] = timestepArr }
                         else if key.contains("hidden") || key.contains("encoder") { c1Dict[key] = hs }
                     }
@@ -202,37 +240,33 @@ struct TextToImageDemoView: View {
                     noiseResidual = c2Out.featureNames.compactMap { c2Out.featureValue(for: $0)?.multiArrayValue }.first
                 }
 
-                // TCD scheduler step: x_pred = latent - sigma * noise
-                if let noise = noiseResidual {
-                    let nPtr = noise.dataPointer.assumingMemoryBound(to: Float16.self)
-                    let lPtr = latent.dataPointer.assumingMemoryBound(to: Float16.self)
+                guard let noise = noiseResidual else { continue }
 
-                    if guidanceScale != 1.0 {
-                        // CFG: noise = uncond + scale * (cond - uncond)
-                        // For 1-step Hyper-SD, guidance_scale = 1.0 so this is skipped
-                        let half = count
-                        for i in 0..<half {
-                            let uncond = Float(nPtr[i])
-                            let cond = Float(nPtr[half + i])
-                            lPtr[i] = Float16(uncond + guidanceScale * (cond - uncond))
-                        }
-                    } else {
-                        // Single step: latent = predicted x0
-                        // TCD 1-step: x0 = latent - noise (simplified)
-                        let beta: Float = 0.00085  // SD1.5 beta_start
-                        let alpha: Float = 1.0 - beta
-                        let sqrtAlpha = sqrt(alpha)
-                        for i in 0..<count {
-                            lPtr[i] = Float16((Float(lPtr[i]) - Float(nPtr[i]) * sqrt(1 - alpha)) / sqrtAlpha)
-                        }
-                    }
+                // Apply CFG: guided = uncond + scale * (cond - uncond). Noise is [2, C, H, W] in
+                // the order [uncond, cond] because that is how input_ids were batched above.
+                let nPtr = noise.dataPointer.assumingMemoryBound(to: Float16.self)
+                var guided = [Float](repeating: 0, count: count)
+                for i in 0..<count {
+                    let uncond = Float(nPtr[i])
+                    let cond = Float(nPtr[count + i])
+                    guided[i] = uncond + guidanceScale * (cond - uncond)
+                }
+
+                // TCD scheduler step (eta=1.0 / pred_original_sample form, matches TCDScheduler.swift):
+                //   x0 = (sample - sqrt(1 - alphaProd_t) * noise) / sqrt(alphaProd_t)
+                let clampedT = min(max(t, 0), alphasCumProd.count - 1)
+                let alphaProdT = alphasCumProd[clampedT]
+                let sqrtAlpha = sqrt(alphaProdT)
+                let sqrtBeta = sqrt(max(0, 1 - alphaProdT))
+                for i in 0..<count {
+                    let predX0 = (Float(lPtr[i]) - sqrtBeta * guided[i]) / sqrtAlpha
+                    lPtr[i] = Float16(predX0)
                 }
             }
 
             // 5. VAE decode
             status = "Decoding image…"
             // Scale latent for VAE
-            let scaleFactor: Float = 0.18215
             let lPtr = latent.dataPointer.assumingMemoryBound(to: Float16.self)
             for i in 0..<count { lPtr[i] = Float16(Float(lPtr[i]) / scaleFactor) }
 
@@ -323,8 +357,9 @@ struct BPETokenizerSimple {
 
         allTokens.append(eosToken)
 
-        // Pad or truncate to maxLength
-        var result = [Int32](repeating: 0, count: maxLength)
+        // Pad with EOS (matches HyperSDDemo BPETokenizer which uses "<|endoftext|>" as padToken)
+        // or truncate to maxLength.
+        var result = [Int32](repeating: Int32(eosToken), count: maxLength)
         for i in 0..<min(allTokens.count, maxLength) { result[i] = Int32(allTokens[i]) }
         return result
     }

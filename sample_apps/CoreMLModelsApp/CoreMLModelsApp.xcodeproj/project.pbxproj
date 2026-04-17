@@ -33,8 +33,15 @@
 		F0000001000000000000001B /* TextToAudioDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000002000000000000001B /* TextToAudioDemoView.swift */; };
 		F0000001000000000000001C /* AudioToScoreDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000002000000000000001C /* AudioToScoreDemoView.swift */; };
 		F0000001000000000000001D /* ChatDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000002000000000000001D /* ChatDemoView.swift */; };
-		F0000001000000000000001F /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000002000000000000001F /* CameraView.swift */; };
 		F0000001000000000000001E /* CoreMLLLM in Frameworks */ = {isa = PBXBuildFile; productRef = F0000002000000000000001E /* CoreMLLLM */; };
+		F0000001000000000000001F /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000002000000000000001F /* CameraView.swift */; };
+		F00000010000000000000020 /* ModelInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000020 /* ModelInspector.swift */; };
+		F00000010000000000000021 /* BenchmarkRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000021 /* BenchmarkRunner.swift */; };
+		F00000010000000000000022 /* ModelInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000022 /* ModelInspectorView.swift */; };
+		F00000010000000000000023 /* BenchmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000023 /* BenchmarkView.swift */; };
+		F00000010000000000000024 /* InpaintingDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000024 /* InpaintingDemoView.swift */; };
+		F00000010000000000000025 /* SegmentAnythingDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000025 /* SegmentAnythingDemoView.swift */; };
+		F00000010000000000000026 /* SAMPromptEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000026 /* SAMPromptEncoder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -67,54 +74,381 @@
 		F0000002000000000000001C /* AudioToScoreDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioToScoreDemoView.swift; sourceTree = "<group>"; };
 		F0000002000000000000001D /* ChatDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDemoView.swift; sourceTree = "<group>"; };
 		F0000002000000000000001F /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		F00000020000000000000020 /* ModelInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInspector.swift; sourceTree = "<group>"; };
+		F00000020000000000000021 /* BenchmarkRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkRunner.swift; sourceTree = "<group>"; };
+		F00000020000000000000022 /* ModelInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInspectorView.swift; sourceTree = "<group>"; };
+		F00000020000000000000023 /* BenchmarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkView.swift; sourceTree = "<group>"; };
+		F00000020000000000000024 /* InpaintingDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InpaintingDemoView.swift; sourceTree = "<group>"; };
+		F00000020000000000000025 /* SegmentAnythingDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentAnythingDemoView.swift; sourceTree = "<group>"; };
+		F00000020000000000000026 /* SAMPromptEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAMPromptEncoder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		F00000030000000000000001 /* Frameworks */ = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (F0000001000000000000001E /* CoreMLLLM in Frameworks */); runOnlyForDeploymentPostprocessing = 0; };
+		F00000030000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0000001000000000000001E /* CoreMLLLM in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		F00000040000000000000001 = { isa = PBXGroup; children = (F00000040000000000000002, F00000040000000000000003); sourceTree = "<group>"; };
-		F00000040000000000000002 /* CoreMLModelsApp */ = { isa = PBXGroup; children = (F00000020000000000000001, F00000040000000000000010, F00000040000000000000011, F00000040000000000000012, F0000002000000000000000C, F0000002000000000000000D); path = CoreMLModelsApp; sourceTree = "<group>"; };
-		F00000040000000000000010 /* Model */ = { isa = PBXGroup; children = (F00000020000000000000002, F00000020000000000000003, F00000020000000000000004, F00000020000000000000005, F00000020000000000000006, F0000002000000000000000E); path = Model; sourceTree = "<group>"; };
-		F00000040000000000000011 /* Views */ = { isa = PBXGroup; children = (F00000020000000000000007, F00000020000000000000008, F00000020000000000000009, F0000002000000000000000A, F0000002000000000000001F); path = Views; sourceTree = "<group>"; };
-		F00000040000000000000012 /* Templates */ = { isa = PBXGroup; children = (F0000002000000000000000B, F0000002000000000000000F, F00000020000000000000011, F00000020000000000000013, F00000020000000000000014, F00000020000000000000015, F00000020000000000000016, F00000020000000000000017, F00000020000000000000018, F00000020000000000000019, F0000002000000000000001A, F0000002000000000000001B, F0000002000000000000001C, F0000002000000000000001D); path = Templates; sourceTree = "<group>"; };
-		F00000040000000000000003 /* Products */ = { isa = PBXGroup; children = (F00000020000000000000010); name = Products; sourceTree = "<group>"; };
+		F00000040000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				F00000040000000000000002 /* CoreMLModelsApp */,
+				F00000040000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F00000040000000000000002 /* CoreMLModelsApp */ = {
+			isa = PBXGroup;
+			children = (
+				F00000020000000000000001 /* CoreMLModelsApp.swift */,
+				F00000040000000000000010 /* Model */,
+				F00000040000000000000011 /* Views */,
+				F00000040000000000000012 /* Templates */,
+				F0000002000000000000000C /* Assets.xcassets */,
+				F0000002000000000000000D /* Info.plist */,
+			);
+			path = CoreMLModelsApp;
+			sourceTree = "<group>";
+		};
+		F00000040000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F00000020000000000000010 /* CoreMLModelsApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F00000040000000000000010 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				F00000020000000000000002 /* Manifest.swift */,
+				F00000020000000000000003 /* Paths.swift */,
+				F00000020000000000000004 /* DownloadManager.swift */,
+				F00000020000000000000005 /* ZipUnpacker.swift */,
+				F00000020000000000000006 /* ModelCatalog.swift */,
+				F0000002000000000000000E /* ModelLoader.swift */,
+				F00000020000000000000020 /* ModelInspector.swift */,
+				F00000020000000000000021 /* BenchmarkRunner.swift */,
+				F00000020000000000000026 /* SAMPromptEncoder.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		F00000040000000000000011 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				F00000020000000000000007 /* RootView.swift */,
+				F00000020000000000000008 /* ModelDetailView.swift */,
+				F00000020000000000000009 /* SettingsView.swift */,
+				F0000002000000000000000A /* DemoLauncherView.swift */,
+				F0000002000000000000001F /* CameraView.swift */,
+				F00000020000000000000022 /* ModelInspectorView.swift */,
+				F00000020000000000000023 /* BenchmarkView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		F00000040000000000000012 /* Templates */ = {
+			isa = PBXGroup;
+			children = (
+				F0000002000000000000000B /* DepthVisualizationDemoView.swift */,
+				F0000002000000000000000F /* ImageInOutDemoView.swift */,
+				F00000020000000000000011 /* ImageDetectionDemoView.swift */,
+				F00000020000000000000013 /* OpenVocabDetectionDemoView.swift */,
+				F00000020000000000000014 /* ZeroShotClassifyDemoView.swift */,
+				F00000020000000000000015 /* FaceCompareDemoView.swift */,
+				F00000020000000000000016 /* Face3DDemoView.swift */,
+				F00000020000000000000017 /* TextToImageDemoView.swift */,
+				F00000020000000000000018 /* ImageToTextDemoView.swift */,
+				F00000020000000000000019 /* VideoMattingDemoView.swift */,
+				F0000002000000000000001A /* AudioInOutDemoView.swift */,
+				F0000002000000000000001B /* TextToAudioDemoView.swift */,
+				F0000002000000000000001C /* AudioToScoreDemoView.swift */,
+				F0000002000000000000001D /* ChatDemoView.swift */,
+				F00000020000000000000024 /* InpaintingDemoView.swift */,
+				F00000020000000000000025 /* SegmentAnythingDemoView.swift */,
+			);
+			path = Templates;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		F00000050000000000000001 /* CoreMLModelsApp */ = { isa = PBXNativeTarget; buildConfigurationList = F00000070000000000000001; buildPhases = (F00000060000000000000001, F00000030000000000000001, F00000060000000000000002); buildRules = (); dependencies = (); name = CoreMLModelsApp; packageProductDependencies = (F0000002000000000000001E /* CoreMLLLM */); productName = CoreMLModelsApp; productReference = F00000020000000000000010; productType = "com.apple.product-type.application"; };
+		F00000050000000000000001 /* CoreMLModelsApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F00000070000000000000001 /* Build configuration list for PBXNativeTarget "CoreMLModelsApp" */;
+			buildPhases = (
+				F00000060000000000000001 /* Sources */,
+				F00000030000000000000001 /* Frameworks */,
+				F00000060000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CoreMLModelsApp;
+			packageProductDependencies = (
+				F0000002000000000000001E /* CoreMLLLM */,
+			);
+			productName = CoreMLModelsApp;
+			productReference = F00000020000000000000010 /* CoreMLModelsApp.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		F00000080000000000000001 /* Project object */ = { isa = PBXProject; attributes = { BuildIndependentTargetsInParallel = 1; LastSwiftUpdateCheck = 1500; LastUpgradeCheck = 1500; TargetAttributes = { F00000050000000000000001 = { CreatedOnToolsVersion = 15.0; }; }; }; buildConfigurationList = F00000070000000000000003; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base); mainGroup = F00000040000000000000001; packageReferences = (F00000100000000000000001 /* XCRemoteSwiftPackageReference "CoreML-LLM" */); productRefGroup = F00000040000000000000003; projectDirPath = ""; projectRoot = ""; targets = (F00000050000000000000001); };
+		F00000080000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					F00000050000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = F00000070000000000000003 /* Build configuration list for PBXProject "CoreMLModelsApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F00000040000000000000001;
+			packageReferences = (
+				F00000100000000000000001 /* XCRemoteSwiftPackageReference "CoreML-LLM" */,
+			);
+			productRefGroup = F00000040000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F00000050000000000000001 /* CoreMLModelsApp */,
+			);
+		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		F00000060000000000000002 /* Resources */ = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (F0000001000000000000000C); runOnlyForDeploymentPostprocessing = 0; };
+		F00000060000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0000001000000000000000C /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		F00000060000000000000001 /* Sources */ = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (F00000010000000000000001, F00000010000000000000002, F00000010000000000000003, F00000010000000000000004, F00000010000000000000005, F00000010000000000000006, F00000010000000000000007, F00000010000000000000008, F00000010000000000000009, F0000001000000000000000A, F0000001000000000000000B, F0000001000000000000000E, F0000001000000000000000F, F00000010000000000000011, F00000010000000000000013, F00000010000000000000014, F00000010000000000000015, F00000010000000000000016, F00000010000000000000017, F00000010000000000000018, F00000010000000000000019, F0000001000000000000001A, F0000001000000000000001B, F0000001000000000000001C, F0000001000000000000001D, F0000001000000000000001F); runOnlyForDeploymentPostprocessing = 0; };
+		F00000060000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F00000010000000000000001 /* CoreMLModelsApp.swift in Sources */,
+				F00000010000000000000002 /* Manifest.swift in Sources */,
+				F00000010000000000000003 /* Paths.swift in Sources */,
+				F00000010000000000000004 /* DownloadManager.swift in Sources */,
+				F00000010000000000000005 /* ZipUnpacker.swift in Sources */,
+				F00000010000000000000006 /* ModelCatalog.swift in Sources */,
+				F00000010000000000000007 /* RootView.swift in Sources */,
+				F00000010000000000000008 /* ModelDetailView.swift in Sources */,
+				F00000010000000000000009 /* SettingsView.swift in Sources */,
+				F0000001000000000000000A /* DemoLauncherView.swift in Sources */,
+				F0000001000000000000000B /* DepthVisualizationDemoView.swift in Sources */,
+				F0000001000000000000000E /* ModelLoader.swift in Sources */,
+				F0000001000000000000000F /* ImageInOutDemoView.swift in Sources */,
+				F00000010000000000000011 /* ImageDetectionDemoView.swift in Sources */,
+				F00000010000000000000013 /* OpenVocabDetectionDemoView.swift in Sources */,
+				F00000010000000000000014 /* ZeroShotClassifyDemoView.swift in Sources */,
+				F00000010000000000000015 /* FaceCompareDemoView.swift in Sources */,
+				F00000010000000000000016 /* Face3DDemoView.swift in Sources */,
+				F00000010000000000000017 /* TextToImageDemoView.swift in Sources */,
+				F00000010000000000000018 /* ImageToTextDemoView.swift in Sources */,
+				F00000010000000000000019 /* VideoMattingDemoView.swift in Sources */,
+				F0000001000000000000001A /* AudioInOutDemoView.swift in Sources */,
+				F0000001000000000000001B /* TextToAudioDemoView.swift in Sources */,
+				F0000001000000000000001C /* AudioToScoreDemoView.swift in Sources */,
+				F0000001000000000000001D /* ChatDemoView.swift in Sources */,
+				F0000001000000000000001F /* CameraView.swift in Sources */,
+				F00000010000000000000020 /* ModelInspector.swift in Sources */,
+				F00000010000000000000021 /* BenchmarkRunner.swift in Sources */,
+				F00000010000000000000022 /* ModelInspectorView.swift in Sources */,
+				F00000010000000000000023 /* BenchmarkView.swift in Sources */,
+				F00000010000000000000024 /* InpaintingDemoView.swift in Sources */,
+				F00000010000000000000025 /* SegmentAnythingDemoView.swift in Sources */,
+				F00000010000000000000026 /* SAMPromptEncoder.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		F00000090000000000000001 /* Debug */ = { isa = XCBuildConfiguration; buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES; CLANG_ANALYZER_NONNULL = YES; CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE; CLANG_CXX_LANGUAGE_STANDARD = "gnu++20"; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; CLANG_ENABLE_OBJC_WEAK = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = dwarf; ENABLE_STRICT_OBJC_MSGSEND = YES; ENABLE_TESTABILITY = YES; ENABLE_USER_SCRIPT_SANDBOXING = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_DYNAMIC_NO_PIC = NO; GCC_NO_COMMON_BLOCKS = YES; GCC_OPTIMIZATION_LEVEL = 0; GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)"); IPHONEOS_DEPLOYMENT_TARGET = 18.0; MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE; MTL_FAST_MATH = YES; ONLY_ACTIVE_ARCH = YES; SDKROOT = iphoneos; SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; }; name = Debug; };
-		F00000090000000000000002 /* Release */ = { isa = XCBuildConfiguration; buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES; CLANG_ANALYZER_NONNULL = YES; CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE; CLANG_CXX_LANGUAGE_STANDARD = "gnu++20"; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; CLANG_ENABLE_OBJC_WEAK = YES; COPY_PHASE_STRIP = NO; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; ENABLE_NS_ASSERTIONS = NO; ENABLE_STRICT_OBJC_MSGSEND = YES; ENABLE_USER_SCRIPT_SANDBOXING = YES; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_NO_COMMON_BLOCKS = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; MTL_ENABLE_DEBUG_INFO = NO; MTL_FAST_MATH = YES; SDKROOT = iphoneos; SWIFT_COMPILATION_MODE = wholemodule; VALIDATE_PRODUCT = YES; }; name = Release; };
-		F00000090000000000000003 /* Debug */ = { isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_TEAM = MFN25KNUGJ; ENABLE_PREVIEWS = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_FILE = CoreMLModelsApp/Info.plist; INFOPLIST_KEY_CFBundleDisplayName = "Model Zoo"; INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is needed for real-time model demos."; INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access is needed for speech and audio model demos."; INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo library access is needed to pick images and videos to run models on."; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks"); MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = "com.coreml-models.zoo"; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Debug; };
-		F00000090000000000000004 /* Release */ = { isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 1; DEVELOPMENT_TEAM = MFN25KNUGJ; ENABLE_PREVIEWS = YES; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_FILE = CoreMLModelsApp/Info.plist; INFOPLIST_KEY_CFBundleDisplayName = "Model Zoo"; INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is needed for real-time model demos."; INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access is needed for speech and audio model demos."; INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo library access is needed to pick images and videos to run models on."; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES; INFOPLIST_KEY_UILaunchScreen_Generation = YES; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"; INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait"; LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks"); MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = "com.coreml-models.zoo"; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
+		F00000090000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F00000090000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F00000090000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CoreMLModelsApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Model Zoo";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is needed for real-time model demos.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access is needed for speech and audio model demos.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo library access is needed to pick images and videos to run models on.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.coreml-models.zoo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F00000090000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 3;
+				DEVELOPMENT_TEAM = MFN25KNUGJ;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CoreMLModelsApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Model Zoo";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is needed for real-time model demos.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access is needed for speech and audio model demos.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Photo library access is needed to pick images and videos to run models on.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.coreml-models.zoo";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F00000070000000000000001 = { isa = XCConfigurationList; buildConfigurations = (F00000090000000000000003, F00000090000000000000004); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
-		F00000070000000000000003 = { isa = XCConfigurationList; buildConfigurations = (F00000090000000000000001, F00000090000000000000002); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		F00000070000000000000001 /* Build configuration list for PBXNativeTarget "CoreMLModelsApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F00000090000000000000003 /* Debug */,
+				F00000090000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F00000070000000000000003 /* Build configuration list for PBXProject "CoreMLModelsApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F00000090000000000000001 /* Debug */,
+				F00000090000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
 		F00000100000000000000001 /* XCRemoteSwiftPackageReference "CoreML-LLM" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/john-rocky/CoreML-LLM";
-			requirement = { kind = upToNextMajorVersion; minimumVersion = 0.5.0; };
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.0;
+			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
