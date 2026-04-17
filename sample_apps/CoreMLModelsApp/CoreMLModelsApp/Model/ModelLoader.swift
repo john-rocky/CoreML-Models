@@ -157,6 +157,30 @@ enum ModelLoader {
         Paths.modelDir(id: modelId).appendingPathComponent(fileName)
     }
 
+    /// Return the URL of a compiled `.mlmodelc` for the first model file whose
+    /// base name contains `substring`. Compiles the `.mlpackage` on disk if no
+    /// cached `.mlmodelc` is present. Used by SAMKit's `SamModelRef`, which
+    /// accepts only pre-compiled model URLs.
+    static func compiledURL(modelId: String, substring: String) async throws -> URL {
+        let dir = Paths.modelDir(id: modelId)
+        guard let src = findModelFileBySubstring(in: dir, substring: substring) else {
+            throw LoadError.fileNotFound(substring)
+        }
+        if src.pathExtension == "mlmodelc" { return src }
+
+        let compiledURL = dir.appendingPathComponent(
+            (src.lastPathComponent as NSString).deletingPathExtension + ".mlmodelc"
+        )
+        if FileManager.default.fileExists(atPath: compiledURL.path) { return compiledURL }
+
+        let tempCompiled = try await MLModel.compileModel(at: src)
+        if !FileManager.default.fileExists(atPath: compiledURL.path) {
+            try? FileManager.default.moveItem(at: tempCompiled, to: compiledURL)
+            return compiledURL
+        }
+        return tempCompiled
+    }
+
     static func parseComputeUnits(_ str: String?) -> MLComputeUnits {
         switch str {
         case "cpuOnly": return .cpuOnly
@@ -330,13 +354,38 @@ enum ImageUtils {
             return nil
         }
 
+        // ESRGAN/GFPGAN output is 2048×2048 and bigger; parallelizing rows
+        // keeps per-pixel clamp+convert from stalling on one core. Hoist the
+        // FP16/FP32 branch out of the inner loop so the hot path is a single
+        // typed load per channel.
+        let isFP16 = array.dataType == .float16
+        let basePtr = array.dataPointer
         var pixels = [UInt8](repeating: 255, count: width * height * 4)
-        for y in 0..<height {
-            for x in 0..<width {
-                let idx = (y * width + x) * 4
-                for c in 0..<3 {
-                    let v = readFloat(array, at: c * cStride + y * hStride + x * wStride)
-                    pixels[idx + c] = UInt8(clamping: Int(max(0, min(1, v)) * 255))
+        pixels.withUnsafeMutableBufferPointer { dstBuf in
+            let dst = dstBuf.baseAddress!
+            DispatchQueue.concurrentPerform(iterations: height) { y in
+                let yOff = y * hStride
+                let rowBase = y * width
+                if isFP16 {
+                    let src = basePtr.assumingMemoryBound(to: Float16.self)
+                    for x in 0..<width {
+                        let xOff = x * wStride
+                        let di = (rowBase + x) * 4
+                        for c in 0..<3 {
+                            let v = Float(src[c * cStride + yOff + xOff])
+                            dst[di + c] = UInt8(clamping: Int(max(0, min(1, v)) * 255))
+                        }
+                    }
+                } else {
+                    let src = basePtr.assumingMemoryBound(to: Float.self)
+                    for x in 0..<width {
+                        let xOff = x * wStride
+                        let di = (rowBase + x) * 4
+                        for c in 0..<3 {
+                            let v = src[c * cStride + yOff + xOff]
+                            dst[di + c] = UInt8(clamping: Int(max(0, min(1, v)) * 255))
+                        }
+                    }
                 }
             }
         }
@@ -348,13 +397,24 @@ enum ImageUtils {
         var dMin: Float = .greatestFiniteMagnitude, dMax: Float = -.greatestFiniteMagnitude
         for v in values where v > 0 && v.isFinite { dMin = min(dMin, v); dMax = max(dMax, v) }
         if dMax <= dMin { dMax = dMin + 1 }
+        let range = dMax - dMin
 
         var pixels = [UInt8](repeating: 255, count: width * height * 4)
-        for i in 0..<(width * height) {
-            let t = max(0, min(1, (values[i] - dMin) / (dMax - dMin)))
-            let (r, g, b) = turboColormap(t)
-            let idx = i * 4
-            pixels[idx] = r; pixels[idx+1] = g; pixels[idx+2] = b
+        pixels.withUnsafeMutableBufferPointer { dstBuf in
+            values.withUnsafeBufferPointer { srcBuf in
+                let dst = dstBuf.baseAddress!
+                let src = srcBuf.baseAddress!
+                DispatchQueue.concurrentPerform(iterations: height) { y in
+                    let rowBase = y * width
+                    for x in 0..<width {
+                        let i = rowBase + x
+                        let t = max(0, min(1, (src[i] - dMin) / range))
+                        let (r, g, b) = turboColormap(t)
+                        let di = i * 4
+                        dst[di] = r; dst[di+1] = g; dst[di+2] = b
+                    }
+                }
+            }
         }
         return makeRGBA(pixels: pixels, width: width, height: height)
     }
@@ -365,14 +425,36 @@ enum ImageUtils {
         let strides = array.strides.map { $0.intValue }
         guard shape.count == 4 && shape[3] == 3 else { return nil }
         let height = shape[1], width = shape[2]
+        let hStride = strides[1], wStride = strides[2], cStride = strides[3]
 
+        let isFP16 = array.dataType == .float16
+        let basePtr = array.dataPointer
         var pixels = [UInt8](repeating: 255, count: width * height * 4)
-        for y in 0..<height {
-            for x in 0..<width {
-                let idx = (y * width + x) * 4
-                for c in 0..<3 {
-                    let v = readFloat(array, at: y * strides[1] + x * strides[2] + c * strides[3])
-                    pixels[idx + c] = UInt8(clamping: Int((v + 1) * 0.5 * 255))
+        pixels.withUnsafeMutableBufferPointer { dstBuf in
+            let dst = dstBuf.baseAddress!
+            DispatchQueue.concurrentPerform(iterations: height) { y in
+                let yOff = y * hStride
+                let rowBase = y * width
+                if isFP16 {
+                    let src = basePtr.assumingMemoryBound(to: Float16.self)
+                    for x in 0..<width {
+                        let base = yOff + x * wStride
+                        let di = (rowBase + x) * 4
+                        for c in 0..<3 {
+                            let v = Float(src[base + c * cStride])
+                            dst[di + c] = UInt8(clamping: Int((v + 1) * 0.5 * 255))
+                        }
+                    }
+                } else {
+                    let src = basePtr.assumingMemoryBound(to: Float.self)
+                    for x in 0..<width {
+                        let base = yOff + x * wStride
+                        let di = (rowBase + x) * 4
+                        for c in 0..<3 {
+                            let v = src[base + c * cStride]
+                            dst[di + c] = UInt8(clamping: Int((v + 1) * 0.5 * 255))
+                        }
+                    }
                 }
             }
         }
