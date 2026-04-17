@@ -1,12 +1,14 @@
 import SwiftUI
 import CoreMLLLM
 import PhotosUI
+import AVFoundation
 
 /// LLM chat demo template with streaming generation.
 /// Used by: Gemma 4 E2B (multimodal), Qwen2.5-0.5B (text-only).
 ///
 /// Uses CoreML-LLM package for ANE-optimized on-device inference.
-/// Supports multimodal input (text + image) when the model includes a vision encoder.
+/// Supports multimodal input (text + image + audio) when the loaded model
+/// includes the respective encoders.
 struct ChatDemoView: View {
     let model: ModelEntry
 
@@ -19,6 +21,9 @@ struct ChatDemoView: View {
     @State private var selectedImage: UIImage?
     @State private var photoItem: PhotosPickerItem?
     @State private var tokensPerSecond: Double?
+    @State private var hasVision = false
+    @State private var hasAudio = false
+    @StateObject private var audioRecorder = ChatAudioRecorder()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -68,11 +73,44 @@ struct ChatDemoView: View {
                     .padding(.horizontal)
                 }
 
-                HStack(spacing: 8) {
-                    PhotosPicker(selection: $photoItem, matching: .images) {
-                        Image(systemName: "photo").font(.title3)
+                // Audio preview (recording / ready-to-send)
+                if hasAudio && (audioRecorder.isRecording || audioRecorder.recordedSamples != nil) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "waveform").foregroundStyle(.purple)
+                        if audioRecorder.isRecording {
+                            Text(String(format: "Recording… %.1fs", audioRecorder.duration))
+                                .font(.caption).foregroundStyle(.secondary)
+                        } else if let count = audioRecorder.recordedSamples?.count {
+                            Text(String(format: "Audio ready (%.1fs)", Double(count) / 16_000))
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        if !audioRecorder.isRecording {
+                            Button { audioRecorder.clear() } label: {
+                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                            }
+                        }
                     }
-                    .onChange(of: photoItem) { _, item in loadImage(item) }
+                    .padding(.horizontal)
+                }
+
+                HStack(spacing: 8) {
+                    if hasVision {
+                        PhotosPicker(selection: $photoItem, matching: .images) {
+                            Image(systemName: "photo").font(.title3)
+                        }
+                        .onChange(of: photoItem) { _, item in loadImage(item) }
+                        .disabled(isGenerating)
+                    }
+
+                    if hasAudio {
+                        Button { toggleRecording() } label: {
+                            Image(systemName: audioRecorder.isRecording ? "stop.circle.fill" : "mic")
+                                .font(.title3)
+                                .foregroundStyle(audioRecorder.isRecording ? .red : .accentColor)
+                        }
+                        .disabled(isGenerating)
+                    }
 
                     TextField("Message…", text: $inputText, axis: .vertical)
                         .textFieldStyle(.roundedBorder)
@@ -82,7 +120,7 @@ struct ChatDemoView: View {
                     Button { send() } label: {
                         Image(systemName: "arrow.up.circle.fill").font(.title2)
                     }
-                    .disabled(inputText.trimmingCharacters(in: .whitespaces).isEmpty || isGenerating || llm == nil)
+                    .disabled(sendButtonDisabled)
                 }
                 .padding(.horizontal).padding(.bottom, 8)
             }
@@ -97,10 +135,19 @@ struct ChatDemoView: View {
         }
         .task { await loadModel() }
         .onDisappear {
+            audioRecorder.stop()
+            audioRecorder.clear()
             llm?.reset()
             llm = nil
             messages.removeAll()
         }
+    }
+
+    private var sendButtonDisabled: Bool {
+        guard !isGenerating, llm != nil else { return true }
+        let hasText = !inputText.trimmingCharacters(in: .whitespaces).isEmpty
+        let hasAudioClip = audioRecorder.recordedSamples != nil
+        return !(hasText || hasAudioClip)
     }
 
     // MARK: - Model Loading
@@ -120,6 +167,9 @@ struct ChatDemoView: View {
 
             await MainActor.run {
                 llm = loaded
+                hasVision = loaded.supportsVision
+                hasAudio = loaded.supportsAudio
+                audioRecorder.maxDuration = loaded.maxAudioDuration
                 isLoading = false
                 status = ""
             }
@@ -144,15 +194,23 @@ struct ChatDemoView: View {
 
     private func send() {
         let text = inputText.trimmingCharacters(in: .whitespaces)
-        guard !text.isEmpty, let llm, !isGenerating else { return }
+        let audio = audioRecorder.recordedSamples
+        guard let llm, !isGenerating, !text.isEmpty || audio != nil else { return }
 
         let image = selectedImage?.cgImage
         let displayImage = selectedImage
         inputText = ""
         selectedImage = nil
         photoItem = nil
+        audioRecorder.clear()
 
-        messages.append(ChatMessage(role: .user, content: text, image: displayImage))
+        // Label audio-only sends so the transcript still shows something visible.
+        let displayText: String
+        if text.isEmpty, audio != nil { displayText = "[Audio]" }
+        else if audio != nil { displayText = "[Audio] " + text }
+        else { displayText = text }
+
+        messages.append(ChatMessage(role: .user, content: displayText, image: displayImage))
         messages.append(ChatMessage(role: .assistant, content: ""))
 
         isGenerating = true
@@ -163,7 +221,7 @@ struct ChatDemoView: View {
             var tokenCount = 0
 
             do {
-                for await token in try await llm.stream(text, image: image, maxTokens: 1024) {
+                for await token in try await llm.stream(text, image: image, audio: audio, maxTokens: 1024) {
                     tokenCount += 1
                     await MainActor.run {
                         if var last = messages.last, last.role == .assistant {
@@ -187,8 +245,21 @@ struct ChatDemoView: View {
 
     private func resetConversation() {
         llm?.reset()
+        audioRecorder.clear()
         messages.removeAll()
         tokensPerSecond = nil
+    }
+
+    private func toggleRecording() {
+        if audioRecorder.isRecording {
+            audioRecorder.stop()
+        } else {
+            do {
+                try audioRecorder.start()
+            } catch {
+                status = "Mic error: \(error.localizedDescription)"
+            }
+        }
     }
 
     private func loadImage(_ item: PhotosPickerItem?) {
@@ -199,6 +270,87 @@ struct ChatDemoView: View {
                 await MainActor.run { selectedImage = img }
             }
         }
+    }
+}
+
+// MARK: - Audio Recorder (mono 16kHz PCM float32 for Gemma's audio encoder)
+
+/// Captures microphone audio into a `[Float]` buffer at 16 kHz mono, suitable
+/// for `CoreMLLLM.stream(..., audio:)`. Named `ChatAudioRecorder` to avoid
+/// colliding with the file-based `AudioRecorder` used by `AudioInOutDemoView`.
+final class ChatAudioRecorder: ObservableObject {
+    @Published var isRecording = false
+    @Published var duration: TimeInterval = 0
+    @Published var recordedSamples: [Float]?
+
+    /// Maximum recording length in seconds (set from `CoreMLLLM.maxAudioDuration`).
+    var maxDuration: TimeInterval = 10.0
+
+    private var engine: AVAudioEngine?
+    private var samples: [Float] = []
+    private let sampleRate: Double = 16_000
+
+    func start() throws {
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.record, mode: .measurement)
+        try session.setActive(true)
+
+        samples.removeAll(keepingCapacity: true)
+        duration = 0
+        recordedSamples = nil
+
+        let engine = AVAudioEngine()
+        let inputNode = engine.inputNode
+        let inputFormat = inputNode.outputFormat(forBus: 0)
+        guard let targetFormat = AVAudioFormat(commonFormat: .pcmFormatFloat32,
+                                               sampleRate: sampleRate,
+                                               channels: 1,
+                                               interleaved: false),
+              let converter = AVAudioConverter(from: inputFormat, to: targetFormat) else {
+            throw NSError(domain: "ChatAudioRecorder", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "Unable to build audio converter"])
+        }
+
+        inputNode.installTap(onBus: 0, bufferSize: 4096, format: inputFormat) { [weak self] buffer, _ in
+            guard let self, self.isRecording else { return }
+            let outFrames = AVAudioFrameCount(
+                Double(buffer.frameLength) * self.sampleRate / inputFormat.sampleRate)
+            guard outFrames > 0,
+                  let converted = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: outFrames) else { return }
+            var err: NSError?
+            let status = converter.convert(to: converted, error: &err) { _, out in
+                out.pointee = .haveData
+                return buffer
+            }
+            guard status != .error, let channel = converted.floatChannelData else { return }
+            let count = Int(converted.frameLength)
+            let chunk = Array(UnsafeBufferPointer(start: channel[0], count: count))
+            DispatchQueue.main.async {
+                self.samples.append(contentsOf: chunk)
+                self.duration = Double(self.samples.count) / self.sampleRate
+                if self.duration >= self.maxDuration { self.stop() }
+            }
+        }
+
+        try engine.start()
+        self.engine = engine
+        isRecording = true
+    }
+
+    func stop() {
+        guard isRecording else { return }
+        engine?.inputNode.removeTap(onBus: 0)
+        engine?.stop()
+        engine = nil
+        isRecording = false
+        let cap = Int(maxDuration * sampleRate)
+        recordedSamples = Array(samples.prefix(cap))
+    }
+
+    func clear() {
+        recordedSamples = nil
+        samples.removeAll(keepingCapacity: false)
+        duration = 0
     }
 }
 

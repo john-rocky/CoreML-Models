@@ -76,9 +76,17 @@ final class ModelCatalog: ObservableObject {
     func startDownload(for model: ModelEntry) {
         Self.noteDownloadStartedForReviewPrompt()
         if let llmInfo = llmModelInfo(for: model) {
+            // Client-side guard against repeated taps / SwiftUI re-entry spawning
+            // parallel download tasks. The package has its own guard now, but
+            // short-circuiting here also avoids spinning a stray async Task.
+            let dl = ModelDownloader.shared
+            if dl.isDownloading && dl.downloadingModelId == llmInfo.id {
+                print("[Catalog] Already downloading \(llmInfo.id), ignoring duplicate tap")
+                return
+            }
             Task {
                 do {
-                    _ = try await ModelDownloader.shared.download(llmInfo)
+                    _ = try await dl.download(llmInfo)
                     installedIds.insert(model.id)
                 } catch {
                     print("[Catalog] LLM download failed: \(error)")
@@ -131,7 +139,12 @@ final class ModelCatalog: ObservableObject {
         let dir = Paths.modelDir(id: model.id)
         try? FileManager.default.removeItem(at: dir)
         installedIds.remove(model.id)
-        downloaders.removeValue(forKey: model.id)
+        // Keep the downloader in the dict: its background URLSession is
+        // identified by modelId, and creating a second session with the
+        // same identifier (on the next download tap) leaves the new
+        // session's delegate callbacks undelivered — progress stalls at 0%.
+        // The existing downloader's run() resets state at the top, so
+        // reusing it for a fresh download is safe.
     }
 
     func isInstalled(_ model: ModelEntry) -> Bool {
