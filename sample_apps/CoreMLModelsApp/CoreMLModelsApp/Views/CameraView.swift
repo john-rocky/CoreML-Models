@@ -89,8 +89,16 @@ class CameraPreviewUIView: UIView, AVCaptureVideoDataOutputSampleBufferDelegate 
 }
 
 /// Overlay view for drawing bounding boxes on camera feed.
+///
+/// Supply `frameSize` (pixel buffer / image dimensions) and `contentMode` so
+/// the overlay can match AVCaptureVideoPreviewLayer's .resizeAspectFill or a
+/// SwiftUI Image's .fit — otherwise boxes drift when aspect ratios differ.
+/// If `frameSize == .zero`, normalized coords are mapped straight onto the
+/// view bounds (legacy behavior).
 struct BoundingBoxOverlay: View {
     let detections: [DetectionBox]
+    var frameSize: CGSize = .zero
+    var contentMode: ContentMode = .fill
     let colors: [Color] = [.red, .blue, .green, .orange, .purple, .cyan, .yellow, .pink]
 
     struct DetectionBox: Identifiable {
@@ -103,13 +111,14 @@ struct BoundingBoxOverlay: View {
 
     var body: some View {
         GeometryReader { geo in
+            let t = transform(for: geo.size)
             ForEach(detections) { det in
                 let color = colors[det.classIndex % colors.count]
                 let rect = CGRect(
-                    x: det.rect.origin.x * geo.size.width,
-                    y: det.rect.origin.y * geo.size.height,
-                    width: det.rect.width * geo.size.width,
-                    height: det.rect.height * geo.size.height
+                    x: t.offset.x + det.rect.origin.x * t.size.width,
+                    y: t.offset.y + det.rect.origin.y * t.size.height,
+                    width: det.rect.width * t.size.width,
+                    height: det.rect.height * t.size.height
                 )
 
                 Rectangle()
@@ -126,5 +135,19 @@ struct BoundingBoxOverlay: View {
                     .position(x: rect.midX, y: rect.minY - 10)
             }
         }
+    }
+
+    /// Mirrors AVCaptureVideoPreviewLayer / SwiftUI Image aspect transforms.
+    private func transform(for viewSize: CGSize) -> (size: CGSize, offset: CGPoint) {
+        guard frameSize.width > 0, frameSize.height > 0 else {
+            return (viewSize, .zero)
+        }
+        let sx = viewSize.width / frameSize.width
+        let sy = viewSize.height / frameSize.height
+        let scale = (contentMode == .fill) ? max(sx, sy) : min(sx, sy)
+        let w = frameSize.width * scale
+        let h = frameSize.height * scale
+        return (CGSize(width: w, height: h),
+                CGPoint(x: (viewSize.width - w) / 2, y: (viewSize.height - h) / 2))
     }
 }

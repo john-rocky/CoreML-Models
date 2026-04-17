@@ -22,6 +22,7 @@ struct ImageDetectionDemoView: View {
     @State private var fps: Double = 0
     @State private var item: PhotosPickerItem?
     @State private var confidenceThreshold: Float = 0.25
+    @State private var didLoadConfidenceDefault = false
     @State private var vnModel: VNCoreMLModel?
     @State private var mlModel: MLModel?
     @State private var isModelLoaded = false
@@ -31,12 +32,25 @@ struct ImageDetectionDemoView: View {
     @State private var videoItem: PhotosPickerItem?
     @State private var videoFrame: UIImage?
     @State private var videoDetections: [BoundingBoxOverlay.DetectionBox] = []
+    @State private var videoFrameSize: CGSize = .zero
     @State private var videoProgress: Double = 0
     @State private var videoFps: Double = 0
     @State private var videoTask: Task<Void, Never>?
 
+    // Camera frame dimensions (portrait after videoRotationAngle=90) — needed
+    // so the overlay can match the preview's .resizeAspectFill crop/scale.
+    @State private var cameraFrameSize: CGSize = .zero
+
     private var labels: [String] { model.configStringArray("labels") ?? Self.cocoLabels }
     private var inputSize: Int { model.configInt("input_size") ?? 640 }
+
+    /// For DETR-style models where the network outputs 91 logits mapped to sparse COCO
+    /// category IDs (1..90, with gaps at 12/26/29/30/45/66/68/69/71/83) and index 0 = background.
+    private var useSparseCoco: Bool {
+        (model.configString("output_format") ?? "yolo") == "detr"
+            && model.configInt("num_classes") == 91
+            && (model.configStringArray("labels") == nil)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -75,15 +89,13 @@ struct ImageDetectionDemoView: View {
             }
             .padding(.horizontal).padding(.vertical, 4)
 
-            // Controls
+            // Confidence slider — shared across Camera / Video / Photo so the user
+            // can tune the threshold live (RF-DETR in particular needs ~0.5).
+            confidenceSlider
+
+            // Mode-specific controls
             if mode == .photo {
                 VStack(spacing: 8) {
-                    HStack {
-                        Text("Confidence").font(.caption2).foregroundStyle(.secondary)
-                        Slider(value: $confidenceThreshold, in: 0.1...0.9)
-                        Text(String(format: "%.0f%%", confidenceThreshold * 100))
-                            .font(.caption2.monospacedDigit()).foregroundStyle(.secondary).frame(width: 36)
-                    }
                     PhotosPicker(selection: $item, matching: .images) {
                         Label("Select Photo", systemImage: "photo.badge.plus").frame(maxWidth: .infinity)
                     }.buttonStyle(.bordered).disabled(isProcessing)
@@ -112,6 +124,17 @@ struct ImageDetectionDemoView: View {
         }
     }
 
+    @ViewBuilder
+    private var confidenceSlider: some View {
+        HStack {
+            Text("Confidence").font(.caption2).foregroundStyle(.secondary)
+            Slider(value: $confidenceThreshold, in: 0.05...0.95, step: 0.01)
+            Text(String(format: "%.0f%%", confidenceThreshold * 100))
+                .font(.caption2.monospacedDigit()).foregroundStyle(.secondary).frame(width: 36)
+        }
+        .padding(.horizontal).padding(.bottom, 4)
+    }
+
     // MARK: - Camera View
 
     @ViewBuilder
@@ -119,9 +142,20 @@ struct ImageDetectionDemoView: View {
         ZStack {
             CameraView(position: .back) { pixelBuffer in
                 guard isModelLoaded else { return }
+                if cameraFrameSize == .zero {
+                    let w = CVPixelBufferGetWidth(pixelBuffer)
+                    let h = CVPixelBufferGetHeight(pixelBuffer)
+                    DispatchQueue.main.async {
+                        cameraFrameSize = CGSize(width: w, height: h)
+                    }
+                }
                 detectOnFrame(pixelBuffer)
             }
-            BoundingBoxOverlay(detections: liveDetections)
+            BoundingBoxOverlay(
+                detections: liveDetections,
+                frameSize: cameraFrameSize,
+                contentMode: .fill
+            )
         }
     }
 
@@ -133,7 +167,13 @@ struct ImageDetectionDemoView: View {
             Image(uiImage: frame)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .overlay { BoundingBoxOverlay(detections: videoDetections) }
+                .overlay {
+                    BoundingBoxOverlay(
+                        detections: videoDetections,
+                        frameSize: videoFrameSize,
+                        contentMode: .fit
+                    )
+                }
         } else {
             VStack(spacing: 12) {
                 Image(systemName: "video.badge.plus").font(.system(size: 60)).foregroundStyle(.secondary)
@@ -201,9 +241,11 @@ struct ImageDetectionDemoView: View {
             let frame = UIImage(cgImage: cgImage)
             let currentFPS = 1.0 / max(elapsed, 0.001)
 
+            let size = CGSize(width: cgImage.width, height: cgImage.height)
             await MainActor.run {
                 videoFrame = frame
                 videoDetections = dets
+                videoFrameSize = size
                 videoProgress = min(currentSec / totalSeconds, 1.0)
                 videoFps = videoFps == 0 ? currentFPS : videoFps * 0.9 + currentFPS * 0.1
             }
@@ -245,6 +287,11 @@ struct ImageDetectionDemoView: View {
             let vn = try VNCoreMLModel(for: loaded)
             await MainActor.run {
                 mlModel = loaded; vnModel = vn; isModelLoaded = true; status = ""
+                if !didLoadConfidenceDefault,
+                   let defaultConf = model.configDouble("confidence_threshold") {
+                    confidenceThreshold = Float(defaultConf)
+                    didLoadConfidenceDefault = true
+                }
             }
         } catch {
             await MainActor.run { status = "Model load failed: \(error.localizedDescription)" }
@@ -366,15 +413,26 @@ struct ImageDetectionDemoView: View {
                     let bw = ImageUtils.readFloat(boxArr, at: i * boxStrides[0] + 2 * boxStrides[1])
                     let bh = ImageUtils.readFloat(boxArr, at: i * boxStrides[0] + 3 * boxStrides[1])
 
-                    // Map DETR class (1-90) to COCO label index (0-79)
-                    let labelIdx = bestCls - 1
-                    let label = labelIdx >= 0 && labelIdx < labels.count ? labels[labelIdx] : "\(bestCls)"
+                    // Resolve label. RF-DETR uses sparse COCO IDs 1..90; YOLO-DETR hybrids
+                    // or user-supplied labels use contiguous indexing.
+                    let label: String
+                    let classIdx: Int
+                    if useSparseCoco {
+                        label = Self.cocoSparse91[safe: bestCls] ?? "\(bestCls)"
+                        classIdx = bestCls
+                    } else {
+                        let labelIdx = bestCls - 1
+                        label = labelIdx >= 0 && labelIdx < labels.count ? labels[labelIdx] : "\(bestCls)"
+                        classIdx = max(0, labelIdx)
+                    }
+                    // Skip N/A slots in the sparse COCO table
+                    if label == "N/A" { continue }
 
                     dets.append(.init(
                         label: label, confidence: bestConf,
                         rect: CGRect(x: CGFloat(cx - bw / 2), y: CGFloat(cy - bh / 2),
                                      width: CGFloat(bw), height: CGFloat(bh)),
-                        classIndex: max(0, labelIdx)
+                        classIndex: classIdx
                     ))
                 }
             } else if let arr = arrays.first {
@@ -449,6 +507,33 @@ struct ImageDetectionDemoView: View {
         "remote","keyboard","cell phone","microwave","oven","toaster","sink",
         "refrigerator","book","clock","vase","scissors","teddy bear","hair drier","toothbrush"
     ]
+
+    /// 91-entry sparse COCO lookup used by RF-DETR: index = COCO category ID,
+    /// index 0 is the background / no-object class, and unused IDs (12, 26, 29,
+    /// 30, 45, 66, 68, 69, 71, 83) are filled with "N/A" so `bestCls` maps
+    /// directly without the -1 offset the hub template applies to other DETRs.
+    static let cocoSparse91: [String] = [
+        "N/A", "person", "bicycle", "car", "motorcycle", "airplane", "bus",
+        "train", "truck", "boat", "traffic light", "fire hydrant", "N/A",
+        "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse",
+        "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "N/A",
+        "backpack", "umbrella", "N/A", "N/A", "handbag", "tie", "suitcase",
+        "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat",
+        "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle",
+        "N/A", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana",
+        "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza",
+        "donut", "cake", "chair", "couch", "potted plant", "bed", "N/A",
+        "dining table", "N/A", "N/A", "toilet", "N/A", "tv", "laptop", "mouse",
+        "remote", "keyboard", "cell phone", "microwave", "oven", "toaster",
+        "sink", "refrigerator", "N/A", "book", "clock", "vase", "scissors",
+        "teddy bear", "hair drier", "toothbrush"
+    ]
+}
+
+fileprivate extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
+    }
 }
 
 // MARK: - Video Transferable
