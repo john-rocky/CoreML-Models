@@ -41,6 +41,12 @@ struct ImageDetectionDemoView: View {
     // so the overlay can match the preview's .resizeAspectFill crop/scale.
     @State private var cameraFrameSize: CGSize = .zero
 
+    // Multi-object tracking. Camera keeps a single tracker across frames;
+    // Video creates a fresh one per loaded clip. Photo mode never uses
+    // the tracker (single-frame → no motion to track).
+    @State private var trackingEnabled: Bool = true
+    @State private var cameraTracker = ByteTracker()
+
     private var labels: [String] { model.configStringArray("labels") ?? Self.cocoLabels }
     private var inputSize: Int { model.configInt("input_size") ?? 640 }
 
@@ -82,6 +88,17 @@ struct ImageDetectionDemoView: View {
                 } else {
                     TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
                 }
+                if mode != .photo {
+                    Button { trackingEnabled.toggle() } label: {
+                        Label(trackingEnabled ? "Track" : "Raw",
+                              systemImage: trackingEnabled ? "scope" : "circle.dashed")
+                            .font(.caption2.weight(.semibold))
+                            .labelStyle(.titleAndIcon)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                    .tint(trackingEnabled ? .blue : .gray)
+                }
                 Spacer()
                 if isProcessing { ProgressView().controlSize(.small) }
                 Text(status).font(.caption).foregroundStyle(.secondary)
@@ -116,6 +133,14 @@ struct ImageDetectionDemoView: View {
         .onChange(of: videoItem) { _, _ in loadAndProcessVideo() }
         .onChange(of: mode) { _, newMode in
             if newMode != .video { videoTask?.cancel() }
+            cameraTracker.reset()
+        }
+        .onChange(of: trackingEnabled) { _, _ in
+            // Reset camera tracker so IDs restart, and rebuild the video
+            // playback so the new mode takes effect on the in-flight task.
+            cameraTracker.reset()
+            liveDetections = []
+            if mode == .video { loadAndProcessVideo() }
         }
         .onDisappear {
             videoTask?.cancel()
@@ -188,6 +213,7 @@ struct ImageDetectionDemoView: View {
         videoTask?.cancel()
         guard let videoItem else { return }
         isProcessing = true; status = "Loading video…"
+        let tracking = trackingEnabled
         Task {
             guard let transferable = try? await videoItem.loadTransferable(type: DetectionVideoTransferable.self) else {
                 await MainActor.run { isProcessing = false; status = "Failed to load video" }
@@ -196,12 +222,12 @@ struct ImageDetectionDemoView: View {
             let url = transferable.url
             await MainActor.run { isProcessing = false; status = "" }
             videoTask = Task.detached(priority: .userInitiated) {
-                await processVideo(url: url)
+                await processVideo(url: url, tracking: tracking)
             }
         }
     }
 
-    private func processVideo(url: URL) async {
+    private func processVideo(url: URL, tracking: Bool) async {
         let asset = AVURLAsset(url: url)
         guard let track = try? await asset.loadTracks(withMediaType: .video).first else { return }
         let duration = try? await asset.load(.duration)
@@ -216,6 +242,7 @@ struct ImageDetectionDemoView: View {
         reader.startReading()
 
         let ciContext = CIContext()
+        let videoTracker = ByteTracker()
 
         while !Task.isCancelled, let sampleBuffer = trackOutput.copyNextSampleBuffer() {
             let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
@@ -230,8 +257,9 @@ struct ImageDetectionDemoView: View {
             let request = VNCoreMLRequest(model: vnModel)
             request.imageCropAndScaleOption = .scaleFill
             try? VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up).perform([request])
-            let dets = parseResults(request.results, imageWidth: CVPixelBufferGetWidth(pixelBuffer),
-                                    imageHeight: CVPixelBufferGetHeight(pixelBuffer))
+            let raw = parseResults(request.results, imageWidth: CVPixelBufferGetWidth(pixelBuffer),
+                                   imageHeight: CVPixelBufferGetHeight(pixelBuffer))
+            let dets = tracking ? videoTracker.update(detections: raw) : raw
 
             let elapsed = CFAbsoluteTimeGetCurrent() - start
 
@@ -311,12 +339,14 @@ struct ImageDetectionDemoView: View {
         guard let vnModel else { return }
         let start = CFAbsoluteTimeGetCurrent()
 
+        let tracking = trackingEnabled
+
         let request = VNCoreMLRequest(model: vnModel) { req, _ in
-            let dets = parseResults(req.results, imageWidth: CVPixelBufferGetWidth(pixelBuffer),
-                                    imageHeight: CVPixelBufferGetHeight(pixelBuffer))
+            let raw = parseResults(req.results, imageWidth: CVPixelBufferGetWidth(pixelBuffer),
+                                   imageHeight: CVPixelBufferGetHeight(pixelBuffer))
             let elapsed = CFAbsoluteTimeGetCurrent() - start
             DispatchQueue.main.async {
-                liveDetections = dets
+                liveDetections = tracking ? cameraTracker.update(detections: raw) : raw
                 fps = fps * 0.9 + (1.0 / max(elapsed, 0.001)) * 0.1  // EMA smoothing
             }
         }

@@ -107,26 +107,56 @@ struct BoundingBoxOverlay: View {
         let confidence: Float
         let rect: CGRect  // normalized 0..1, origin top-left
         let classIndex: Int
+        var trackId: Int? = nil
+        // Recent Kalman-center history (normalized top-left, oldest → newest),
+        // populated by ByteTracker for motion trails; empty for raw detections.
+        var trail: [CGPoint] = []
     }
 
     var body: some View {
         GeometryReader { geo in
             let t = transform(for: geo.size)
+
+            // Motion trails for tracked objects, underneath the boxes.
             ForEach(detections) { det in
-                let color = colors[det.classIndex % colors.count]
+                if det.trail.count >= 2 {
+                    let colorIdx = det.trackId ?? det.classIndex
+                    let color = colors[colorIdx % colors.count]
+                    Path { path in
+                        let pts = det.trail.map { p in
+                            CGPoint(x: t.offset.x + p.x * t.size.width,
+                                    y: t.offset.y + p.y * t.size.height)
+                        }
+                        path.move(to: pts[0])
+                        for p in pts.dropFirst() { path.addLine(to: p) }
+                    }
+                    .stroke(color.opacity(0.75),
+                            style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                }
+            }
+
+            ForEach(detections) { det in
+                let colorIdx = det.trackId ?? det.classIndex
+                let color = colors[colorIdx % colors.count]
                 let rect = CGRect(
                     x: t.offset.x + det.rect.origin.x * t.size.width,
                     y: t.offset.y + det.rect.origin.y * t.size.height,
                     width: det.rect.width * t.size.width,
                     height: det.rect.height * t.size.height
                 )
+                let labelText: String = {
+                    if let tid = det.trackId {
+                        return "#\(tid) \(det.label) \(Int(det.confidence * 100))%"
+                    }
+                    return "\(det.label) \(Int(det.confidence * 100))%"
+                }()
 
                 Rectangle()
                     .stroke(color, lineWidth: 2)
                     .frame(width: rect.width, height: rect.height)
                     .position(x: rect.midX, y: rect.midY)
 
-                Text("\(det.label) \(Int(det.confidence * 100))%")
+                Text(labelText)
                     .font(.caption2.bold())
                     .foregroundStyle(.white)
                     .padding(.horizontal, 4).padding(.vertical, 2)

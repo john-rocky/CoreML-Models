@@ -51,6 +51,7 @@
 		F00000010000000000000050 /* CLIPTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000050 /* CLIPTokenizer.swift */; };
 		F00000010000000000000051 /* clip_vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000051 /* clip_vocab.json */; };
 		F00000010000000000000054 /* CodeExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000054 /* CodeExportView.swift */; };
+		F00000010000000000000060 /* ByteTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000060 /* ByteTracker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -99,6 +100,7 @@
 		F00000020000000000000050 /* CLIPTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIPTokenizer.swift; sourceTree = "<group>"; };
 		F00000020000000000000051 /* clip_vocab.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = clip_vocab.json; sourceTree = "<group>"; };
 		F00000020000000000000054 /* CodeExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeExportView.swift; sourceTree = "<group>"; };
+		F00000020000000000000060 /* ByteTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteTracker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -168,6 +170,7 @@
 				F00000020000000000000009 /* SettingsView.swift */,
 				F0000002000000000000000A /* DemoLauncherView.swift */,
 				F0000002000000000000001F /* CameraView.swift */,
+				F00000020000000000000060 /* ByteTracker.swift */,
 				F00000020000000000000022 /* ModelInspectorView.swift */,
 				F00000020000000000000023 /* BenchmarkView.swift */,
 				F00000020000000000000054 /* CodeExportView.swift */,
@@ -314,6 +317,7 @@
 				F0000001000000000000001C /* AudioToScoreDemoView.swift in Sources */,
 				F0000001000000000000001D /* ChatDemoView.swift in Sources */,
 				F0000001000000000000001F /* CameraView.swift in Sources */,
+				F00000010000000000000060 /* ByteTracker.swift in Sources */,
 				F00000010000000000000020 /* ModelInspector.swift in Sources */,
 				F00000010000000000000021 /* BenchmarkRunner.swift in Sources */,
 				F00000010000000000000022 /* ModelInspectorView.swift in Sources */,
