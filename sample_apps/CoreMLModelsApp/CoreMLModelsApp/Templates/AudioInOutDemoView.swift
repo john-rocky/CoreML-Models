@@ -31,6 +31,8 @@ struct AudioInOutDemoView: View {
     @State private var showTargetImport = false
     @State private var convertedURL: URL?
 
+    @StateObject private var session = ModelSession<Void>()
+
     private var stemNames: [String] { model.configStringArray("output_stems") ?? ["output"] }
 
     private var mode: AudioMode {
@@ -47,13 +49,34 @@ struct AudioInOutDemoView: View {
     }
 
     var body: some View {
+        Group {
+            switch mode {
+            case .sourceSeparation:
+                sourceSeparationBody
+            case .diarization:
+                diarizationBody
+            case .voiceConversion:
+                voiceConversionBody
+            }
+        }
+        .task {
+            session.ensure { try await eagerPreload() }
+        }
+    }
+
+    /// Pre-compile the main inference model(s) for the current mode while the
+    /// user is picking / recording material. Subsequent `ModelLoader.load(...)`
+    /// calls in the run path hit the mlmodelc cache.
+    private func eagerPreload() async throws {
         switch mode {
         case .sourceSeparation:
-            sourceSeparationBody
+            _ = try await ModelLoader.loadPrimary(for: model)
         case .diarization:
-            diarizationBody
+            _ = try await ModelLoader.loadPrimary(for: model)
         case .voiceConversion:
-            voiceConversionBody
+            for file in model.files where (file.kind ?? "model") == "model" {
+                _ = try await ModelLoader.load(for: model, named: file.name)
+            }
         }
     }
 
@@ -152,11 +175,7 @@ struct AudioInOutDemoView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                if let t = processingTime {
-                    Text(String(format: "%.1fs", t))
-                        .font(.caption.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                }
+                TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
 
                 if inputURL == nil {
                     Button { showingFilePicker = true } label: {
@@ -379,6 +398,8 @@ struct AudioInOutDemoView: View {
                     .foregroundStyle(.secondary)
                     .padding(.horizontal)
             }
+            TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
+                .padding(.horizontal)
         }
         .sheet(isPresented: $showingFilePicker) {
             AudioPickerView { url in
@@ -607,11 +628,7 @@ struct AudioInOutDemoView: View {
                     .padding(.horizontal)
                 }
 
-                if let t = processingTime {
-                    Text(String(format: "Converted in %.1fs", t))
-                        .font(.caption.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                }
+                TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
             }
             .padding(.vertical)
         }

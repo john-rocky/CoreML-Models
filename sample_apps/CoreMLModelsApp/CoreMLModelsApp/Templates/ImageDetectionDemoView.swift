@@ -25,6 +25,7 @@ struct ImageDetectionDemoView: View {
     @State private var vnModel: VNCoreMLModel?
     @State private var mlModel: MLModel?
     @State private var isModelLoaded = false
+    @StateObject private var session = ModelSession<MLModel>()
 
     // Video state
     @State private var videoItem: PhotosPickerItem?
@@ -64,8 +65,8 @@ struct ImageDetectionDemoView: View {
                     Text(String(format: "%.1f FPS", fps)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                 } else if mode == .video && videoFrame != nil {
                     Text(String(format: "%.1f FPS", videoFps)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                } else if let t = processingTime {
-                    Text(String(format: "%.2fs", t)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                } else {
+                    TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
                 }
                 Spacer()
                 if isProcessing { ProgressView().controlSize(.small) }
@@ -238,9 +239,9 @@ struct ImageDetectionDemoView: View {
     // MARK: - Model Loading
 
     private func loadModel() async {
-        status = "Compiling model…"
+        session.ensure { try await ModelLoader.loadPrimary(for: model) }
         do {
-            let loaded = try await ModelLoader.loadPrimary(for: model)
+            let loaded = try await session.get()
             let vn = try VNCoreMLModel(for: loaded)
             await MainActor.run {
                 mlModel = loaded; vnModel = vn; isModelLoaded = true; status = ""

@@ -24,6 +24,7 @@ struct Face3DDemoView: View {
     @State private var item: PhotosPickerItem?
     @State private var mlModel: MLModel?
     @State private var isModelLoaded = false
+    @StateObject private var session = ModelSession<MLModel>()
 
     // Camera mode state
     @State private var liveResults: [FacePoseResult] = []
@@ -54,11 +55,7 @@ struct Face3DDemoView: View {
 
             if mode == .photo {
                 VStack(spacing: 8) {
-                    if let t = processingTime {
-                        Text(String(format: "%.2fs", t))
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                    }
+                    TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
                     if isProcessing { ProgressView(status) }
                     PhotosPicker(selection: $item, matching: .images) {
                         Label("Select Face Photo", systemImage: "person.crop.rectangle")
@@ -156,9 +153,9 @@ struct Face3DDemoView: View {
     // MARK: - Model loading
 
     private func loadModel() async {
-        status = "Compiling model…"
+        session.ensure { try await ModelLoader.loadPrimary(for: model) }
         do {
-            let loaded = try await ModelLoader.loadPrimary(for: model)
+            let loaded = try await session.get()
             await MainActor.run {
                 mlModel = loaded
                 isModelLoaded = true

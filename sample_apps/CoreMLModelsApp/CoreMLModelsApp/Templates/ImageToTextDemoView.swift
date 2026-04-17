@@ -36,6 +36,7 @@ struct ImageToTextDemoView: View {
     @State private var decoder: MLModel?
     @State private var reverseVocab: [Int: String] = [:]
     @State private var isModelLoaded = false
+    @StateObject private var session = ModelSession<Void>()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -97,9 +98,7 @@ struct ImageToTextDemoView: View {
                 }.pickerStyle(.segmented)
 
                 HStack {
-                    if let t = processingTime {
-                        Text(String(format: "%.2fs", t)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                    }
+                    TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
                     Spacer()
                     if isProcessing { ProgressView().controlSize(.small); Text(status).font(.caption) }
                     if !isModelLoaded { Text("Loading models…").font(.caption).foregroundStyle(.orange) }
@@ -150,21 +149,27 @@ struct ImageToTextDemoView: View {
     // MARK: - Model Loading
 
     private func loadModels() async {
-        status = "Loading models…"
-        do {
+        session.ensure {
             let veFile = model.configString("vision_encoder")
                 ?? model.files.first { $0.name.lowercased().contains("vision") }?.name ?? model.files[0].name
-            visionEncoder = try await ModelLoader.load(for: model, named: veFile)
+            let ve = try await ModelLoader.load(for: model, named: veFile)
 
             let teFile = model.configString("text_encoder")
                 ?? model.files.first { $0.name.lowercased().contains("textencoder") }?.name
-            if let teFile { textEncoder = try await ModelLoader.load(for: model, named: teFile) }
+            let te = try await { () async throws -> MLModel? in
+                guard let teFile else { return nil }
+                return try await ModelLoader.load(for: model, named: teFile)
+            }()
 
             let decFile = model.configString("decoder")
                 ?? model.files.first { $0.name.lowercased().contains("decoder") }?.name
-            if let decFile { decoder = try await ModelLoader.load(for: model, named: decFile) }
+            let dec = try await { () async throws -> MLModel? in
+                guard let decFile else { return nil }
+                return try await ModelLoader.load(for: model, named: decFile)
+            }()
 
-            // Load vocab
+            // Build reverse vocab
+            var vocab: [Int: String] = [:]
             let vocabFile = model.configString("vocab_file")
                 ?? model.files.first { ($0.kind ?? "") == "vocab" }?.name
             if let vf = vocabFile {
@@ -172,13 +177,23 @@ struct ImageToTextDemoView: View {
                 if let data = try? Data(contentsOf: url),
                    let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
                     for (k, v) in json {
-                        if let id = v as? Int { reverseVocab[id] = k }
-                        else if let piece = v as? String, let id = Int(k) { reverseVocab[id] = piece }
+                        if let id = v as? Int { vocab[id] = k }
+                        else if let piece = v as? String, let id = Int(k) { vocab[id] = piece }
                     }
                 }
             }
 
-            await MainActor.run { isModelLoaded = true; status = "" }
+            await MainActor.run {
+                visionEncoder = ve
+                textEncoder = te
+                decoder = dec
+                reverseVocab = vocab
+                isModelLoaded = true
+                status = ""
+            }
+        }
+        do {
+            try await session.get()
         } catch {
             await MainActor.run { status = "Load failed: \(error.localizedDescription)" }
         }

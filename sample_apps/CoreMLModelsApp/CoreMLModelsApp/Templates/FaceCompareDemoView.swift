@@ -14,6 +14,8 @@ struct FaceCompareDemoView: View {
     @State private var mlModel: MLModel?
     @State private var isModelLoaded = false
     @State private var registeredFaces: [(String, UIImage, [Float])] = []  // (name, thumbnail, embedding)
+    @State private var lastInferSec: Double?
+    @StateObject private var session = ModelSession<MLModel>()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -78,6 +80,8 @@ struct FaceCompareDemoView: View {
             if !registerStatus.isEmpty {
                 Text(registerStatus).font(.caption).foregroundStyle(registerStatus.contains("Error") ? .red : .green)
             }
+
+            TimingsLabel(loadSec: session.loadTimeSec, inferSec: lastInferSec)
 
             if !registeredFaces.isEmpty {
                 List {
@@ -207,8 +211,9 @@ struct FaceCompareDemoView: View {
     // MARK: - Model Loading
 
     private func loadModel() async {
+        session.ensure { try await ModelLoader.loadPrimary(for: model) }
         do {
-            mlModel = try await ModelLoader.loadPrimary(for: model)
+            mlModel = try await session.get()
             isModelLoaded = true
         } catch {
             registerStatus = "Error: \(error.localizedDescription)"
@@ -295,7 +300,10 @@ struct FaceCompareDemoView: View {
         guard let pb = ImageUtils.pixelBuffer(from: cropped, width: inputSize, height: inputSize) else { return nil }
 
         let inputName = mlModel.modelDescription.inputDescriptionsByName.first { $0.value.type == .image }?.key ?? "face_image"
+        let start = CFAbsoluteTimeGetCurrent()
         guard let output = try? await mlModel.prediction(from: MLDictionaryFeatureProvider(dictionary: [inputName: pb])) else { return nil }
+        let elapsed = CFAbsoluteTimeGetCurrent() - start
+        await MainActor.run { lastInferSec = elapsed }
         let embName = output.featureNames.first(where: { $0.contains("embed") }) ?? output.featureNames.first ?? ""
         guard let embArr = output.featureValue(for: embName)?.multiArrayValue else { return nil }
         return ImageUtils.extractFloats(embArr)

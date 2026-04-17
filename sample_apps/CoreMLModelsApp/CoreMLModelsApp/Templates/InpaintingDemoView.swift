@@ -19,8 +19,8 @@ struct InpaintingDemoView: View {
     @State private var brushSize: CGFloat = 40
     @State private var compareMode = false
     @State private var comparePosition: CGFloat = 0.5
-    @State private var mlModel: MLModel?
     @State private var displaySize: CGSize = .zero
+    @StateObject private var session = ModelSession<MLModel>()
 
     private var inputSize: Int { model.configInt("input_size") ?? 800 }
 
@@ -73,6 +73,9 @@ struct InpaintingDemoView: View {
             }
 
             controls
+        }
+        .task {
+            session.ensure { try await ModelLoader.loadPrimary(for: model) }
         }
         .onChange(of: item) { _, _ in loadPhoto() }
     }
@@ -167,9 +170,7 @@ struct InpaintingDemoView: View {
     private var controls: some View {
         VStack(spacing: 8) {
             HStack {
-                if let t = processingTime {
-                    Text(String(format: "%.2fs", t)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                }
+                TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
                 Spacer()
             }
 
@@ -240,7 +241,7 @@ struct InpaintingDemoView: View {
     private func loadPhoto() {
         guard let item else { return }
         outputImage = nil; maskStrokes.removeAll(); imageHistory.removeAll()
-        compareMode = false; mlModel = nil; processingTime = nil
+        compareMode = false; processingTime = nil
         Task {
             guard let data = try? await item.loadTransferable(type: Data.self),
                   let img = UIImage(data: data) else { return }
@@ -271,10 +272,7 @@ struct InpaintingDemoView: View {
 
         Task {
             do {
-                if mlModel == nil {
-                    mlModel = try await ModelLoader.loadPrimary(for: model)
-                }
-                guard let mlModel else { return }
+                let mlModel = try await session.get()
                 await MainActor.run { status = "Processing…" }
 
                 guard let cgImage = ImageUtils.normalizeOrientation(inputImage) else {

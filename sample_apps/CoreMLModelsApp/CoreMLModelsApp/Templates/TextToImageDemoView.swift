@@ -30,6 +30,15 @@ struct TextToImageDemoView: View {
     @State private var isGenerating = false
     @State private var status = ""
     @State private var generationTime: Double?
+    @StateObject private var session = ModelSession<DiffusionAssets>()
+
+    private struct DiffusionAssets {
+        let tokenizer: BPETokenizerSimple
+        let textEncoder: MLModel
+        let unetChunk1: MLModel?
+        let unetChunk2: MLModel?
+        let vaeDecoder: MLModel
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -55,9 +64,7 @@ struct TextToImageDemoView: View {
                 if isGenerating { ProgressView().controlSize(.small) }
                 Text(status).font(.caption2).foregroundStyle(.secondary)
                 Spacer()
-                if let t = generationTime {
-                    Text(String(format: "%.1fs", t)).font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
-                }
+                TimingsLabel(loadSec: session.loadTimeSec, inferSec: generationTime)
             }
             .padding(.horizontal)
 
@@ -92,6 +99,45 @@ struct TextToImageDemoView: View {
             .padding(.horizontal)
         }
         .padding(.vertical, 8)
+        .task {
+            session.ensure {
+                let vocabFile = model.configString("vocab_file") ?? "vocab.json"
+                let mergesFile = model.configString("merges_file") ?? "merges.txt"
+                let tokenizer = try BPETokenizerSimple(
+                    vocabURL: ModelLoader.auxFileURL(modelId: model.id, fileName: vocabFile),
+                    mergesURL: ModelLoader.auxFileURL(modelId: model.id, fileName: mergesFile)
+                )
+
+                let teFile = model.configString("text_encoder")
+                    ?? model.files.first { $0.name.lowercased().contains("textencoder") }?.name ?? model.files[0].name
+                let te = try await ModelLoader.load(for: model, named: teFile)
+
+                let chunk1File = model.configString("unet_chunk1")
+                    ?? model.files.first { $0.name.lowercased().contains("chunk1") }?.name
+                let chunk2File = model.configString("unet_chunk2")
+                    ?? model.files.first { $0.name.lowercased().contains("chunk2") }?.name
+                let c1 = try await { () async throws -> MLModel? in
+                    guard let f = chunk1File else { return nil }
+                    return try await ModelLoader.load(for: model, named: f)
+                }()
+                let c2 = try await { () async throws -> MLModel? in
+                    guard let f = chunk2File else { return nil }
+                    return try await ModelLoader.load(for: model, named: f)
+                }()
+
+                let vaeFile = model.configString("vae_decoder")
+                    ?? model.files.first { $0.name.lowercased().contains("decoder") }?.name ?? model.files.last!.name
+                let vae = try await ModelLoader.load(for: model, named: vaeFile)
+
+                return DiffusionAssets(
+                    tokenizer: tokenizer,
+                    textEncoder: te,
+                    unetChunk1: c1,
+                    unetChunk2: c2,
+                    vaeDecoder: vae
+                )
+            }
+        }
     }
 
     // MARK: - Generation
@@ -102,34 +148,13 @@ struct TextToImageDemoView: View {
         let currentSeed = seed
 
         do {
-            // Load vocab + merges
-            status = "Loading tokenizer…"
-            let vocabFile = model.configString("vocab_file") ?? "vocab.json"
-            let mergesFile = model.configString("merges_file") ?? "merges.txt"
-            let tokenizer = try BPETokenizerSimple(
-                vocabURL: ModelLoader.auxFileURL(modelId: model.id, fileName: vocabFile),
-                mergesURL: ModelLoader.auxFileURL(modelId: model.id, fileName: mergesFile)
-            )
-
-            // Load models
-            status = "Loading text encoder…"
-            let teFile = model.configString("text_encoder")
-                ?? model.files.first { $0.name.lowercased().contains("textencoder") }?.name ?? model.files[0].name
-            let textEncoder = try await ModelLoader.load(for: model, named: teFile)
-
-            status = "Loading UNet…"
-            let chunk1File = model.configString("unet_chunk1")
-                ?? model.files.first { $0.name.lowercased().contains("chunk1") }?.name
-            let chunk2File = model.configString("unet_chunk2")
-                ?? model.files.first { $0.name.lowercased().contains("chunk2") }?.name
-
-            let unetChunk1 = chunk1File != nil ? try await ModelLoader.load(for: model, named: chunk1File!) : nil
-            let unetChunk2 = chunk2File != nil ? try await ModelLoader.load(for: model, named: chunk2File!) : nil
-
-            status = "Loading VAE decoder…"
-            let vaeFile = model.configString("vae_decoder")
-                ?? model.files.first { $0.name.lowercased().contains("decoder") }?.name ?? model.files.last!.name
-            let vaeDecoder = try await ModelLoader.load(for: model, named: vaeFile)
+            status = session.loadTimeSec == nil ? "Loading models…" : "Preparing…"
+            let assets = try await session.get()
+            let tokenizer = assets.tokenizer
+            let textEncoder = assets.textEncoder
+            let unetChunk1 = assets.unetChunk1
+            let unetChunk2 = assets.unetChunk2
+            let vaeDecoder = assets.vaeDecoder
 
             let latentSize = model.configInt("latent_size") ?? 64
             let latentChannels = model.configInt("latent_channels") ?? 4

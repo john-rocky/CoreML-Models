@@ -19,6 +19,7 @@ struct AudioToScoreDemoView: View {
     @State private var frameThreshold: Float = 0.3
     @State private var player: AVAudioPlayer?
     @State private var isPlayingOriginal = false
+    @StateObject private var session = ModelSession<MLModel>()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -32,9 +33,7 @@ struct AudioToScoreDemoView: View {
                 HStack {
                     Text("\(noteCount) note onsets").font(.caption).foregroundStyle(.secondary)
                     Spacer()
-                    if let t = processingTime {
-                        Text(String(format: "%.2fs", t)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                    }
+                    TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
                 }.padding(.horizontal).padding(.top, 4)
             } else {
                 VStack(spacing: 12) {
@@ -96,6 +95,9 @@ struct AudioToScoreDemoView: View {
         .sheet(isPresented: $showingFilePicker) {
             AudioPickerView { url in inputURL = url; pianoRollImage = nil; noteCount = 0 }
         }
+        .task {
+            session.ensure { try await ModelLoader.loadPrimary(for: model) }
+        }
     }
 
     // MARK: - Transcription
@@ -123,8 +125,8 @@ struct AudioToScoreDemoView: View {
             for i in 0..<totalSamples { peak = max(peak, abs(samples[i])) }
             if peak > 0 { for i in 0..<totalSamples { samples[i] *= 0.98 / peak } }
 
-            status = "Loading model…"
-            let mlModel = try await ModelLoader.loadPrimary(for: model)
+            status = session.loadTimeSec == nil ? "Loading model…" : "Preparing…"
+            let mlModel = try await session.get()
 
             let start = CFAbsoluteTimeGetCurrent()
             let hopSize = model.configInt("hop_size") ?? 256

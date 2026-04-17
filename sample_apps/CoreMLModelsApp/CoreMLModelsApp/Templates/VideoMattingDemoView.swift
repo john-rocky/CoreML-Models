@@ -46,6 +46,7 @@ struct VideoMattingDemoView: View {
     @State private var showingVideoPicker = false
     @State private var overrideMaskItem: PhotosPickerItem?
     @State private var backgroundColorChoice: Int = 0
+    @StateObject private var session = ModelSession<MatAnyoneHubEngine>()
 
     // Solid background colours the user can cycle through while previewing.
     private let bgChoices: [(name: String, color: CIColor)] = [
@@ -116,9 +117,7 @@ struct VideoMattingDemoView: View {
             }
 
             VStack(spacing: 12) {
-                if let t = processingTime {
-                    Text(String(format: "%.1fs", t)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                }
+                TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
 
                 // Background colour picker.
                 Picker("Background", selection: $backgroundColorChoice) {
@@ -164,6 +163,9 @@ struct VideoMattingDemoView: View {
             }
         }
         .onChange(of: overrideMaskItem) { _, _ in loadOverrideMask() }
+        .task {
+            session.ensure { try await MatAnyoneHubEngine(model: model) }
+        }
     }
 
     private func loadOverrideMask() {
@@ -200,7 +202,7 @@ struct VideoMattingDemoView: View {
 
         let start = CFAbsoluteTimeGetCurrent()
         do {
-            let engine = try await MatAnyoneHubEngine(model: model)
+            let engine = try await session.get()
             await MainActor.run { status = "Running MatAnyone..." }
 
             let matter = MatAnyoneHubMatter(engine: engine)

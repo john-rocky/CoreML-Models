@@ -42,6 +42,7 @@ struct TextToAudioDemoView: View {
     @State private var ttsInferenceMs: Double = 0
     @State private var ttsAudioDurationSec: Double = 0
     @FocusState private var ttsTextFocused: Bool
+    @StateObject private var session = ModelSession<Void>()
 
     // MARK: - Music State
 
@@ -130,6 +131,26 @@ struct TextToAudioDemoView: View {
         .onAppear {
             if ttsVoice.isEmpty, let first = ttsVoicesForLanguage.first {
                 ttsVoice = first
+            }
+        }
+        .task {
+            session.ensure { try await eagerPreload() }
+        }
+    }
+
+    /// Warm up the primary inference model(s) in the background so the user
+    /// doesn't wait on disk I/O and ANE specialization after tapping Generate.
+    /// TTS: pre-load Predictor (Decoder bucket is input-dependent). Music:
+    /// pre-load all four StableAudio models.
+    private func eagerPreload() async throws {
+        if isTTS {
+            let predictorFile = model.files.first {
+                $0.name.lowercased().contains("predict")
+            }?.name ?? model.files[0].name
+            _ = try await ModelLoader.load(for: model, named: predictorFile)
+        } else {
+            for file in model.files where (file.kind ?? "model") == "model" {
+                _ = try await ModelLoader.load(for: model, named: file.name)
             }
         }
     }
@@ -248,22 +269,34 @@ struct TextToAudioDemoView: View {
             }
 
             // Stats row
-            if ttsInferenceMs > 0 {
+            if ttsInferenceMs > 0 || session.loadTimeSec != nil {
                 HStack {
-                    VStack(alignment: .leading) {
-                        Text("Inference")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text(String(format: "%.0f ms", ttsInferenceMs))
-                            .font(.title3.monospacedDigit())
+                    if let l = session.loadTimeSec {
+                        VStack(alignment: .leading) {
+                            Text("Load")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text(l < 1 ? String(format: "%.0f ms", l * 1000) : String(format: "%.2f s", l))
+                                .font(.title3.monospacedDigit())
+                        }
+                        Spacer()
                     }
-                    Spacer()
-                    VStack(alignment: .trailing) {
-                        Text("Duration")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text(String(format: "%.1f s", ttsAudioDurationSec))
-                            .font(.title3.monospacedDigit())
+                    if ttsInferenceMs > 0 {
+                        VStack(alignment: .leading) {
+                            Text("Inference")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text(String(format: "%.0f ms", ttsInferenceMs))
+                                .font(.title3.monospacedDigit())
+                        }
+                        Spacer()
+                        VStack(alignment: .trailing) {
+                            Text("Duration")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text(String(format: "%.1f s", ttsAudioDurationSec))
+                                .font(.title3.monospacedDigit())
+                        }
                     }
                 }
                 .padding(12)
@@ -414,6 +447,9 @@ struct TextToAudioDemoView: View {
                 }
                 .padding(.horizontal)
             }
+
+            TimingsLabel(loadSec: session.loadTimeSec, inferSec: nil)
+                .padding(.horizontal)
 
             // Error
             if let errorMessage {

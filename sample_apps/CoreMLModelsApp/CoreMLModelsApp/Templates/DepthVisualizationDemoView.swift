@@ -14,6 +14,7 @@ struct DepthVisualizationDemoView: View {
     @State private var isProcessing = false
     @State private var status = ""
     @State private var item: PhotosPickerItem?
+    @StateObject private var session = ModelSession<MLModel>()
 
     enum ViewMode: String, CaseIterable, Identifiable {
         case original, depth, normal
@@ -38,9 +39,7 @@ struct DepthVisualizationDemoView: View {
                             .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                     }
                     Spacer()
-                    if let t = processingTime {
-                        Text(String(format: "%.2fs", t)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                    }
+                    TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
                 }
                 .padding(.horizontal)
             }
@@ -54,6 +53,9 @@ struct DepthVisualizationDemoView: View {
                 .buttonStyle(.bordered)
             }
             .padding()
+        }
+        .task {
+            session.ensure { try await ModelLoader.loadPrimary(for: model) }
         }
         .onChange(of: item) { _, newItem in
             print("[Depth] onChange fired, newItem=\(String(describing: newItem))")
@@ -114,12 +116,9 @@ struct DepthVisualizationDemoView: View {
     }
 
     private func runDepth(on image: UIImage) async {
-        await MainActor.run { status = "Compiling model…" }
+        await MainActor.run { status = session.isLoading ? "Loading model…" : "Running inference…" }
         do {
-            print("[Depth] Loading model: id=\(model.id), files=\(model.files.map { $0.name })")
-            let mlModel = try await ModelLoader.loadPrimary(for: model)
-            print("[Depth] Model loaded. inputs=\(mlModel.modelDescription.inputDescriptionsByName.keys)")
-            print("[Depth] Model outputs=\(mlModel.modelDescription.outputDescriptionsByName.keys)")
+            let mlModel = try await session.get()
             await MainActor.run { status = "Running inference…" }
 
             let inputSize = model.configInt("input_size") ?? 504
