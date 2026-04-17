@@ -136,7 +136,11 @@ struct ImageInOutDemoView: View {
             if outputType == "sinsr" {
                 await MainActor.run { status = "Loading models…" }
                 let start = CFAbsoluteTimeGetCurrent()
-                let result = try await processSinSRPipeline(image: image, inputSize: model.configInt("input_size") ?? 256)
+                let inputSize = model.configInt("input_size") ?? 256
+                var result = try await processSinSRPipeline(image: image, inputSize: inputSize)
+                if let r = result, let cg = ImageUtils.normalizeOrientation(image) {
+                    result = restoreAspect(r, origW: cg.width, origH: cg.height, inputSize: inputSize)
+                }
                 let elapsed = CFAbsoluteTimeGetCurrent() - start
                 await MainActor.run { outputImage = result; processingTime = elapsed; isProcessing = false; status = "" }
                 return
@@ -200,7 +204,11 @@ struct ImageInOutDemoView: View {
             case "segmap":
                 result = processSegmapOutput(output: output, originalImage: cgImage, origW: origW, origH: origH, modelSize: inputSize)
             default:
-                result = processImageOutput(output: output)
+                if let r = processImageOutput(output: output) {
+                    result = restoreAspect(r, origW: origW, origH: origH, inputSize: inputSize)
+                } else {
+                    result = nil
+                }
             }
             // Measure inference + post-processing together — post-processing
             // is a meaningful fraction of wall time on large photos (RMBG mask
@@ -241,6 +249,22 @@ struct ImageInOutDemoView: View {
             }}
         }
         return arr
+    }
+
+    // MARK: - Aspect restoration
+
+    // SR inputs are stretched to inputSize × inputSize, so model outputs are
+    // also stretched. Resize to (origW, origH) times the upscale factor so the
+    // displayed image keeps the photo's original aspect.
+    private func restoreAspect(_ image: UIImage, origW: Int, origH: Int, inputSize: Int) -> UIImage? {
+        guard origW > 0, origH > 0, inputSize > 0 else { return image }
+        let outW = Int(image.size.width), outH = Int(image.size.height)
+        let scaleX = Double(outW) / Double(inputSize)
+        let scaleY = Double(outH) / Double(inputSize)
+        let newW = max(1, Int((Double(origW) * scaleX).rounded()))
+        let newH = max(1, Int((Double(origH) * scaleY).rounded()))
+        if newW == outW && newH == outH { return image }
+        return ImageUtils.resize(image, to: CGSize(width: newW, height: newH)) ?? image
     }
 
     // MARK: - Output: image
