@@ -1,9 +1,11 @@
+import CoreML
 import SwiftUI
 
 struct BenchmarkView: View {
     let model: ModelEntry
 
     @State private var selectedFile: FileSpec
+    @State private var selectedComputeUnits: MLComputeUnits
     @State private var iterations: Int = 10
     @State private var phase: BenchmarkPhase = .idle
     @State private var result: BenchmarkResult?
@@ -13,10 +15,18 @@ struct BenchmarkView: View {
         model.files.filter { ($0.kind ?? "model") == "model" }
     }
 
+    private static let computeUnitOptions: [(MLComputeUnits, String)] = [
+        (.all, "All"),
+        (.cpuAndNeuralEngine, "CPU + Neural Engine"),
+        (.cpuAndGPU, "CPU + GPU"),
+        (.cpuOnly, "CPU Only"),
+    ]
+
     init(model: ModelEntry) {
         self.model = model
         let primary = model.files.first { ($0.kind ?? "model") == "model" } ?? model.files[0]
         _selectedFile = State(initialValue: primary)
+        _selectedComputeUnits = State(initialValue: ModelLoader.parseComputeUnits(primary.computeUnits))
     }
 
     var body: some View {
@@ -27,7 +37,20 @@ struct BenchmarkView: View {
                 progressSection
                 if let result { resultsSection(result) }
                 if case .failed(let msg) = phase {
-                    Text(msg).font(.caption).foregroundStyle(.red).padding()
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label("Error", systemImage: "exclamationmark.triangle.fill")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.red)
+                        Text(msg)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                            .textSelection(.enabled)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.red.opacity(0.1),
+                                in: RoundedRectangle(cornerRadius: 12))
                 }
             }
             .padding()
@@ -50,17 +73,27 @@ struct BenchmarkView: View {
                         Text(file.name).tag(file)
                     }
                 }
+                .onChange(of: selectedFile) { _, newValue in
+                    selectedComputeUnits = ModelLoader.parseComputeUnits(newValue.computeUnits)
+                }
             }
 
             Stepper("Iterations: \(iterations)", value: $iterations, in: 5...100, step: 5)
                 .font(.subheadline)
 
-            HStack {
-                Text("Compute units").foregroundStyle(.secondary)
-                Spacer()
-                Text(selectedFile.computeUnits ?? "all")
+            Picker("Compute units", selection: $selectedComputeUnits) {
+                ForEach(Self.computeUnitOptions, id: \.0) { opt in
+                    Text(opt.1).tag(opt.0)
+                }
             }
             .font(.subheadline)
+
+            if let recommended = selectedFile.computeUnits,
+               ModelLoader.parseComputeUnits(recommended) != selectedComputeUnits {
+                Text("Recommended: \(recommended)")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            }
         }
         .padding()
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
@@ -155,7 +188,8 @@ struct BenchmarkView: View {
                 let r = try await BenchmarkRunner.run(
                     model: model,
                     file: selectedFile,
-                    iterations: iterations
+                    iterations: iterations,
+                    computeUnits: selectedComputeUnits
                 ) { newPhase in
                     phase = newPhase
                 }

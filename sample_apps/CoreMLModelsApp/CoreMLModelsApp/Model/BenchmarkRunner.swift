@@ -42,11 +42,15 @@ enum BenchmarkRunner {
         file: FileSpec,
         iterations: Int = 10,
         warmupIterations: Int = 3,
+        computeUnits: MLComputeUnits? = nil,
         onPhase: @MainActor (BenchmarkPhase) -> Void
     ) async throws -> BenchmarkResult {
         // Load
         await onPhase(.loadingModel)
-        let mlModel = try await ModelLoader.load(for: model, named: file.name)
+        let units = computeUnits ?? ModelLoader.parseComputeUnits(file.computeUnits)
+        let mlModel = try await ModelLoader.load(
+            modelId: model.id, fileName: file.name, computeUnits: units
+        )
         let dummyInput = try generateDummyInput(for: mlModel)
 
         // Warmup
