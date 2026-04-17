@@ -1,4 +1,5 @@
 import CoreML
+import CoreImage
 import UIKit
 
 enum BackgroundRemoverError: LocalizedError {
@@ -65,58 +66,35 @@ enum BackgroundRemover {
     // MARK: - Mask Application
 
     private static func applyMask(_ mask: [Float], modelSize: Int, to cgImage: CGImage, width: Int, height: Int) -> UIImage {
-        // Extract original RGBA pixels
-        var pixelData = [UInt8](repeating: 0, count: width * height * 4)
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let ctx = CGContext(data: &pixelData, width: width, height: height,
-                            bitsPerComponent: 8, bytesPerRow: width * 4,
-                            space: colorSpace,
-                            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
-        ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
-
-        // Resize mask from modelSize x modelSize to original resolution using bilinear interpolation
-        // Mask shape: [1,1,modelSize,modelSize]
-        var result = [UInt8](repeating: 0, count: width * height * 4)
-        for y in 0..<height {
-            let srcY = Float(y) * Float(modelSize) / Float(height)
-            let y0 = min(Int(srcY), modelSize - 1)
-            let y1 = min(y0 + 1, modelSize - 1)
-            let fy = srcY - Float(y0)
-            for x in 0..<width {
-                let srcX = Float(x) * Float(modelSize) / Float(width)
-                let x0 = min(Int(srcX), modelSize - 1)
-                let x1 = min(x0 + 1, modelSize - 1)
-                let fx = srcX - Float(x0)
-
-                let v00 = mask[y0 * modelSize + x0]
-                let v10 = mask[y0 * modelSize + x1]
-                let v01 = mask[y1 * modelSize + x0]
-                let v11 = mask[y1 * modelSize + x1]
-
-                let alpha = v00 * (1 - fx) * (1 - fy) + v10 * fx * (1 - fy) +
-                            v01 * (1 - fx) * fy + v11 * fx * fy
-                let a = UInt8(clamping: Int(alpha * 255))
-
-                let idx = (y * width + x) * 4
-                let r = pixelData[idx]
-                let g = pixelData[idx + 1]
-                let b = pixelData[idx + 2]
-
-                // Premultiply alpha
-                let af = Float(a) / 255.0
-                result[idx]     = UInt8(clamping: Int(Float(r) * af))
-                result[idx + 1] = UInt8(clamping: Int(Float(g) * af))
-                result[idx + 2] = UInt8(clamping: Int(Float(b) * af))
-                result[idx + 3] = a
-            }
+        // Bilinear-upscale the mask and alpha-blend on the GPU. The prior
+        // per-pixel Swift loop was seconds on full-res iPhone photos (12MP).
+        var mask8 = [UInt8](repeating: 0, count: modelSize * modelSize)
+        for i in 0..<mask8.count { mask8[i] = UInt8(clamping: Int(mask[i] * 255)) }
+        let maskCG = CGDataProvider(data: Data(mask8) as CFData).flatMap {
+            CGImage(width: modelSize, height: modelSize,
+                    bitsPerComponent: 8, bitsPerPixel: 8,
+                    bytesPerRow: modelSize,
+                    space: CGColorSpaceCreateDeviceGray(),
+                    bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
+                    provider: $0, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
         }
+        guard let maskCG else { return UIImage(cgImage: cgImage) }
 
-        let outCtx = CGContext(data: &result, width: width, height: height,
-                               bitsPerComponent: 8, bytesPerRow: width * 4,
-                               space: colorSpace,
-                               bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
-        let outImage = outCtx.makeImage()!
-        return UIImage(cgImage: outImage)
+        let origCI = CIImage(cgImage: cgImage)
+        let extent = origCI.extent
+        let maskCI = CIImage(cgImage: maskCG).transformed(by:
+            CGAffineTransform(scaleX: extent.width / CGFloat(modelSize),
+                              y: extent.height / CGFloat(modelSize)))
+        let transparent = CIImage.empty().cropped(to: extent)
+        let blended = origCI.applyingFilter("CIBlendWithMask", parameters: [
+            kCIInputBackgroundImageKey: transparent,
+            kCIInputMaskImageKey: maskCI,
+        ])
+        let ciCtx = CIContext(options: [.useSoftwareRenderer: false])
+        guard let outCG = ciCtx.createCGImage(blended, from: extent) else {
+            return UIImage(cgImage: cgImage)
+        }
+        return UIImage(cgImage: outCG)
     }
 
     // MARK: - Utilities
