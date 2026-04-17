@@ -12,7 +12,7 @@ import CoreML
 ///   "image_encoder": "SigLIP_ImageEncoder.mlpackage",
 ///   "text_encoder": "SigLIP_TextEncoder.mlpackage",
 ///   "vocab_file": "siglip_vocab.json",
-///   "prompt_template": "a photo of {}",
+///   "prompt_template": "a photo of a {}",
 ///   "logit_scale": 117.33
 /// }
 /// ```
@@ -26,6 +26,7 @@ struct ZeroShotClassifyDemoView: View {
     @State private var status = ""
     @State private var processingTime: Double?
     @State private var item: PhotosPickerItem?
+    @StateObject private var session = ModelSession<(img: MLModel, txt: MLModel?)>()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -68,9 +69,7 @@ struct ZeroShotClassifyDemoView: View {
                     .textFieldStyle(.roundedBorder).font(.callout)
 
                 HStack {
-                    if let t = processingTime {
-                        Text(String(format: "%.2fs", t)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                    }
+                    TimingsLabel(loadSec: session.loadTimeSec, inferSec: processingTime)
                     Spacer()
                     if isProcessing { ProgressView().controlSize(.small); Text(status).font(.caption) }
                 }
@@ -91,6 +90,21 @@ struct ZeroShotClassifyDemoView: View {
             }
             .padding()
         }
+        .task {
+            session.ensure {
+                let imgEncoderName = model.configString("image_encoder")
+                    ?? model.files.first { $0.name.lowercased().contains("image") }?.name
+                    ?? model.files[0].name
+                let txtEncoderName = model.configString("text_encoder")
+                    ?? model.files.first { $0.name.lowercased().contains("text") }?.name
+                let img = try await ModelLoader.load(for: model, named: imgEncoderName)
+                let txt = try await { () async throws -> MLModel? in
+                    guard let n = txtEncoderName else { return nil }
+                    return try await ModelLoader.load(for: model, named: n)
+                }()
+                return (img: img, txt: txt)
+            }
+        }
         .onChange(of: item) { _, _ in loadPhoto() }
     }
 
@@ -108,15 +122,10 @@ struct ZeroShotClassifyDemoView: View {
         let classes = classText.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
         guard !classes.isEmpty else { return }
 
-        isProcessing = true; status = "Loading models…"
+        isProcessing = true
+        status = session.loadTimeSec == nil ? "Loading models…" : "Encoding…"
         do {
-            let imgEncoderName = model.configString("image_encoder")
-                ?? model.files.first { $0.name.lowercased().contains("image") }?.name
-                ?? model.files[0].name
-            let txtEncoderName = model.configString("text_encoder")
-                ?? model.files.first { $0.name.lowercased().contains("text") }?.name
-
-            let imgEncoder = try await ModelLoader.load(for: model, named: imgEncoderName)
+            let (imgEncoder, txtEncoder) = try await session.get()
 
             // Encode image
             status = "Encoding image…"
@@ -141,19 +150,22 @@ struct ZeroShotClassifyDemoView: View {
 
             // Encode text (if text encoder model exists)
             var classScores: [Float]
-            if let txtName = txtEncoderName {
-                let txtEncoder = try await ModelLoader.load(for: model, named: txtName)
-
+            if let txtEncoder {
                 // Load vocab if available
                 let vocabFile = model.configString("vocab_file")
                     ?? model.files.first { ($0.kind ?? "") == "vocab" }?.name
                 let vocab = vocabFile.flatMap { loadVocab(modelId: model.id, fileName: $0) }
 
-                let template = model.configString("prompt_template") ?? "{}"
+                // SigLIP was trained on caption-style text; a bare "{}" template
+                // gives misaligned embeddings. Default to a full caption prompt.
+                let rawTemplate = model.configString("prompt_template") ?? "a photo of a {}"
+                let template = (rawTemplate == "{}" || rawTemplate.isEmpty) ? "a photo of a {}" : rawTemplate
                 let logitScale = model.configDouble("logit_scale").map { Float($0) } ?? 100.0
 
                 status = "Encoding text…"
-                var textVecs: [[Float]] = []
+                // Keep (label, logit) paired so a failed-to-encode class can't
+                // shift the ranking of the classes after it.
+                var logits: [(String, Float)] = []
                 for cls in classes {
                     let prompt = template.replacingOccurrences(of: "{}", with: cls)
                     let tokenIds = tokenize(prompt, vocab: vocab)
@@ -167,18 +179,30 @@ struct ZeroShotClassifyDemoView: View {
                     let txtOutput = try await txtEncoder.prediction(from: txtInput)
 
                     let txtEmbName = txtOutput.featureNames.first ?? "text_embedding"
-                    if let txtEmb = txtOutput.featureValue(for: txtEmbName)?.multiArrayValue {
-                        textVecs.append(ImageUtils.extractFloats(txtEmb))
-                    }
+                    guard let txtEmb = txtOutput.featureValue(for: txtEmbName)?.multiArrayValue else { continue }
+                    let textVec = ImageUtils.extractFloats(txtEmb)
+                    logits.append((cls, ImageUtils.cosineSimilarity(imageVec, textVec) * logitScale))
                 }
 
-                // Compute similarities with softmax
-                let logits = textVecs.map { ImageUtils.cosineSimilarity(imageVec, $0) * logitScale }
-                classScores = softmax(logits)
-            } else {
-                // Single model with built-in text handling — use output directly
-                classScores = Array(repeating: 1.0 / Float(classes.count), count: classes.count)
+                let maxLogit = logits.map(\.1).max() ?? 0
+                let exps = logits.map { exp($0.1 - maxLogit) }
+                let sumExp = exps.reduce(0, +)
+                let pairs: [(String, Float)] = exps.enumerated().map { (i, e) in
+                    (logits[i].0, sumExp > 0 ? e / sumExp : 0)
+                }
+
+                let elapsed = CFAbsoluteTimeGetCurrent() - start
+                let ranked = pairs.sorted { $0.1 > $1.1 }
+                await MainActor.run {
+                    results = ranked
+                    processingTime = elapsed
+                    isProcessing = false; status = ""
+                }
+                return
             }
+
+            // Single model with built-in text handling — use output directly
+            classScores = Array(repeating: 1.0 / Float(classes.count), count: classes.count)
 
             let elapsed = CFAbsoluteTimeGetCurrent() - start
 

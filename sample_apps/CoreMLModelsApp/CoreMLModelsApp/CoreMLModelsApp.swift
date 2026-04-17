@@ -40,4 +40,39 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             AppDelegate.backgroundCompletionHandler = completionHandler
         }
     }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        KeyboardDismissInstaller.shared.install()
+    }
+}
+
+/// Installs a tap-outside-to-dismiss-keyboard gesture on every app window.
+/// `cancelsTouchesInView = false` keeps buttons/text fields working; tapping
+/// a TextField still makes it first responder after the brief dismiss.
+final class KeyboardDismissInstaller: NSObject {
+    static let shared = KeyboardDismissInstaller()
+    private static let recognizerName = "coreml.keyboardDismiss"
+
+    func install() {
+        for scene in UIApplication.shared.connectedScenes {
+            guard let windowScene = scene as? UIWindowScene else { continue }
+            for window in windowScene.windows {
+                let existing = window.gestureRecognizers?.contains {
+                    $0.name == Self.recognizerName
+                } ?? false
+                if existing { continue }
+                let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+                tap.cancelsTouchesInView = false
+                tap.name = Self.recognizerName
+                window.addGestureRecognizer(tap)
+            }
+        }
+    }
+
+    @objc private func dismissKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil, from: nil, for: nil
+        )
+    }
 }

@@ -41,7 +41,15 @@
 		F00000010000000000000023 /* BenchmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000023 /* BenchmarkView.swift */; };
 		F00000010000000000000024 /* InpaintingDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000024 /* InpaintingDemoView.swift */; };
 		F00000010000000000000025 /* SegmentAnythingDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000025 /* SegmentAnythingDemoView.swift */; };
-		F00000010000000000000026 /* SAMPromptEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000026 /* SAMPromptEncoder.swift */; };
+		F00000010000000000000030 /* SamSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000030 /* SamSession.swift */; };
+		F00000010000000000000031 /* Preprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000031 /* Preprocessor.swift */; };
+		F00000010000000000000032 /* PromptEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000032 /* PromptEncoder.swift */; };
+		F00000010000000000000033 /* Postprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000033 /* Postprocessor.swift */; };
+		F00000010000000000000034 /* SamView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000034 /* SamView.swift */; };
+		F00000010000000000000035 /* SubjectLiftHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000035 /* SubjectLiftHelpers.swift */; };
+		F00000010000000000000040 /* ModelSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000040 /* ModelSession.swift */; };
+		F00000010000000000000050 /* CLIPTokenizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000050 /* CLIPTokenizer.swift */; };
+		F00000010000000000000051 /* clip_vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000051 /* clip_vocab.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -80,7 +88,15 @@
 		F00000020000000000000023 /* BenchmarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkView.swift; sourceTree = "<group>"; };
 		F00000020000000000000024 /* InpaintingDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InpaintingDemoView.swift; sourceTree = "<group>"; };
 		F00000020000000000000025 /* SegmentAnythingDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentAnythingDemoView.swift; sourceTree = "<group>"; };
-		F00000020000000000000026 /* SAMPromptEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAMPromptEncoder.swift; sourceTree = "<group>"; };
+		F00000020000000000000030 /* SamSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SamSession.swift; sourceTree = "<group>"; };
+		F00000020000000000000031 /* Preprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preprocessor.swift; sourceTree = "<group>"; };
+		F00000020000000000000032 /* PromptEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptEncoder.swift; sourceTree = "<group>"; };
+		F00000020000000000000033 /* Postprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Postprocessor.swift; sourceTree = "<group>"; };
+		F00000020000000000000034 /* SamView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SamView.swift; sourceTree = "<group>"; };
+		F00000020000000000000035 /* SubjectLiftHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubjectLiftHelpers.swift; sourceTree = "<group>"; };
+		F00000020000000000000040 /* ModelSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSession.swift; sourceTree = "<group>"; };
+		F00000020000000000000050 /* CLIPTokenizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLIPTokenizer.swift; sourceTree = "<group>"; };
+		F00000020000000000000051 /* clip_vocab.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = clip_vocab.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,11 +123,13 @@
 			isa = PBXGroup;
 			children = (
 				F00000020000000000000001 /* CoreMLModelsApp.swift */,
+				F00000040000000000000013 /* SAMKit */,
 				F00000040000000000000010 /* Model */,
 				F00000040000000000000011 /* Views */,
 				F00000040000000000000012 /* Templates */,
 				F0000002000000000000000C /* Assets.xcassets */,
 				F0000002000000000000000D /* Info.plist */,
+				F00000020000000000000051 /* clip_vocab.json */,
 			);
 			path = CoreMLModelsApp;
 			sourceTree = "<group>";
@@ -135,9 +153,22 @@
 				F0000002000000000000000E /* ModelLoader.swift */,
 				F00000020000000000000020 /* ModelInspector.swift */,
 				F00000020000000000000021 /* BenchmarkRunner.swift */,
-				F00000020000000000000026 /* SAMPromptEncoder.swift */,
+				F00000020000000000000040 /* ModelSession.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		F00000040000000000000013 /* SAMKit */ = {
+			isa = PBXGroup;
+			children = (
+				F00000020000000000000030 /* SamSession.swift */,
+				F00000020000000000000031 /* Preprocessor.swift */,
+				F00000020000000000000032 /* PromptEncoder.swift */,
+				F00000020000000000000033 /* Postprocessor.swift */,
+				F00000020000000000000034 /* SamView.swift */,
+				F00000020000000000000035 /* SubjectLiftHelpers.swift */,
+			);
+			path = SAMKit;
 			sourceTree = "<group>";
 		};
 		F00000040000000000000011 /* Views */ = {
@@ -161,6 +192,7 @@
 				F0000002000000000000000F /* ImageInOutDemoView.swift */,
 				F00000020000000000000011 /* ImageDetectionDemoView.swift */,
 				F00000020000000000000013 /* OpenVocabDetectionDemoView.swift */,
+				F00000020000000000000050 /* CLIPTokenizer.swift */,
 				F00000020000000000000014 /* ZeroShotClassifyDemoView.swift */,
 				F00000020000000000000015 /* FaceCompareDemoView.swift */,
 				F00000020000000000000016 /* Face3DDemoView.swift */,
@@ -242,6 +274,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F0000001000000000000000C /* Assets.xcassets in Resources */,
+				F00000010000000000000051 /* clip_vocab.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,7 +317,14 @@
 				F00000010000000000000023 /* BenchmarkView.swift in Sources */,
 				F00000010000000000000024 /* InpaintingDemoView.swift in Sources */,
 				F00000010000000000000025 /* SegmentAnythingDemoView.swift in Sources */,
-				F00000010000000000000026 /* SAMPromptEncoder.swift in Sources */,
+				F00000010000000000000030 /* SamSession.swift in Sources */,
+				F00000010000000000000031 /* Preprocessor.swift in Sources */,
+				F00000010000000000000032 /* PromptEncoder.swift in Sources */,
+				F00000010000000000000033 /* Postprocessor.swift in Sources */,
+				F00000010000000000000034 /* SamView.swift in Sources */,
+				F00000010000000000000035 /* SubjectLiftHelpers.swift in Sources */,
+				F00000010000000000000040 /* ModelSession.swift in Sources */,
+				F00000010000000000000050 /* CLIPTokenizer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
