@@ -169,18 +169,32 @@ enum BenchmarkRunner {
     // MARK: - Device info
 
     static func deviceInfo() -> (model: String, chip: String) {
-        let machine = sysctlString("hw.machine") ?? "Unknown"
+        let machine = currentMachineIdentifier()
         let model = deviceNames[machine] ?? machine
-        // Exact match first, then longest prefix match
+        // Exact match first, then longest prefix match. Fall back to the raw
+        // identifier so we at least show something actionable.
         let chip: String
         if let exact = chipNames[machine] {
             chip = exact
+        } else if let prefix = chipNames
+            .filter({ machine.hasPrefix($0.key) })
+            .max(by: { $0.key.count < $1.key.count })?.value {
+            chip = prefix
         } else {
-            chip = chipNames
-                .filter { machine.hasPrefix($0.key) }
-                .max(by: { $0.key.count < $1.key.count })?.value ?? "Unknown"
+            chip = machine
         }
         return (model, chip)
+    }
+
+    private static func currentMachineIdentifier() -> String {
+        // On the simulator `hw.machine` returns the host architecture
+        // (arm64 / x86_64). The real device identifier is exposed via an
+        // environment variable.
+        if let simID = ProcessInfo.processInfo.environment["SIMULATOR_MODEL_IDENTIFIER"],
+           !simID.isEmpty {
+            return simID
+        }
+        return sysctlString("hw.machine") ?? "Unknown"
     }
 
     private static func sysctlString(_ name: String) -> String? {
@@ -207,6 +221,9 @@ enum BenchmarkRunner {
     // MARK: - Device name mappings
 
     private static let deviceNames: [String: String] = [
+        // iPhone 17 / Air
+        "iPhone18,1": "iPhone 17 Pro", "iPhone18,2": "iPhone 17 Pro Max",
+        "iPhone18,3": "iPhone 17", "iPhone18,4": "iPhone Air",
         // iPhone 16
         "iPhone17,1": "iPhone 16 Pro", "iPhone17,2": "iPhone 16 Pro Max",
         "iPhone17,3": "iPhone 16", "iPhone17,4": "iPhone 16 Plus",
@@ -220,24 +237,78 @@ enum BenchmarkRunner {
         // iPhone 13
         "iPhone14,2": "iPhone 13 Pro", "iPhone14,3": "iPhone 13 Pro Max",
         "iPhone14,5": "iPhone 13", "iPhone14,4": "iPhone 13 mini",
+        // iPhone SE (2nd / 3rd gen)
+        "iPhone12,8": "iPhone SE (2nd gen)", "iPhone14,6": "iPhone SE (3rd gen)",
+        // iPhone 12
+        "iPhone13,1": "iPhone 12 mini", "iPhone13,2": "iPhone 12",
+        "iPhone13,3": "iPhone 12 Pro", "iPhone13,4": "iPhone 12 Pro Max",
+        // iPhone 11
+        "iPhone12,1": "iPhone 11",
+        "iPhone12,3": "iPhone 11 Pro", "iPhone12,5": "iPhone 11 Pro Max",
         // iPad Pro M4
-        "iPad16,3": "iPad Pro 13\" (M4)", "iPad16,4": "iPad Pro 13\" (M4)",
-        "iPad16,5": "iPad Pro 11\" (M4)", "iPad16,6": "iPad Pro 11\" (M4)",
+        "iPad16,3": "iPad Pro 11\" (M4)", "iPad16,4": "iPad Pro 11\" (M4)",
+        "iPad16,5": "iPad Pro 13\" (M4)", "iPad16,6": "iPad Pro 13\" (M4)",
         // iPad Air M2/M3
-        "iPad14,8": "iPad Air 13\" (M2)", "iPad14,9": "iPad Air 13\" (M2)",
-        "iPad14,10": "iPad Air 11\" (M2)", "iPad14,11": "iPad Air 11\" (M2)",
+        "iPad14,8": "iPad Air 11\" (M2)", "iPad14,9": "iPad Air 11\" (M2)",
+        "iPad14,10": "iPad Air 13\" (M2)", "iPad14,11": "iPad Air 13\" (M2)",
+        // iPad mini 7 (A17 Pro)
+        "iPad16,1": "iPad mini (7th gen)", "iPad16,2": "iPad mini (7th gen)",
+        // iPad (11th gen, A16) / iPad (10th gen, A14)
+        "iPad15,7": "iPad (11th gen)", "iPad15,8": "iPad (11th gen)",
+        "iPad13,18": "iPad (10th gen)", "iPad13,19": "iPad (10th gen)",
+        // iPad Pro M2 (2022)
+        "iPad14,3": "iPad Pro 11\" (M2)", "iPad14,4": "iPad Pro 11\" (M2)",
+        "iPad14,5": "iPad Pro 12.9\" (M2)", "iPad14,6": "iPad Pro 12.9\" (M2)",
+        // iPad Air 5 / iPad Pro M1
+        "iPad13,16": "iPad Air (5th gen)", "iPad13,17": "iPad Air (5th gen)",
+        "iPad13,4": "iPad Pro 11\" (M1)", "iPad13,5": "iPad Pro 11\" (M1)",
+        "iPad13,6": "iPad Pro 11\" (M1)", "iPad13,7": "iPad Pro 11\" (M1)",
+        "iPad13,8": "iPad Pro 12.9\" (M1)", "iPad13,9": "iPad Pro 12.9\" (M1)",
+        "iPad13,10": "iPad Pro 12.9\" (M1)", "iPad13,11": "iPad Pro 12.9\" (M1)",
+        // iPad mini 6 (A15)
+        "iPad14,1": "iPad mini (6th gen)", "iPad14,2": "iPad mini (6th gen)",
     ]
 
     private static let chipNames: [String: String] = [
-        "iPhone17,": "A18 Pro", "iPhone17,3": "A18", "iPhone17,4": "A18", "iPhone17,5": "A16",
-        "iPhone16,": "A17 Pro",
+        // iPhone 17 / Air — A19 / A19 Pro
+        "iPhone18,1": "A19 Pro", "iPhone18,2": "A19 Pro",
+        "iPhone18,3": "A19", "iPhone18,4": "A19 Pro",
+        // iPhone 16
+        "iPhone17,1": "A18 Pro", "iPhone17,2": "A18 Pro",
+        "iPhone17,3": "A18", "iPhone17,4": "A18", "iPhone17,5": "A18",
+        // iPhone 15
+        "iPhone16,1": "A17 Pro", "iPhone16,2": "A17 Pro",
         "iPhone15,4": "A16", "iPhone15,5": "A16",
+        // iPhone 14
         "iPhone15,2": "A16", "iPhone15,3": "A16",
         "iPhone14,7": "A15", "iPhone14,8": "A15",
-        "iPhone14,2": "A15 Pro", "iPhone14,3": "A15 Pro",
+        // iPhone 13
+        "iPhone14,2": "A15", "iPhone14,3": "A15",
         "iPhone14,4": "A15", "iPhone14,5": "A15",
-        "iPad16,": "M4",
+        // iPhone SE 2 / 3
+        "iPhone12,8": "A13", "iPhone14,6": "A15",
+        // iPhone 12
+        "iPhone13,1": "A14", "iPhone13,2": "A14",
+        "iPhone13,3": "A14", "iPhone13,4": "A14",
+        // iPhone 11
+        "iPhone12,1": "A13", "iPhone12,3": "A13", "iPhone12,5": "A13",
+        // iPad Pro M4
+        "iPad16,3": "M4", "iPad16,4": "M4", "iPad16,5": "M4", "iPad16,6": "M4",
+        // iPad mini 7
+        "iPad16,1": "A17 Pro", "iPad16,2": "A17 Pro",
+        // iPad 11 / 10
+        "iPad15,7": "A16", "iPad15,8": "A16",
+        "iPad13,18": "A14", "iPad13,19": "A14",
+        // iPad Air M2
         "iPad14,8": "M2", "iPad14,9": "M2", "iPad14,10": "M2", "iPad14,11": "M2",
+        // iPad Pro M2
+        "iPad14,3": "M2", "iPad14,4": "M2", "iPad14,5": "M2", "iPad14,6": "M2",
+        // iPad Air 5 / iPad Pro M1
+        "iPad13,16": "M1", "iPad13,17": "M1",
+        "iPad13,4": "M1", "iPad13,5": "M1", "iPad13,6": "M1", "iPad13,7": "M1",
+        "iPad13,8": "M1", "iPad13,9": "M1", "iPad13,10": "M1", "iPad13,11": "M1",
+        // iPad mini 6
+        "iPad14,1": "A15", "iPad14,2": "A15",
     ]
 
     enum BenchmarkError: LocalizedError {
