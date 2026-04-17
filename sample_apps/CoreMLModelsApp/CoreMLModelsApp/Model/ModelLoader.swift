@@ -278,8 +278,18 @@ enum ImageUtils {
     /// `UIImagePNGRepresentation` output) are returned as-is to avoid a
     /// pointless re-render that would also drop the alpha channel.
     static func normalizeOrientation(_ image: UIImage) -> CGImage? {
+        // Fast path: only trust `.up` when the backing CGImage pixel
+        // dimensions agree with the UIImage's oriented size. PhotosPicker
+        // occasionally hands us an image whose orientation is reported as
+        // `.up` but whose pixels are still in sensor orientation (landscape
+        // for a portrait iPhone photo); in that case we must redraw or the
+        // frame goes to the model rotated 90°.
         if image.imageOrientation == .up, let cg = image.cgImage {
-            return cg
+            let expectedW = Int((image.size.width * image.scale).rounded())
+            let expectedH = Int((image.size.height * image.scale).rounded())
+            if cg.width == expectedW && cg.height == expectedH {
+                return cg
+            }
         }
         let size = image.size
         UIGraphicsBeginImageContextWithOptions(size, true, image.scale)
