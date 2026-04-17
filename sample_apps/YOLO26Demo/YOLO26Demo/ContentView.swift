@@ -52,6 +52,22 @@ struct DetectionOverlay: View {
 
     var body: some View {
         let transform = aspectFitTransform()
+
+        // Motion trails for tracked objects, drawn underneath the boxes.
+        ForEach(detections) { det in
+            if det.trail.count >= 2 {
+                let colorIdx = det.trackId ?? det.classIndex
+                let color = Color(colors[colorIdx % colors.count])
+                Path { path in
+                    let pts = det.trail.map { scaledPoint($0, transform: transform) }
+                    path.move(to: pts[0])
+                    for p in pts.dropFirst() { path.addLine(to: p) }
+                }
+                .stroke(color.opacity(0.75),
+                        style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+            }
+        }
+
         ForEach(detections) { det in
             let r = scaledRect(det.normRect, transform: transform)
             // Color by trackId when present so each tracked object keeps
@@ -81,6 +97,11 @@ struct DetectionOverlay: View {
                 .cornerRadius(8)
                 .position(x: r.midX, y: r.minY > 20 ? r.minY - 14 : r.maxY + 14)
         }
+    }
+
+    private func scaledPoint(_ p: CGPoint, transform t: FitTransform) -> CGPoint {
+        CGPoint(x: p.x * imageSize.width * t.scale + t.offsetX,
+                y: p.y * imageSize.height * t.scale + t.offsetY)
     }
 
     private struct FitTransform {
@@ -554,7 +575,7 @@ class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
         smoothedFps = smoothedFps == 0 ? 1000/ms : smoothedFps * 0.8 + (1000/ms) * 0.2
 
         let visionDets = dets.map { d in
-            (d.label, d.confidence, d.classIndex, d.trackId,
+            (d.label, d.confidence, d.classIndex, d.trackId, d.trail,
              CGRect(x: d.normRect.minX, y: 1 - d.normRect.maxY,
                     width: d.normRect.width, height: d.normRect.height))
         }
@@ -568,14 +589,14 @@ class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
         }
     }
 
-    private func showBoxes(_ dets: [(String, Float, Int, Int?, CGRect)]) {
+    private func showBoxes(_ dets: [(String, Float, Int, Int?, [CGPoint], CGRect)]) {
         let width = view.bounds.width
         let height = view.bounds.height
         let ratio = (height / width) / (longSide / shortSide)
 
         for i in 0..<boxViews.count {
             guard i < dets.count && i < 50 else { boxViews[i].hide(); continue }
-            let (label, conf, cid, tid, nr) = dets[i]
+            let (label, conf, cid, tid, trail, nr) = dets[i]
             var displayRect = nr
 
             if ratio >= 1 {
@@ -598,7 +619,34 @@ class CameraVC: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
                 ?? String(format: "%@ %.0f%%", label, conf * 100)
             let alpha = CGFloat(max(conf - 0.2, 0.1) / 0.8 * 0.9)
             boxViews[i].show(frame: screenRect, label: text, color: color, alpha: alpha)
+
+            // Motion trail: map each normalized Kalman center into the
+            // same aspect-fill preview space as the box using a zero-size
+            // rect through the existing transform.
+            let trailScreen = trail.map { trailPointToScreen($0, ratio: ratio,
+                                                             width: width, height: height) }
+            boxViews[i].showTrail(points: trailScreen, color: color)
         }
+    }
+
+    private func trailPointToScreen(_ p: CGPoint, ratio: CGFloat,
+                                    width: CGFloat, height: CGFloat) -> CGPoint {
+        // p is top-left normalized. Treat it as a 0×0 rect at the
+        // equivalent bottom-left normalized position, run it through the
+        // same preview-aspect transform showBoxes uses, then convert to
+        // pixel coords with VNImageRectForNormalizedRect.
+        var rect = CGRect(x: p.x, y: 1 - p.y, width: 0, height: 0)
+        if ratio >= 1 {
+            let offset = (1 - ratio) * (0.5 - rect.minX)
+            let transform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: offset, y: -1)
+            rect = rect.applying(transform)
+        } else {
+            let offset = (ratio - 1) * (0.5 - rect.maxY)
+            let transform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: offset - 1)
+            rect = rect.applying(transform)
+        }
+        let screenRect = VNImageRectForNormalizedRect(rect, Int(width), Int(height))
+        return CGPoint(x: screenRect.origin.x, y: screenRect.origin.y)
     }
 }
 
@@ -608,6 +656,7 @@ class BoundingBoxView {
     let shapeLayer = CAShapeLayer()
     let fillLayer = CAShapeLayer()
     let textLayer = CATextLayer()
+    let trailLayer = CAShapeLayer()
 
     init() {
         fillLayer.isHidden = true
@@ -616,6 +665,11 @@ class BoundingBoxView {
         shapeLayer.lineCap = .round
         shapeLayer.lineJoin = .round
         shapeLayer.isHidden = true
+        trailLayer.fillColor = nil
+        trailLayer.lineWidth = 2
+        trailLayer.lineCap = .round
+        trailLayer.lineJoin = .round
+        trailLayer.isHidden = true
         textLayer.fontSize = 11
         textLayer.font = UIFont.systemFont(ofSize: 11, weight: .semibold)
         textLayer.foregroundColor = UIColor.white.cgColor
@@ -627,6 +681,8 @@ class BoundingBoxView {
     }
 
     func addToLayer(_ parent: CALayer) {
+        // Trail sits underneath the box so labels and edges stay on top.
+        parent.addSublayer(trailLayer)
         parent.addSublayer(fillLayer)
         parent.addSublayer(shapeLayer)
         parent.addSublayer(textLayer)
@@ -652,12 +708,30 @@ class BoundingBoxView {
         CATransaction.commit()
     }
 
+    func showTrail(points: [CGPoint], color: UIColor) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        guard points.count >= 2 else {
+            trailLayer.isHidden = true
+            CATransaction.commit()
+            return
+        }
+        let path = UIBezierPath()
+        path.move(to: points[0])
+        for p in points.dropFirst() { path.addLine(to: p) }
+        trailLayer.path = path.cgPath
+        trailLayer.strokeColor = color.withAlphaComponent(0.75).cgColor
+        trailLayer.isHidden = false
+        CATransaction.commit()
+    }
+
     func hide() {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         shapeLayer.isHidden = true
         fillLayer.isHidden = true
         textLayer.isHidden = true
+        trailLayer.isHidden = true
         CATransaction.commit()
     }
 }

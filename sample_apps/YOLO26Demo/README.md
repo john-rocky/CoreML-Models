@@ -29,7 +29,7 @@ Tracking is implemented in pure Swift (`Tracker.swift`) using **ByteTrack**
 - **Class-aware.** Only detections of the same class can inherit a track.
 - **Track lifecycle.** Lost tracks survive 30 frames before being dropped; new tentative tracks need a second-frame confirmation before being drawn.
 
-Each tracked object gets a persistent color (indexed by track ID) and its box label shows `#<id> <class> <conf>%`. Track IDs restart when tracking is toggled or when the Camera view re-appears.
+Each tracked object gets a persistent color (indexed by track ID) and its box label shows `#<id> <class> <conf>%`. A short motion **trail** (~2 seconds of recent Kalman-smoothed centers, configurable via `Config.trailMaxLen`) is drawn behind each active track so movement direction and velocity are visible at a glance. Track IDs restart when tracking is toggled or when the Camera view re-appears.
 
 ## Setup
 

@@ -24,6 +24,7 @@ final class ByteTracker {
         var iouThreshSecond:      Float = 0.5 // min IoU for stage-2 (rescue with low-conf)
         var iouThreshUnconfirmed: Float = 0.3 // min IoU for stage-3 (tentative track confirmation)
         var perClass: Bool = true             // only match tracks and detections of the same class
+        var trailMaxLen: Int = 60             // how many recent centers to keep for each track (≈ 2 sec at 30 fps)
     }
 
     private let config: Config
@@ -98,7 +99,8 @@ final class ByteTracker {
             let d = leftoverHigh[di]
             guard d.confidence >= config.newTrackThresh else { continue }
             let t = STrack(det: d, id: nextId, frameId: frameId,
-                           firstFrame: frameId == 1)
+                           firstFrame: frameId == 1,
+                           trailMaxLen: config.trailMaxLen)
             nextId += 1
             trackedTracks.append(t)
         }
@@ -188,19 +190,26 @@ fileprivate final class STrack {
     private(set) var hits: Int = 1
     private(set) var isActivated: Bool
     private let kf = KalmanBoxFilter()
+    private let trailMaxLen: Int
+    // Recent Kalman centers in top-left normalized coords (oldest → newest).
+    // Appended on every observation match; not on pure prediction, so we
+    // don't draw speculative Kalman drift during occlusion.
+    private var trailPoints: [CGPoint] = []
 
-    init(det: Detection, id: Int, frameId: Int, firstFrame: Bool) {
+    init(det: Detection, id: Int, frameId: Int, firstFrame: Bool, trailMaxLen: Int) {
         self.id = id
         self.classIndex = det.classIndex
         self.label = det.label
         self.confidence = det.confidence
         self.frameId = frameId
         self.startFrame = frameId
+        self.trailMaxLen = trailMaxLen
         // ByteTrack convention: only the very first frame's tracks are
         // considered confirmed immediately; later tracks need a second
         // frame match before they're drawn.
         self.isActivated = firstFrame
         kf.initiate(measurement: STrack.xyah(det.normRect))
+        appendTrail()
     }
 
     func predict() {
@@ -217,6 +226,7 @@ fileprivate final class STrack {
         kf.update(measurement: STrack.xyah(det.normRect))
         state = .tracked
         isActivated = true
+        appendTrail()
     }
 
     func reActivate(det: Detection, frameId: Int) {
@@ -225,6 +235,7 @@ fileprivate final class STrack {
         self.confidence = det.confidence
         state = .tracked
         isActivated = true
+        appendTrail()
     }
 
     func markLost()    { state = .lost }
@@ -236,7 +247,15 @@ fileprivate final class STrack {
         var d = Detection(label: label, confidence: confidence,
                           classIndex: classIndex, normRect: predictedRect())
         d.trackId = id
+        d.trail = trailPoints
         return d
+    }
+
+    private func appendTrail() {
+        trailPoints.append(CGPoint(x: kf.mean[0], y: kf.mean[1]))
+        if trailPoints.count > trailMaxLen {
+            trailPoints.removeFirst(trailPoints.count - trailMaxLen)
+        }
     }
 
     private static func xyah(_ r: CGRect) -> [Double] {

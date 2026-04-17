@@ -11,6 +11,9 @@ struct Detection: Identifiable {
     let classIndex: Int
     let normRect: CGRect // [0,1], top-left origin (x, y, w, h)
     var trackId: Int? = nil
+    // Recent Kalman-center history (normalized top-left, oldest → newest).
+    // Populated by the tracker for visualization trails; empty for raw detections.
+    var trail: [CGPoint] = []
 }
 
 // MARK: - Shared Detector
