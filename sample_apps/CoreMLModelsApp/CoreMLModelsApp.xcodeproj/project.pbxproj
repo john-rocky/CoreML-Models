@@ -39,6 +39,7 @@
 		F00000010000000000000021 /* BenchmarkRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000021 /* BenchmarkRunner.swift */; };
 		F00000010000000000000022 /* ModelInspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000022 /* ModelInspectorView.swift */; };
 		F00000010000000000000023 /* BenchmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000023 /* BenchmarkView.swift */; };
+		F00000010000000000000054 /* CodeExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000054 /* CodeExportView.swift */; };
 		F00000010000000000000024 /* InpaintingDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000024 /* InpaintingDemoView.swift */; };
 		F00000010000000000000025 /* SegmentAnythingDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000025 /* SegmentAnythingDemoView.swift */; };
 		F00000010000000000000030 /* SamSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000030 /* SamSession.swift */; };
@@ -86,6 +87,7 @@
 		F00000020000000000000021 /* BenchmarkRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkRunner.swift; sourceTree = "<group>"; };
 		F00000020000000000000022 /* ModelInspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInspectorView.swift; sourceTree = "<group>"; };
 		F00000020000000000000023 /* BenchmarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BenchmarkView.swift; sourceTree = "<group>"; };
+		F00000020000000000000054 /* CodeExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeExportView.swift; sourceTree = "<group>"; };
 		F00000020000000000000024 /* InpaintingDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InpaintingDemoView.swift; sourceTree = "<group>"; };
 		F00000020000000000000025 /* SegmentAnythingDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentAnythingDemoView.swift; sourceTree = "<group>"; };
 		F00000020000000000000030 /* SamSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SamSession.swift; sourceTree = "<group>"; };
@@ -168,6 +170,7 @@
 				F0000002000000000000001F /* CameraView.swift */,
 				F00000020000000000000022 /* ModelInspectorView.swift */,
 				F00000020000000000000023 /* BenchmarkView.swift */,
+				F00000020000000000000054 /* CodeExportView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -315,6 +318,7 @@
 				F00000010000000000000021 /* BenchmarkRunner.swift in Sources */,
 				F00000010000000000000022 /* ModelInspectorView.swift in Sources */,
 				F00000010000000000000023 /* BenchmarkView.swift in Sources */,
+				F00000010000000000000054 /* CodeExportView.swift in Sources */,
 				F00000010000000000000024 /* InpaintingDemoView.swift in Sources */,
 				F00000010000000000000025 /* SegmentAnythingDemoView.swift in Sources */,
 				F00000010000000000000030 /* SamSession.swift in Sources */,

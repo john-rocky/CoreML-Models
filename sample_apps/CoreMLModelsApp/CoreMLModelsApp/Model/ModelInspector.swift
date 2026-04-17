@@ -19,6 +19,8 @@ struct ModelFileInspection: Identifiable {
     let inputs: [TensorInfo]
     let outputs: [TensorInfo]
     let metadata: [(key: String, value: String)]
+    let downloadUrl: String?
+    let archive: String?
 }
 
 // MARK: - Inspector
@@ -72,7 +74,9 @@ enum ModelInspector {
             sizeOnDisk: size,
             inputs: inputs,
             outputs: outputs,
-            metadata: meta
+            metadata: meta,
+            downloadUrl: file.url,
+            archive: file.archive
         )
     }
 
@@ -184,47 +188,200 @@ enum ModelInspector {
 
     static func generateSnippet(for inspection: ModelFileInspection) -> String {
         var lines: [String] = []
+        let hasImageInput = inspection.inputs.contains { $0.featureType == "Image" }
+        let hasMultiArrayInput = inspection.inputs.contains { $0.featureType == "MultiArray" }
+        let hasMultiArrayOutput = inspection.outputs.contains { $0.featureType == "MultiArray" }
+
+        // Imports
         lines.append("import CoreML")
+        if hasImageInput {
+            lines.append("import CoreVideo")
+            lines.append("import UIKit")
+        }
+        lines.append("")
+
+        // Download-from-HF option (as comment)
+        if let url = inspection.downloadUrl {
+            lines.append("// MARK: - Load the model")
+            lines.append("//")
+            lines.append("// Option A · Download from Hugging Face at first launch:")
+            lines.append("//   1. Download \(url)")
+            if let ar = inspection.archive, !ar.isEmpty {
+                lines.append("//   2. Unarchive (.\(ar)) to get \(inspection.fileName)")
+            }
+            lines.append("//   3. Pass the resulting \(inspection.fileName) URL to MLModel.compileModel(at:).")
+            lines.append("//")
+            lines.append("// Option B · Add \(inspection.fileName) to your Xcode target (shown below).")
+            lines.append("")
+        }
+
+        // Load
+        let resourceName = (inspection.fileName as NSString).deletingPathExtension
+        let pathExt = (inspection.fileName as NSString).pathExtension
+        lines.append("let modelURL = Bundle.main.url(forResource: \"\(resourceName)\",")
+        lines.append("                               withExtension: \"\(pathExt)\")!")
+        if pathExt == "mlpackage" {
+            lines.append("let compiledURL = try MLModel.compileModel(at: modelURL)")
+        } else {
+            lines.append("let compiledURL = modelURL")
+        }
         lines.append("")
 
         // Config
         let cu = computeUnitsSwift(inspection.computeUnits)
         lines.append("let config = MLModelConfiguration()")
-        lines.append("config.computeUnits = \(cu)")
+        lines.append("config.computeUnits = \(cu)  // recommended for this model")
+        lines.append("let model = try MLModel(contentsOf: compiledURL, configuration: config)")
         lines.append("")
 
-        // Load
-        lines.append("let model = try MLModel(")
-        lines.append("    contentsOf: Bundle.main.url(forResource: \"\(inspection.fileName)\",")
-        lines.append("                                withExtension: nil)!,")
-        lines.append("    configuration: config")
-        lines.append(")")
+        // Input preparation
+        lines.append("// MARK: - Prepare inputs")
+        for tensor in inspection.inputs {
+            lines.append(contentsOf: inputPreparation(for: tensor))
+        }
         lines.append("")
 
-        // Input
+        // Build feature provider
         lines.append("let input = try MLDictionaryFeatureProvider(dictionary: [")
         for (i, tensor) in inspection.inputs.enumerated() {
             let comma = i < inspection.inputs.count - 1 ? "," : ""
-            let comment = inputComment(tensor)
-            let value = inputPlaceholder(tensor)
-            lines.append("    \"\(tensor.name)\": \(value)\(comma)  // \(comment)")
+            let value = inputFeatureValue(tensor)
+            lines.append("    \"\(tensor.name)\": \(value)\(comma)")
         }
         lines.append("])")
         lines.append("")
 
         // Prediction
+        lines.append("// MARK: - Run inference")
         lines.append("let output = try model.prediction(from: input)")
+        lines.append("")
 
         // Outputs
+        lines.append("// MARK: - Read outputs")
         for tensor in inspection.outputs {
             let accessor = outputAccessor(tensor)
             let comment = outputComment(tensor)
             let varName = swiftVarName(tensor.name)
-            lines.append("let \(varName) = output.featureValue(forName: \"\(tensor.name)\")!\(accessor)  // \(comment)")
+            lines.append("let \(varName) = output.featureValue(for: \"\(tensor.name)\")!\(accessor)  // \(comment)")
+        }
+
+        // Output reading tip for MultiArray (stride-aware)
+        if hasMultiArrayOutput, let sample = inspection.outputs.first(where: { $0.featureType == "MultiArray" }) {
+            lines.append("")
+            lines.append("// Read values safely via strides (ANE pads rows for SIMD alignment,")
+            lines.append("// so `.dataPointer` is not C-contiguous on .all / .cpuAndNeuralEngine).")
+            lines.append("let \(swiftVarName(sample.name))Strides = \(swiftVarName(sample.name)).strides.map { $0.intValue }")
+            if let s = sample.shape, s.count >= 2 {
+                let idx = (0..<s.count).map { _ in "0" }.joined(separator: ", ")
+                lines.append("// let offset = \(swiftVarName(sample.name))Strides[0]*0 + ... at indices [\(idx)]")
+            }
+        }
+
+        // Helpers
+        if hasImageInput {
+            lines.append("")
+            lines.append("// MARK: - Helpers")
+            lines.append(bgraHelperSource)
+        }
+        if hasMultiArrayInput {
+            if !hasImageInput { lines.append("") ; lines.append("// MARK: - Helpers") }
+            lines.append("")
+            lines.append(multiArrayFillStub)
         }
 
         return lines.joined(separator: "\n")
     }
+
+    /// Per-input preparation lines (pixel buffer, MLMultiArray init, primitive default).
+    private static func inputPreparation(for tensor: TensorInfo) -> [String] {
+        let varName = swiftVarName(tensor.name)
+        switch tensor.featureType {
+        case "Image":
+            let h = tensor.shape?.first ?? 0
+            let w = tensor.shape?.last ?? 0
+            return [
+                "// \"\(tensor.name)\": Image \(h) × \(w) (\(tensor.dataType))",
+                "let image: UIImage = /* your image */",
+                "guard let \(varName)Buffer = makeBGRAPixelBuffer(from: image, width: \(w), height: \(h)) else {",
+                "    fatalError(\"Failed to create pixel buffer for \\\"\(tensor.name)\\\"\")",
+                "}",
+            ]
+        case "MultiArray":
+            let shape = tensor.shape ?? []
+            let shapeLiteral = "[\(shape.map(String.init).joined(separator: ", "))]"
+            let dtype = mlArrayDataTypeSwift(tensor.dataType)
+            return [
+                "// \"\(tensor.name)\": \(shape.map(String.init).joined(separator: " × ")) (\(tensor.dataType))",
+                "let \(varName) = try MLMultiArray(shape: \(shapeLiteral), dataType: \(dtype))",
+                "fill(\(varName))  // TODO: populate via \(varName).dataPointer",
+            ]
+        case "Int64":
+            return ["let \(varName): Int64 = 0  // \"\(tensor.name)\""]
+        case "Double":
+            return ["let \(varName): Double = 0.0  // \"\(tensor.name)\""]
+        case "String":
+            return ["let \(varName): String = \"\"  // \"\(tensor.name)\""]
+        default:
+            return ["// \"\(tensor.name)\": \(tensor.featureType) (not yet scaffolded)"]
+        }
+    }
+
+    private static func inputFeatureValue(_ t: TensorInfo) -> String {
+        let v = swiftVarName(t.name)
+        switch t.featureType {
+        case "Image":      return "MLFeatureValue(pixelBuffer: \(v)Buffer)"
+        case "MultiArray": return "MLFeatureValue(multiArray: \(v))"
+        case "Int64":      return "MLFeatureValue(int64: \(v))"
+        case "Double":     return "MLFeatureValue(double: \(v))"
+        case "String":     return "MLFeatureValue(string: \(v))"
+        default:           return "/* \(t.featureType) */"
+        }
+    }
+
+    private static func mlArrayDataTypeSwift(_ name: String) -> String {
+        switch name {
+        case "Float16": return ".float16"
+        case "Float32": return ".float32"
+        case "Float64": return ".float64"
+        case "Int32":   return ".int32"
+        default:        return ".float32"
+        }
+    }
+
+    private static let bgraHelperSource = """
+    /// Create a BGRA CVPixelBuffer sized width × height from a UIImage.
+    func makeBGRAPixelBuffer(from image: UIImage, width: Int, height: Int) -> CVPixelBuffer? {
+        let attrs: [CFString: Any] = [
+            kCVPixelBufferCGImageCompatibilityKey: true,
+            kCVPixelBufferCGBitmapContextCompatibilityKey: true,
+        ]
+        var pb: CVPixelBuffer?
+        CVPixelBufferCreate(kCFAllocatorDefault, width, height,
+                            kCVPixelFormatType_32BGRA, attrs as CFDictionary, &pb)
+        guard let buffer = pb, let cg = image.cgImage else { return nil }
+        CVPixelBufferLockBaseAddress(buffer, [])
+        defer { CVPixelBufferUnlockBaseAddress(buffer, []) }
+        guard let ctx = CGContext(
+            data: CVPixelBufferGetBaseAddress(buffer),
+            width: width, height: height, bitsPerComponent: 8,
+            bytesPerRow: CVPixelBufferGetBytesPerRow(buffer),
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue
+                      | CGBitmapInfo.byteOrder32Little.rawValue
+        ) else { return nil }
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: width, height: height))
+        return buffer
+    }
+    """
+
+    private static let multiArrayFillStub = """
+    /// Replace with your real tensor population. Cast `dataPointer` to Float16/Float/Int32
+    /// depending on `array.dataType` and write via strides for correctness on ANE.
+    func fill(_ array: MLMultiArray) {
+        // let ptr = array.dataPointer.assumingMemoryBound(to: Float.self)
+        // for i in 0..<array.count { ptr[i] = 0 }
+    }
+    """
 
     private static func computeUnitsSwift(_ cu: String) -> String {
         switch cu {

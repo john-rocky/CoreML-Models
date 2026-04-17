@@ -130,6 +130,13 @@ struct DownloadSection: View {
                 }
                 .buttonStyle(.bordered)
             }
+            NavigationLink {
+                CodeExportView(model: model)
+            } label: {
+                Label("Copy Swift Code", systemImage: "curlybraces")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
             HStack(spacing: 12) {
                 NavigationLink {
                     ModelInspectorView(model: model)
