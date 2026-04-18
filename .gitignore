@@ -12,3 +12,4 @@ models_draft.json
 
 # Vendored upstream repos (clone from README link, do not commit)
 conversion_scripts/MoGe/
+conversion_scripts/DepthAnythingV3/

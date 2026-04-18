@@ -8,6 +8,7 @@ struct DepthVisualizationDemoView: View {
     @State private var inputImage: UIImage?
     @State private var depthImage: UIImage?
     @State private var normalImage: UIImage?
+    @State private var confidenceImage: UIImage?
     @State private var depthRange: (min: Float, max: Float) = (0, 0)
     @State private var processingTime: Double?
     @State private var viewMode: ViewMode = .depth
@@ -17,9 +18,21 @@ struct DepthVisualizationDemoView: View {
     @StateObject private var session = ModelSession<MLModel>()
 
     enum ViewMode: String, CaseIterable, Identifiable {
-        case original, depth, normal
+        case original, depth, normal, confidence
         var id: String { rawValue }
         var label: String { rawValue.capitalized }
+    }
+
+    private var availableModes: [ViewMode] {
+        var modes: [ViewMode] = [.original, .depth]
+        if normalImage != nil { modes.append(.normal) }
+        if confidenceImage != nil { modes.append(.confidence) }
+        return modes
+    }
+
+    // "meters", "relative", or nil. Controls the range label unit suffix.
+    private var depthUnit: String {
+        model.configString("depth_unit") ?? "meters"
     }
 
     var body: some View {
@@ -28,14 +41,17 @@ struct DepthVisualizationDemoView: View {
 
             if depthImage != nil {
                 Picker("View", selection: $viewMode) {
-                    ForEach(ViewMode.allCases) { Text($0.label).tag($0) }
+                    ForEach(availableModes) { Text($0.label).tag($0) }
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
 
                 HStack {
                     if depthRange.max > 0 {
-                        Text(String(format: "Depth: %.2f – %.2f m", depthRange.min, depthRange.max))
+                        let format = depthUnit == "meters"
+                            ? "Depth: %.2f – %.2f m"
+                            : "Depth (relative): %.2f – %.2f"
+                        Text(String(format: format, depthRange.min, depthRange.max))
                             .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                     }
                     Spacer()
@@ -70,6 +86,7 @@ struct DepthVisualizationDemoView: View {
             case .original: return inputImage
             case .depth: return depthImage
             case .normal: return normalImage
+            case .confidence: return confidenceImage
             }
         }()
         if let img {
@@ -162,8 +179,9 @@ struct DepthVisualizationDemoView: View {
             let normalArr = output.featureValue(for: "normal")?.multiArrayValue
             let maskArr = output.featureValue(for: "mask")?.multiArrayValue
             let scaleArr = output.featureValue(for: "metric_scale")?.multiArrayValue
+            let confArr = output.featureValue(for: "confidence")?.multiArrayValue
 
-            print("[Depth] depthArr=\(depthArr != nil), normalArr=\(normalArr != nil), maskArr=\(maskArr != nil), scaleArr=\(scaleArr != nil)")
+            print("[Depth] depthArr=\(depthArr != nil), normalArr=\(normalArr != nil), maskArr=\(maskArr != nil), scaleArr=\(scaleArr != nil), confArr=\(confArr != nil)")
 
             let metricScale: Float = scaleArr.map { ImageUtils.readFloat($0, at: 0) } ?? 1.0
             print("[Depth] metricScale=\(metricScale)")
@@ -206,13 +224,36 @@ struct DepthVisualizationDemoView: View {
                 print("[Depth] normalMap: \(normalResult != nil)")
             }
 
+            // Build confidence heatmap (normalized to [0, 1] across the image).
+            var confResult: UIImage?
+            if let confArr {
+                let shape = confArr.shape.map { $0.intValue }
+                let strides = confArr.strides.map { $0.intValue }
+                let h = shape.count == 3 ? shape[1] : shape[2]
+                let w = shape.count == 3 ? shape[2] : shape[3]
+                let hS = shape.count == 3 ? strides[1] : strides[2]
+                let wS = shape.count == 3 ? strides[2] : strides[3]
+                var vals = [Float](repeating: 0, count: h * w)
+                for y in 0..<h {
+                    for x in 0..<w {
+                        vals[y * w + x] = ImageUtils.readFloat(confArr, at: y * hS + x * wS)
+                    }
+                }
+                confResult = ImageUtils.heatmapFromDepth(vals, width: w, height: h)
+                print("[Depth] confidence heatmap: \(confResult != nil)")
+            }
+
             await MainActor.run {
                 depthImage = depthResult
                 normalImage = normalResult
+                confidenceImage = confResult
                 depthRange = (dMin, dMax)
                 processingTime = elapsed
+                if viewMode == .normal && normalResult == nil { viewMode = .depth }
+                if viewMode == .confidence && confResult == nil { viewMode = .depth }
+                processingTime = elapsed
                 isProcessing = false; status = ""
-                print("[Depth] UI updated. depthImage=\(depthResult != nil), normalImage=\(normalResult != nil)")
+                print("[Depth] UI updated. depthImage=\(depthResult != nil), normalImage=\(normalResult != nil), confidenceImage=\(confResult != nil)")
             }
         } catch {
             print("[Depth] ERROR: \(error)")

@@ -112,6 +112,7 @@ You are free to do or not.
   - [Lama](#lama)
 
 - [**Monocular Depth Estimation**](#monocular-depth-estimation)
+  - [Depth Anything 3](#depth-anything-3)
   - [MoGe-2](#moge-2)
   - [MiDaS](#midas)
   
@@ -881,6 +882,15 @@ White-box facial image cartoonizaiton
 |[Lama](https://drive.google.com/drive/folders/1s_uICJQykFFxgVubpBNeLLDL0JsxgdCd?usp=sharing)|216.6MB| Image (Color 800 × 800), Image (GrayScale 800 × 800)| Image (Color 800 × 800) |[advimman/lama](https://github.com/advimman/lama)|[Apache2.0](https://github.com/advimman/lama/blob/main/LICENSE)|To use see sample.| [john-rocky/lama-cleaner-iOS](https://github.com/john-rocky/lama-cleaner-iOS) | [mallman/CoreMLaMa](https://github.com/mallman/CoreMLaMa)|
 
 # Monocular Depth Estimation
+
+### Depth Anything 3
+
+[ByteDance-Seed/Depth-Anything-3](https://github.com/ByteDance-Seed/Depth-Anything-3) (ICLR 2026 Oral) — relative monocular depth from a single image. DA3 Main Series uses a plain DINOv2 ViT backbone plus a DualDPT head with a unified depth-ray representation; this Core ML port exposes only the monocular depth + confidence subgraph (camera / multi-view / sky / 3DGS branches are stripped). First public Core ML conversion of DA3.
+
+| Module | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| [DA3 Small 504×504](https://huggingface.co/mlboydaisuke/coreml-zoo/resolve/main/depth_anything_v3/DepthAnythingV3_small_504.mlpackage.zip) | ~44 MB FP16 | Image (RGB 504 × 504) | depth + confidence | [ByteDance-Seed/Depth-Anything-3](https://github.com/ByteDance-Seed/Depth-Anything-3) | [Apache 2.0](https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/LICENSE) | 2025 | Hub App | [convert_depth_anything_v3.py](conversion_scripts/convert_depth_anything_v3.py) |
+| [DA3 Base 504×504](https://huggingface.co/mlboydaisuke/coreml-zoo/resolve/main/depth_anything_v3/DepthAnythingV3_base_504.mlpackage.zip) | ~173 MB FP16 | Image (RGB 504 × 504) | depth + confidence | [ByteDance-Seed/Depth-Anything-3](https://github.com/ByteDance-Seed/Depth-Anything-3) | [Apache 2.0](https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/LICENSE) | 2025 | Hub App | [convert_depth_anything_v3.py](conversion_scripts/convert_depth_anything_v3.py) |
 
 ### MoGe-2
 
