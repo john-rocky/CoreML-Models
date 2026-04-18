@@ -1,12 +1,13 @@
 import SwiftUI
 import PhotosUI
 import CoreML
+import AVFoundation
 
 struct DepthVisualizationDemoView: View {
     let model: ModelEntry
 
     enum Mode: String, CaseIterable, Identifiable {
-        case camera = "Camera", photo = "Photo"
+        case camera = "Camera", video = "Video", photo = "Photo"
         var id: String { rawValue }
     }
 
@@ -31,6 +32,11 @@ struct DepthVisualizationDemoView: View {
     @State private var liveFps: Double = 0
     @State private var isInferring = false
     @State private var frameSkip = 0
+
+    // Video-mode state
+    @State private var videoItem: PhotosPickerItem?
+    @State private var videoProgress: Double = 0
+    @State private var videoTask: Task<Void, Never>?
 
     @StateObject private var session = ModelSession<MLModel>()
 
@@ -72,25 +78,36 @@ struct DepthVisualizationDemoView: View {
             ZStack {
                 switch mode {
                 case .camera: cameraContent
+                case .video: videoContent
                 case .photo: photoContent
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            if mode == .photo {
-                photoControls
-            } else {
-                cameraControls
-            }
+            modeControls
         }
         .task { await loadModel() }
         .onChange(of: item) { _, _ in loadAndRun() }
-        .onChange(of: mode) { _, _ in
+        .onChange(of: videoItem) { _, _ in loadAndProcessVideo() }
+        .onChange(of: mode) { _, newMode in
             liveDepth = nil
             liveFps = 0
             frameSkip = 0
+            if newMode != .video { videoTask?.cancel() }
         }
-        .onDisappear { mlModel = nil }
+        .onDisappear {
+            videoTask?.cancel()
+            mlModel = nil
+        }
+    }
+
+    @ViewBuilder
+    private var modeControls: some View {
+        switch mode {
+        case .photo: photoControls
+        case .camera: cameraControls
+        case .video: videoControls
+        }
     }
 
     // MARK: - Photo mode
@@ -193,6 +210,46 @@ struct DepthVisualizationDemoView: View {
             TimingsLabel(loadSec: session.loadTimeSec, inferSec: nil)
         }
         .padding(.horizontal).padding(.vertical, 8)
+    }
+
+    // MARK: - Video mode
+
+    @ViewBuilder
+    private var videoContent: some View {
+        ZStack {
+            if let depth = liveDepth {
+                Image(uiImage: depth).resizable().aspectRatio(contentMode: .fit)
+            } else {
+                VStack(spacing: 12) {
+                    Image(systemName: "film").font(.system(size: 60)).foregroundStyle(.secondary)
+                    Text("Select a video to run depth frame-by-frame").foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var videoControls: some View {
+        VStack(spacing: 8) {
+            HStack {
+                Text(String(format: "%.1f FPS", liveFps))
+                    .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                Spacer()
+                TimingsLabel(loadSec: session.loadTimeSec, inferSec: nil)
+            }
+            .padding(.horizontal)
+
+            if liveDepth != nil {
+                ProgressView(value: videoProgress).tint(.blue).padding(.horizontal)
+            }
+
+            PhotosPicker(selection: $videoItem, matching: .videos) {
+                Label("Select Video", systemImage: "video.badge.plus").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .padding(.horizontal)
+        }
+        .padding(.vertical, 8)
     }
 
     // MARK: - Model loading
@@ -317,6 +374,33 @@ struct DepthVisualizationDemoView: View {
         }
     }
 
+    // MARK: - Video pipeline
+
+    private func loadAndProcessVideo() {
+        videoTask?.cancel()
+        guard let videoItem else { return }
+        liveDepth = nil; liveFps = 0; videoProgress = 0
+        Task {
+            guard let transferable = try? await videoItem.loadTransferable(type: DepthVideoTransferable.self) else {
+                await MainActor.run { status = "Failed to load video" }
+                return
+            }
+            let url = transferable.url
+            let inputSize = model.configInt("input_size") ?? 504
+            guard let mlModel else { return }
+            videoTask = Task.detached(priority: .userInitiated) {
+                await runDepthVideo(url: url, mlModel: mlModel, inputSize: inputSize) { frame, progress, fps in
+                    Task { @MainActor in
+                        liveDepth = frame
+                        videoProgress = progress
+                        liveFps = liveFps == 0 ? fps : liveFps * 0.9 + fps * 0.1
+                    }
+                }
+                await MainActor.run { videoProgress = 1.0 }
+            }
+        }
+    }
+
     // MARK: - Heatmap helpers (shared between photo and camera)
 
     private func buildDepthHeatmap(
@@ -361,6 +445,67 @@ struct DepthVisualizationDemoView: View {
             }
         }
         return ImageUtils.heatmapFromDepth(vals, width: w, height: h)
+    }
+}
+
+// MARK: - Video transferable
+
+struct DepthVideoTransferable: Transferable {
+    let url: URL
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(contentType: .movie) { movie in
+            SentTransferredFile(movie.url)
+        } importing: { received in
+            let tmp = FileManager.default.temporaryDirectory.appendingPathComponent(
+                UUID().uuidString + "." + received.file.pathExtension)
+            try FileManager.default.copyItem(at: received.file, to: tmp)
+            return Self(url: tmp)
+        }
+    }
+}
+
+// MARK: - Video depth (detached)
+
+// Streams a picked video through the depth model. Cooperative cancellation via
+// Task.isCancelled lets the view abort when the user switches modes or picks
+// another clip; callback fires on every decoded frame for UI updates.
+private func runDepthVideo(
+    url: URL,
+    mlModel: MLModel,
+    inputSize: Int,
+    onFrame: @escaping (UIImage, Double, Double) -> Void
+) async {
+    let asset = AVURLAsset(url: url)
+    guard let track = try? await asset.loadTracks(withMediaType: .video).first else { return }
+    let duration = try? await asset.load(.duration)
+    let totalSeconds = duration.map { CMTimeGetSeconds($0) } ?? 1
+    let nominalFPS = (try? await track.load(.nominalFrameRate)) ?? 30
+    let frameInterval = 1.0 / Double(nominalFPS)
+
+    guard let reader = try? AVAssetReader(asset: asset) else { return }
+    let outputSettings: [String: Any] = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
+    let trackOutput = AVAssetReaderTrackOutput(track: track, outputSettings: outputSettings)
+    reader.add(trackOutput)
+    reader.startReading()
+
+    while !Task.isCancelled, let sampleBuffer = trackOutput.copyNextSampleBuffer() {
+        let pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+        let currentSec = CMTimeGetSeconds(pts)
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { continue }
+
+        let start = CFAbsoluteTimeGetCurrent()
+        guard let heatmap = runLiveDepth(pixelBuffer: pixelBuffer, mlModel: mlModel, inputSize: inputSize) else { continue }
+        let elapsed = CFAbsoluteTimeGetCurrent() - start
+        let fps = 1.0 / max(elapsed, 0.001)
+        let progress = min(currentSec / totalSeconds, 1.0)
+        onFrame(heatmap, progress, fps)
+
+        // Pace to source frame rate when inference is faster than playback,
+        // so a 30fps clip shows at 30fps instead of tearing through in seconds.
+        let sleepTime = max(frameInterval - elapsed, 0)
+        if sleepTime > 0 {
+            try? await Task.sleep(for: .seconds(sleepTime))
+        }
     }
 }
 
