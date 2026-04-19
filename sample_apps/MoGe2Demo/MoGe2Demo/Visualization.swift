@@ -1,60 +1,52 @@
 import UIKit
 
 /// Visualization helpers: turbo colormap for depth, RGB encoding for normals.
-/// All methods accept the full 504x504 model output and a valid rect that
-/// describes where the actual image content sits (letterbox region). The
-/// returned UIImage is cropped to the valid rect so it matches the original
-/// aspect ratio.
+/// Both methods render the full `size × size` model output. Since the input
+/// was stretch-resized to a square, the output is in square coordinates too;
+/// the caller re-applies the original image's aspect ratio at display time so
+/// the `.original` / `.depth` / `.normal` views overlap pixel-for-pixel.
 enum Visualization {
 
     /// Render a metric depth map as a turbo-colormap UIImage.
-    static func depthImage(
-        _ depth: [Float], size: Int, dMin: Float, dMax: Float,
-        validX: Int, validY: Int, validW: Int, validH: Int
-    ) -> UIImage {
-        var rgba = [UInt8](repeating: 0, count: validW * validH * 4)
+    static func depthImage(_ depth: [Float], size: Int, dMin: Float, dMax: Float) -> UIImage {
+        var rgba = [UInt8](repeating: 0, count: size * size * 4)
         let span = max(dMax - dMin, 1e-3)
-        for row in 0..<validH {
-            let srcRow = (validY + row) * size + validX
-            let dstRow = row * validW
-            for col in 0..<validW {
-                let d = depth[srcRow + col]
+        for row in 0..<size {
+            let base = row * size
+            for col in 0..<size {
+                let d = depth[base + col]
                 if d <= 0 { continue }
                 let t = min(max((d - dMin) / span, 0), 1)
                 let (r, g, b) = turbo(1 - t)
-                let idx = (dstRow + col) * 4
+                let idx = (base + col) * 4
                 rgba[idx] = UInt8(r * 255)
                 rgba[idx + 1] = UInt8(g * 255)
                 rgba[idx + 2] = UInt8(b * 255)
                 rgba[idx + 3] = 255
             }
         }
-        return makeUIImage(rgba: rgba, width: validW, height: validH)
+        return makeUIImage(rgba: rgba, width: size, height: size)
     }
 
     /// Render surface normals as an RGB image.
-    static func normalImage(
-        _ normal: [Float], mask: [Float], size: Int,
-        validX: Int, validY: Int, validW: Int, validH: Int
-    ) -> UIImage {
-        var rgba = [UInt8](repeating: 0, count: validW * validH * 4)
-        for row in 0..<validH {
-            let srcRow = (validY + row) * size + validX
-            let dstRow = row * validW
-            for col in 0..<validW {
-                let si = srcRow + col
+    static func normalImage(_ normal: [Float], mask: [Float], size: Int) -> UIImage {
+        var rgba = [UInt8](repeating: 0, count: size * size * 4)
+        for row in 0..<size {
+            let base = row * size
+            for col in 0..<size {
+                let si = base + col
                 if mask[si] < 0.5 { continue }
                 let nx = normal[si * 3]
                 let ny = -normal[si * 3 + 1]
                 let nz = normal[si * 3 + 2]
-                let idx = (dstRow + col) * 4
+                let idx = si * 4
                 rgba[idx] = UInt8(((nx + 1) * 0.5 * 255).rounded())
                 rgba[idx + 1] = UInt8(((ny + 1) * 0.5 * 255).rounded())
                 rgba[idx + 2] = UInt8(((nz + 1) * 0.5 * 255).rounded())
                 rgba[idx + 3] = 255
             }
         }
-        return makeUIImage(rgba: rgba, width: validW, height: validH)
+        return makeUIImage(rgba: rgba, width: size, height: size)
     }
 
     // MARK: - Turbo colormap (Mikhailov 2019)
