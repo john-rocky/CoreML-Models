@@ -236,6 +236,38 @@ enum ImageUtils {
         return pixelBuffer(from: cg, width: width, height: height)
     }
 
+    /// Stretch-resize a CGImage into a square of `size` — no aspect
+    /// preservation, no padding. Callers that want the result to look
+    /// aspect-correct on screen must re-apply the source aspect at display
+    /// time. Used by the depth/normal templates so the input and output
+    /// heatmap don't carry visible black letterbox bands.
+    static func stretchResize(_ cgImage: CGImage, size: Int) -> CVPixelBuffer? {
+        let attrs: [String: Any] = [
+            kCVPixelBufferCGImageCompatibilityKey as String: true,
+            kCVPixelBufferCGBitmapContextCompatibilityKey as String: true
+        ]
+        var pb: CVPixelBuffer?
+        CVPixelBufferCreate(kCFAllocatorDefault, size, size,
+                            kCVPixelFormatType_32BGRA, attrs as CFDictionary, &pb)
+        guard let buf = pb else { return nil }
+
+        CVPixelBufferLockBaseAddress(buf, [])
+        defer { CVPixelBufferUnlockBaseAddress(buf, []) }
+
+        guard let ctx = CGContext(
+            data: CVPixelBufferGetBaseAddress(buf),
+            width: size, height: size,
+            bitsPerComponent: 8,
+            bytesPerRow: CVPixelBufferGetBytesPerRow(buf),
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.noneSkipFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
+        ) else { return nil }
+
+        ctx.interpolationQuality = .high
+        ctx.draw(cgImage, in: CGRect(x: 0, y: 0, width: size, height: size))
+        return buf
+    }
+
     /// Letterbox a CGImage into a square of `size`, returning the buffer and the content rect.
     static func letterbox(_ cgImage: CGImage, size: Int) -> (CVPixelBuffer, CGRect)? {
         let w = cgImage.width, h = cgImage.height

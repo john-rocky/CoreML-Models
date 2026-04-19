@@ -24,6 +24,11 @@ struct DepthVisualizationDemoView: View {
     @State private var isProcessing = false
     @State private var status = ""
     @State private var item: PhotosPickerItem?
+    // Aspect ratio of the source image/frame. The model takes a square
+    // stretch-resized input and emits square outputs; we replay the source
+    // aspect at display time so the depth/normal/confidence views line up
+    // with the original and neither preview shows black letterbox bands.
+    @State private var sourceAspect: CGFloat = 1.0
 
     // Camera-mode state. `mlModel` is cached on load so the per-frame
     // callback can run prediction without awaiting the session.
@@ -130,7 +135,8 @@ struct DepthVisualizationDemoView: View {
     @ViewBuilder
     private var displayArea: some View {
         if let img = currentDisplayImage {
-            Image(uiImage: img).resizable().aspectRatio(contentMode: .fit)
+            Image(uiImage: img).resizable()
+                .aspectRatio(sourceAspect, contentMode: .fit)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             VStack(spacing: 12) {
@@ -191,7 +197,8 @@ struct DepthVisualizationDemoView: View {
             .opacity(liveDepth == nil ? 1 : 0.001)
 
             if let depth = liveDepth {
-                Image(uiImage: depth).resizable().aspectRatio(contentMode: .fit)
+                Image(uiImage: depth).resizable()
+                    .aspectRatio(sourceAspect, contentMode: .fit)
             }
 
             if mlModel == nil {
@@ -218,7 +225,8 @@ struct DepthVisualizationDemoView: View {
     private var videoContent: some View {
         ZStack {
             if let depth = liveDepth {
-                Image(uiImage: depth).resizable().aspectRatio(contentMode: .fit)
+                Image(uiImage: depth).resizable()
+                    .aspectRatio(sourceAspect, contentMode: .fit)
             } else {
                 VStack(spacing: 12) {
                     Image(systemName: "film").font(.system(size: 60)).foregroundStyle(.secondary)
@@ -275,6 +283,7 @@ struct DepthVisualizationDemoView: View {
         isInferring = true
 
         let inputSize = model.configInt("input_size") ?? 504
+        let aspect = CGFloat(CVPixelBufferGetWidth(pb)) / CGFloat(max(CVPixelBufferGetHeight(pb), 1))
 
         Task.detached(priority: .userInitiated) {
             let start = CFAbsoluteTimeGetCurrent()
@@ -282,6 +291,7 @@ struct DepthVisualizationDemoView: View {
             let elapsed = CFAbsoluteTimeGetCurrent() - start
             await MainActor.run {
                 if heatmap != nil { liveDepth = heatmap }
+                sourceAspect = aspect
                 let fps = 1.0 / max(elapsed, 0.001)
                 liveFps = liveFps == 0 ? fps : liveFps * 0.9 + fps * 0.1
                 isInferring = false
@@ -301,7 +311,12 @@ struct DepthVisualizationDemoView: View {
                     await MainActor.run { isProcessing = false; status = "Invalid image data" }
                     return
                 }
-                await MainActor.run { inputImage = img }
+                await MainActor.run {
+                    inputImage = img
+                    // Pre-set so the freshly-shown input isn't briefly rendered
+                    // with the previous photo's aspect ratio.
+                    sourceAspect = img.size.width / max(img.size.height, 1)
+                }
                 await runDepth(on: img)
             } catch {
                 await MainActor.run { isProcessing = false; status = "Load error: \(error.localizedDescription)" }
@@ -321,10 +336,12 @@ struct DepthVisualizationDemoView: View {
                 return
             }
 
-            guard let (pb, _) = ImageUtils.letterbox(cgImage, size: inputSize) else {
-                await MainActor.run { isProcessing = false; status = "Letterbox failed" }
+            guard let pb = ImageUtils.stretchResize(cgImage, size: inputSize) else {
+                await MainActor.run { isProcessing = false; status = "Preprocess failed" }
                 return
             }
+            let aspect = CGFloat(cgImage.width) / CGFloat(max(cgImage.height, 1))
+            await MainActor.run { sourceAspect = aspect }
 
             let inputName = mlModel.modelDescription.inputDescriptionsByName.first {
                 $0.value.type == .image
@@ -389,9 +406,10 @@ struct DepthVisualizationDemoView: View {
             let inputSize = model.configInt("input_size") ?? 504
             guard let mlModel else { return }
             videoTask = Task.detached(priority: .userInitiated) {
-                await runDepthVideo(url: url, mlModel: mlModel, inputSize: inputSize) { frame, progress, fps in
+                await runDepthVideo(url: url, mlModel: mlModel, inputSize: inputSize) { frame, progress, fps, aspect in
                     Task { @MainActor in
                         liveDepth = frame
+                        sourceAspect = aspect
                         videoProgress = progress
                         liveFps = liveFps == 0 ? fps : liveFps * 0.9 + fps * 0.1
                     }
@@ -473,7 +491,7 @@ private func runDepthVideo(
     url: URL,
     mlModel: MLModel,
     inputSize: Int,
-    onFrame: @escaping (UIImage, Double, Double) -> Void
+    onFrame: @escaping (UIImage, Double, Double, CGFloat) -> Void
 ) async {
     let asset = AVURLAsset(url: url)
     guard let track = try? await asset.loadTracks(withMediaType: .video).first else { return }
@@ -498,7 +516,9 @@ private func runDepthVideo(
         let elapsed = CFAbsoluteTimeGetCurrent() - start
         let fps = 1.0 / max(elapsed, 0.001)
         let progress = min(currentSec / totalSeconds, 1.0)
-        onFrame(heatmap, progress, fps)
+        let aspect = CGFloat(CVPixelBufferGetWidth(pixelBuffer))
+            / CGFloat(max(CVPixelBufferGetHeight(pixelBuffer), 1))
+        onFrame(heatmap, progress, fps, aspect)
 
         // Pace to source frame rate when inference is faster than playback,
         // so a 30fps clip shows at 30fps instead of tearing through in seconds.
@@ -517,7 +537,7 @@ private func runLiveDepth(pixelBuffer: CVPixelBuffer, mlModel: MLModel, inputSiz
     let ci = CIImage(cvPixelBuffer: pixelBuffer)
     let ctx = CIContext(options: [.useSoftwareRenderer: false])
     guard let cg = ctx.createCGImage(ci, from: ci.extent) else { return nil }
-    guard let (pb, _) = ImageUtils.letterbox(cg, size: inputSize) else { return nil }
+    guard let pb = ImageUtils.stretchResize(cg, size: inputSize) else { return nil }
 
     let inputName = mlModel.modelDescription.inputDescriptionsByName.first {
         $0.value.type == .image
