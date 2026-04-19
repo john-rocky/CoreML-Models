@@ -89,20 +89,26 @@ final class DepthEstimator: ObservableObject {
         // normal: (1, H, W, 3)
         let normal = readMultiArray3D(normalArr, height: Self.inputSize, width: Self.inputSize, channels: 3)
 
-        // Apply mask × metric_scale to depth, ignoring the background.
+        // Multiply by metric_scale for every pixel. Confident pixels (mask > 0.5)
+        // set the dMin/dMax range so the colormap stays tight; low-confidence
+        // regions (usually sky) keep their raw prediction and get clamped into
+        // the same range by the visualizer, so they take the "far" end of turbo
+        // instead of appearing as black bands that look like letterbox padding.
         var metricDepth = [Float](repeating: 0, count: depth.count)
         var dMin: Float = .greatestFiniteMagnitude
         var dMax: Float = 0
         for i in 0..<depth.count {
-            let valid = mask[i] > 0.5
-            let d = valid ? depth[i] * metricScale : 0
+            let d = depth[i] * metricScale
             metricDepth[i] = d
-            if valid {
+            if mask[i] > 0.5 {
                 if d < dMin { dMin = d }
                 if d > dMax { dMax = d }
             }
         }
-        if dMin == .greatestFiniteMagnitude { dMin = 0 }
+        if dMin == .greatestFiniteMagnitude {
+            dMin = 0
+            dMax = 1
+        }
 
         return Result(
             depth: metricDepth,

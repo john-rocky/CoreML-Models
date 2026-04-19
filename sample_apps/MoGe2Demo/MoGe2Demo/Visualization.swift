@@ -7,7 +7,10 @@ import UIKit
 /// the `.original` / `.depth` / `.normal` views overlap pixel-for-pixel.
 enum Visualization {
 
-    /// Render a metric depth map as a turbo-colormap UIImage.
+    /// Render a metric depth map as a turbo-colormap UIImage. Every pixel gets
+    /// a colour — low-confidence regions (sky/background) are clamped into the
+    /// "far" end of the colormap instead of being rendered transparent, so the
+    /// output never shows letterbox-looking black bands.
     static func depthImage(_ depth: [Float], size: Int, dMin: Float, dMax: Float) -> UIImage {
         var rgba = [UInt8](repeating: 0, count: size * size * 4)
         let span = max(dMax - dMin, 1e-3)
@@ -15,7 +18,6 @@ enum Visualization {
             let base = row * size
             for col in 0..<size {
                 let d = depth[base + col]
-                if d <= 0 { continue }
                 let t = min(max((d - dMin) / span, 0), 1)
                 let (r, g, b) = turbo(1 - t)
                 let idx = (base + col) * 4
@@ -28,14 +30,16 @@ enum Visualization {
         return makeUIImage(rgba: rgba, width: size, height: size)
     }
 
-    /// Render surface normals as an RGB image.
+    /// Render surface normals as an RGB image. `mask` is accepted for API
+    /// symmetry with `depthImage` but not consulted — skipping low-mask pixels
+    /// used to leave transparent bands that looked like letterbox padding.
     static func normalImage(_ normal: [Float], mask: [Float], size: Int) -> UIImage {
+        _ = mask
         var rgba = [UInt8](repeating: 0, count: size * size * 4)
         for row in 0..<size {
             let base = row * size
             for col in 0..<size {
                 let si = base + col
-                if mask[si] < 0.5 { continue }
                 let nx = normal[si * 3]
                 let ny = -normal[si * 3 + 1]
                 let nz = normal[si * 3 + 2]
