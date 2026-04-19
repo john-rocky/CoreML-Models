@@ -8,5 +8,7 @@
     <string>Microphone access is needed for speech and audio model demos.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Photo library access is needed to pick images and videos to run models on.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Save model outputs (annotated photos, depth maps, generated images) back to your photo library.</string>
 </dict>
 </plist>

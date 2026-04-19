@@ -98,6 +98,14 @@ struct OpenVocabDetectionDemoView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(isProcessing || inputImage == nil || queryText.trimmingCharacters(in: .whitespaces).isEmpty)
+
+                    if let annotated = annotatedImage {
+                        Button {
+                            UIImageWriteToSavedPhotosAlbum(annotated, nil, nil, nil)
+                        } label: {
+                            Image(systemName: "arrow.down.to.line")
+                        }.buttonStyle(.bordered)
+                    }
                 }
             }
             .padding()

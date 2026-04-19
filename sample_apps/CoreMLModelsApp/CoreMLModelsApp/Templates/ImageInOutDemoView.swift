@@ -90,10 +90,12 @@ struct ImageInOutDemoView: View {
                         Label("Select Photo", systemImage: "photo.badge.plus")
                     }.buttonStyle(.bordered).disabled(isProcessing)
 
-                    if outputType == "mask", let output = outputImage {
-                        ShareLink(item: Image(uiImage: output), preview: SharePreview("Result", image: Image(uiImage: output))) {
-                            Image(systemName: "square.and.arrow.up")
-                        }.buttonStyle(.bordered)
+                    if let output = outputImage {
+                        if outputType == "mask" {
+                            ShareLink(item: Image(uiImage: output), preview: SharePreview("Result", image: Image(uiImage: output))) {
+                                Image(systemName: "square.and.arrow.up")
+                            }.buttonStyle(.bordered)
+                        }
 
                         Button {
                             UIImageWriteToSavedPhotosAlbum(output, nil, nil, nil)

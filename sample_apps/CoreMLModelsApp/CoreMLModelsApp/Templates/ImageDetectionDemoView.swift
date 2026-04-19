@@ -112,20 +112,9 @@ struct ImageDetectionDemoView: View {
 
             // Mode-specific controls
             if mode == .photo {
-                VStack(spacing: 8) {
-                    PhotosPicker(selection: $item, matching: .images) {
-                        Label("Select Photo", systemImage: "photo.badge.plus").frame(maxWidth: .infinity)
-                    }.buttonStyle(.bordered).disabled(isProcessing)
-                }.padding(.horizontal).padding(.bottom, 8)
+                photoControls
             } else if mode == .video {
-                VStack(spacing: 8) {
-                    if videoFrame != nil {
-                        ProgressView(value: videoProgress).tint(.blue).padding(.horizontal)
-                    }
-                    PhotosPicker(selection: $videoItem, matching: .videos) {
-                        Label("Select Video", systemImage: "video.badge.plus").frame(maxWidth: .infinity)
-                    }.buttonStyle(.bordered).disabled(isProcessing)
-                }.padding(.horizontal).padding(.bottom, 8)
+                videoControls
             }
         }
         .task { await loadModel() }
@@ -158,6 +147,37 @@ struct ImageDetectionDemoView: View {
                 .font(.caption2.monospacedDigit()).foregroundStyle(.secondary).frame(width: 36)
         }
         .padding(.horizontal).padding(.bottom, 4)
+    }
+
+    @ViewBuilder
+    private var photoControls: some View {
+        HStack(spacing: 12) {
+            PhotosPicker(selection: $item, matching: .images) {
+                Label("Select Photo", systemImage: "photo.badge.plus").frame(maxWidth: .infinity)
+            }.buttonStyle(.bordered).disabled(isProcessing)
+
+            if let annotated = annotatedImage {
+                Button {
+                    UIImageWriteToSavedPhotosAlbum(annotated, nil, nil, nil)
+                } label: {
+                    Image(systemName: "arrow.down.to.line")
+                }.buttonStyle(.bordered)
+            }
+        }
+        .padding(.horizontal).padding(.bottom, 8)
+    }
+
+    @ViewBuilder
+    private var videoControls: some View {
+        VStack(spacing: 8) {
+            if videoFrame != nil {
+                ProgressView(value: videoProgress).tint(.blue).padding(.horizontal)
+            }
+            PhotosPicker(selection: $videoItem, matching: .videos) {
+                Label("Select Video", systemImage: "video.badge.plus").frame(maxWidth: .infinity)
+            }.buttonStyle(.bordered).disabled(isProcessing)
+        }
+        .padding(.horizontal).padding(.bottom, 8)
     }
 
     // MARK: - Camera View
