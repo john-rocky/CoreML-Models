@@ -4,6 +4,10 @@ Sample iOS app for [microsoft/MoGe](https://github.com/microsoft/MoGe) (CVPR 202
 
 This demo uses the **MoGe-2 ViT-B + normal** variant (104 M parameters) at a fixed 504 × 504 input. The CoreML model is one self-contained mlpackage (~200 MB at FP16) that returns five tensors: `points`, `depth`, `normal`, `mask`, `metric_scale`.
 
+<img width="256" src="https://github.com/user-attachments/assets/0e22611d-c27f-4117-b6ef-99de98c3926e"> <img width="256" src="https://github.com/user-attachments/assets/4541c0a2-e9ad-41ca-8ad2-118414d69843"> <img width="256" src="https://github.com/user-attachments/assets/218ff176-9371-4855-86e2-4d469306fb7b">
+
+*Left: original photo, center: metric depth (turbo colormap), right: surface normals.*
+
 ## Models
 
 | Module | Inputs | Outputs |
