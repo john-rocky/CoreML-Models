@@ -13,7 +13,7 @@ import CoreGraphics
 // Reference: Zhang et al., "ByteTrack: Multi-Object Tracking by
 // Associating Every Detection Box", ECCV 2022 (arxiv 2110.06864).
 
-fileprivate typealias Det = BoundingBoxOverlay.DetectionBox
+typealias Det = BoundingBoxOverlay.DetectionBox
 
 final class ByteTracker {
 
