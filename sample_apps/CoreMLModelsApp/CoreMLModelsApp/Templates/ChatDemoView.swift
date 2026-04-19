@@ -7,8 +7,8 @@ import AVFoundation
 /// Used by: Gemma 4 E2B (multimodal), Qwen2.5-0.5B (text-only).
 ///
 /// Uses CoreML-LLM package for ANE-optimized on-device inference.
-/// Supports multimodal input (text + image + audio) when the loaded model
-/// includes the respective encoders.
+/// Supports multimodal input (text + image + audio + video) when the loaded
+/// model includes the respective encoders.
 struct ChatDemoView: View {
     let model: ModelEntry
 
@@ -23,6 +23,11 @@ struct ChatDemoView: View {
     @State private var tokensPerSecond: Double?
     @State private var hasVision = false
     @State private var hasAudio = false
+    @State private var hasVideo = false
+    @State private var selectedVideoURL: URL?
+    @State private var videoPickerItem: PhotosPickerItem?
+    @State private var videoThumbnail: UIImage?
+    @State private var videoDuration: TimeInterval = 0
     @StateObject private var audioRecorder = ChatAudioRecorder()
 
     var body: some View {
@@ -73,6 +78,30 @@ struct ChatDemoView: View {
                     .padding(.horizontal)
                 }
 
+                // Video preview
+                if selectedVideoURL != nil {
+                    HStack {
+                        ZStack {
+                            if let thumb = videoThumbnail {
+                                Image(uiImage: thumb).resizable().aspectRatio(contentMode: .fill)
+                                    .frame(width: 60, height: 60).clipShape(RoundedRectangle(cornerRadius: 8))
+                            } else {
+                                RoundedRectangle(cornerRadius: 8).fill(.gray.opacity(0.25))
+                                    .frame(width: 60, height: 60)
+                            }
+                            Image(systemName: "play.circle.fill")
+                                .font(.title3).foregroundStyle(.white).shadow(radius: 2)
+                        }
+                        Text(videoDuration > 0 ? String(format: "Video · %.1fs", videoDuration) : "Video")
+                            .font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Button { clearVideo() } label: {
+                            Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+
                 // Audio preview (recording / ready-to-send)
                 if hasAudio && (audioRecorder.isRecording || audioRecorder.recordedSamples != nil) {
                     HStack(spacing: 8) {
@@ -100,6 +129,14 @@ struct ChatDemoView: View {
                             Image(systemName: "photo").font(.title3)
                         }
                         .onChange(of: photoItem) { _, item in loadImage(item) }
+                        .disabled(isGenerating || selectedVideoURL != nil)
+                    }
+
+                    if hasVideo {
+                        PhotosPicker(selection: $videoPickerItem, matching: .videos) {
+                            Image(systemName: "video").font(.title3)
+                        }
+                        .onChange(of: videoPickerItem) { _, item in loadVideo(item) }
                         .disabled(isGenerating)
                     }
 
@@ -109,7 +146,7 @@ struct ChatDemoView: View {
                                 .font(.title3)
                                 .foregroundStyle(audioRecorder.isRecording ? .red : .accentColor)
                         }
-                        .disabled(isGenerating)
+                        .disabled(isGenerating || selectedVideoURL != nil)
                     }
 
                     TextField("Message…", text: $inputText, axis: .vertical)
@@ -137,6 +174,7 @@ struct ChatDemoView: View {
         .onDisappear {
             audioRecorder.stop()
             audioRecorder.clear()
+            clearVideo()
             llm?.reset()
             llm = nil
             messages.removeAll()
@@ -147,7 +185,8 @@ struct ChatDemoView: View {
         guard !isGenerating, llm != nil else { return true }
         let hasText = !inputText.trimmingCharacters(in: .whitespaces).isEmpty
         let hasAudioClip = audioRecorder.recordedSamples != nil
-        return !(hasText || hasAudioClip)
+        let hasVideoClip = selectedVideoURL != nil
+        return !(hasText || hasAudioClip || hasVideoClip)
     }
 
     // MARK: - Model Loading
@@ -169,6 +208,10 @@ struct ChatDemoView: View {
                 llm = loaded
                 hasVision = loaded.supportsVision
                 hasAudio = loaded.supportsAudio
+                // CoreMLLLM 0.8 ships a video encoder only for Gemma 4 E2B.
+                // There is no public supportsVideo flag yet, so gate on the
+                // manifest id of the single currently-capable model.
+                hasVideo = loaded.supportsVision && model.id == "gemma4_e2b"
                 audioRecorder.maxDuration = loaded.maxAudioDuration
                 isLoading = false
                 status = ""
@@ -195,22 +238,36 @@ struct ChatDemoView: View {
     private func send() {
         let text = inputText.trimmingCharacters(in: .whitespaces)
         let audio = audioRecorder.recordedSamples
-        guard let llm, !isGenerating, !text.isEmpty || audio != nil else { return }
+        let videoURL = selectedVideoURL
+        guard let llm, !isGenerating,
+              !text.isEmpty || audio != nil || videoURL != nil else { return }
 
         let image = selectedImage?.cgImage
         let displayImage = selectedImage
+        let displayVideoThumbnail = videoThumbnail
         inputText = ""
         selectedImage = nil
         photoItem = nil
         audioRecorder.clear()
+        // Keep the temp file on disk until the stream finishes; just drop the
+        // UI state so the user sees the composer clear immediately.
+        selectedVideoURL = nil
+        videoPickerItem = nil
+        videoThumbnail = nil
+        videoDuration = 0
 
-        // Label audio-only sends so the transcript still shows something visible.
+        // Label audio/video-only sends so the transcript still shows something visible.
         let displayText: String
-        if text.isEmpty, audio != nil { displayText = "[Audio]" }
-        else if audio != nil { displayText = "[Audio] " + text }
-        else { displayText = text }
+        if videoURL != nil {
+            displayText = text.isEmpty ? "[Video]" : "[Video] " + text
+        } else if audio != nil {
+            displayText = text.isEmpty ? "[Audio]" : "[Audio] " + text
+        } else {
+            displayText = text
+        }
 
-        messages.append(ChatMessage(role: .user, content: displayText, image: displayImage))
+        messages.append(ChatMessage(role: .user, content: displayText,
+                                    image: displayImage ?? displayVideoThumbnail))
         messages.append(ChatMessage(role: .assistant, content: ""))
 
         isGenerating = true
@@ -221,7 +278,16 @@ struct ChatDemoView: View {
             var tokenCount = 0
 
             do {
-                for await token in try await llm.stream(text, image: image, audio: audio, maxTokens: 1024) {
+                let stream: AsyncStream<String>
+                if let videoURL {
+                    stream = try await llm.stream(text, videoURL: videoURL,
+                                                  videoOptions: .init(),
+                                                  maxTokens: 1024)
+                } else {
+                    stream = try await llm.stream(text, image: image, audio: audio,
+                                                  maxTokens: 1024)
+                }
+                for await token in stream {
                     tokenCount += 1
                     await MainActor.run {
                         if var last = messages.last, last.role == .assistant {
@@ -233,6 +299,10 @@ struct ChatDemoView: View {
                 await MainActor.run {
                     messages[messages.count - 1].content += "\n[Error: \(error.localizedDescription)]"
                 }
+            }
+
+            if let videoURL {
+                try? FileManager.default.removeItem(at: videoURL)
             }
 
             let elapsed = CFAbsoluteTimeGetCurrent() - start
@@ -267,9 +337,67 @@ struct ChatDemoView: View {
         Task {
             if let data = try? await item.loadTransferable(type: Data.self),
                let img = UIImage(data: data) {
-                await MainActor.run { selectedImage = img }
+                await MainActor.run {
+                    selectedImage = img
+                    // Image and video are mutually exclusive — CoreMLLLM's
+                    // video stream has no image parameter.
+                    clearVideo()
+                }
             }
         }
+    }
+
+    private func loadVideo(_ item: PhotosPickerItem?) {
+        guard let item else { return }
+        Task {
+            guard let data = try? await item.loadTransferable(type: Data.self) else { return }
+            let tmpURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("chat_video_\(UUID().uuidString).mp4")
+            do {
+                try data.write(to: tmpURL)
+            } catch {
+                print("[Chat] Failed to stage video: \(error)")
+                return
+            }
+            let asset = AVURLAsset(url: tmpURL)
+            let duration = (try? await asset.load(.duration).seconds) ?? 0
+            let thumb = await generateVideoThumbnail(asset: asset)
+            await MainActor.run {
+                // Clear other modalities — video stream API is exclusive.
+                selectedImage = nil
+                photoItem = nil
+                audioRecorder.clear()
+                selectedVideoURL = tmpURL
+                videoThumbnail = thumb
+                videoDuration = duration
+            }
+        }
+    }
+
+    private func generateVideoThumbnail(asset: AVURLAsset) async -> UIImage? {
+        let gen = AVAssetImageGenerator(asset: asset)
+        gen.appliesPreferredTrackTransform = true
+        gen.maximumSize = CGSize(width: 240, height: 240)
+        let t = CMTime(seconds: 0.1, preferredTimescale: 600)
+        return await withCheckedContinuation { continuation in
+            gen.generateCGImagesAsynchronously(forTimes: [NSValue(time: t)]) { _, cg, _, _, _ in
+                if let cg {
+                    continuation.resume(returning: UIImage(cgImage: cg))
+                } else {
+                    continuation.resume(returning: nil)
+                }
+            }
+        }
+    }
+
+    private func clearVideo() {
+        if let url = selectedVideoURL {
+            try? FileManager.default.removeItem(at: url)
+        }
+        selectedVideoURL = nil
+        videoPickerItem = nil
+        videoThumbnail = nil
+        videoDuration = 0
     }
 }
 

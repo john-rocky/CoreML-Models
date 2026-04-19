@@ -495,7 +495,7 @@
 			repositoryURL = "https://github.com/john-rocky/CoreML-LLM";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.5.0;
+				minimumVersion = 0.7.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
