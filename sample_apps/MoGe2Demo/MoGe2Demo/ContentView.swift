@@ -43,12 +43,12 @@ struct ContentView: View {
                         if depthImage != nil {
                             displayedImage
                                 .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .aspectRatio(displayAspect, contentMode: .fit)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                         } else if let original = originalImage {
                             Image(uiImage: original)
                                 .resizable()
-                                .aspectRatio(contentMode: .fit)
+                                .aspectRatio(displayAspect, contentMode: .fit)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                         } else {
                             VStack(spacing: 12) {
@@ -136,6 +136,16 @@ struct ContentView: View {
         }
     }
 
+    /// Aspect ratio used to render every view mode. The CoreML outputs are
+    /// 504 × 504 squares (the input was stretched to match the model's
+    /// hard-coded `aspect_ratio = 1.0`), so we restore the original photo's
+    /// proportions on display. When the original isn't loaded yet we fall back
+    /// to square to avoid a divide-by-zero.
+    private var displayAspect: CGFloat {
+        guard let img = originalImage, img.size.height > 0 else { return 1 }
+        return img.size.width / img.size.height
+    }
+
     private func loadImage() {
         guard let item = selectedItem else { return }
         depthImage = nil
@@ -164,12 +174,10 @@ struct ContentView: View {
                 let result = try await estimator.estimate(image: image)
                 let elapsed = CFAbsoluteTimeGetCurrent() - start
                 let depthImg = Visualization.depthImage(
-                    result.depth, size: result.size, dMin: result.depthMin, dMax: result.depthMax,
-                    validX: result.validX, validY: result.validY, validW: result.validW, validH: result.validH
+                    result.depth, size: result.size, dMin: result.depthMin, dMax: result.depthMax
                 )
                 let normalImg = Visualization.normalImage(
-                    result.normal, mask: result.mask, size: result.size,
-                    validX: result.validX, validY: result.validY, validW: result.validW, validH: result.validH
+                    result.normal, mask: result.mask, size: result.size
                 )
                 await MainActor.run {
                     depthImage = depthImg

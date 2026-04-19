@@ -5,12 +5,17 @@ import Accelerate
 /// MoGe-2 ViT-B (504x504, FP16) wrapped in a small Swift driver.
 ///
 /// The CoreML model takes a single ImageType input (`image`) and returns five
-/// outputs: `points`, `depth`, `normal`, `mask`, `metric_scale`. We center-crop
-/// the input UIImage to a square, run inference, and return:
+/// outputs: `points`, `depth`, `normal`, `mask`, `metric_scale`. We stretch
+/// the input UIImage to a 504×504 square, run inference, and return:
 ///
 ///   - depth in metric meters (= raw_depth × metric_scale)
 ///   - per-pixel surface normals in [-1, 1]
 ///   - confidence mask in [0, 1]
+///
+/// The wrapper bakes `aspect_ratio = 1.0` into the UV grids, so stretching the
+/// input is equivalent to what the converted graph assumes anyway; the caller
+/// just applies the original image's aspect at display time to restore the
+/// scene proportions so input and output views overlap pixel-for-pixel.
 ///
 /// Visualization (turbo colormap, normal RGB) lives on the View side.
 final class DepthEstimator: ObservableObject {
@@ -27,11 +32,6 @@ final class DepthEstimator: ObservableObject {
         let depthMin: Float
         let depthMax: Float
         let size: Int
-        // Letterbox: the valid region within the 504x504 output.
-        let validX: Int
-        let validY: Int
-        let validW: Int
-        let validH: Int
     }
 
     init() {
@@ -64,9 +64,9 @@ final class DepthEstimator: ObservableObject {
         let fixed = image.normalizedOrientation()
         guard let cgImage = fixed.cgImage else { throw EstimatorError.invalidImage }
 
-        let (letterboxed, validRect) = letterboxCGImage(cgImage, targetSize: Self.inputSize)
+        let resized = resizeCGImage(cgImage, targetSize: Self.inputSize)
 
-        let pixelBuffer = try makeBGRAPixelBuffer(from: letterboxed)
+        let pixelBuffer = try makeBGRAPixelBuffer(from: resized)
         let input = try MLDictionaryFeatureProvider(dictionary: [
             "image": MLFeatureValue(pixelBuffer: pixelBuffer)
         ])
@@ -111,11 +111,7 @@ final class DepthEstimator: ObservableObject {
             metricScale: metricScale,
             depthMin: dMin,
             depthMax: dMax,
-            size: Self.inputSize,
-            validX: validRect.x,
-            validY: validRect.y,
-            validW: validRect.w,
-            validH: validRect.h
+            size: Self.inputSize
         )
     }
 
@@ -222,21 +218,11 @@ final class DepthEstimator: ObservableObject {
 
     // MARK: - Image helpers
 
-    struct ValidRect { let x: Int; let y: Int; let w: Int; let h: Int }
-
-    /// Letterbox: resize the image so the long side fits `targetSize`, then
-    /// center it on a black `targetSize × targetSize` canvas. Returns the
-    /// composited CGImage and the rect describing where the actual image pixels
-    /// landed (so we can crop the model output back to the original aspect ratio).
-    private func letterboxCGImage(_ image: CGImage, targetSize: Int) -> (CGImage, ValidRect) {
-        let srcW = image.width
-        let srcH = image.height
-        let scale = Float(targetSize) / Float(max(srcW, srcH))
-        let dstW = Int((Float(srcW) * scale).rounded())
-        let dstH = Int((Float(srcH) * scale).rounded())
-        let padX = (targetSize - dstW) / 2
-        let padY = (targetSize - dstH) / 2
-
+    /// Stretch-resize the image to `targetSize × targetSize`. The converted
+    /// MoGe-2 graph hard-codes `aspect_ratio = 1.0` in its UV grids, so a plain
+    /// resize matches what the model expects; the caller reapplies the original
+    /// image's aspect ratio at display time so input and output views overlap.
+    private func resizeCGImage(_ image: CGImage, targetSize: Int) -> CGImage {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let ctx = CGContext(
             data: nil, width: targetSize, height: targetSize,
@@ -244,10 +230,9 @@ final class DepthEstimator: ObservableObject {
             space: colorSpace,
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
         )!
-        // Canvas is zero-initialized (black).
         ctx.interpolationQuality = .high
-        ctx.draw(image, in: CGRect(x: padX, y: padY, width: dstW, height: dstH))
-        return (ctx.makeImage()!, ValidRect(x: padX, y: padY, w: dstW, h: dstH))
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: targetSize, height: targetSize))
+        return ctx.makeImage()!
     }
 
     /// Build a kCVPixelFormatType_32BGRA CVPixelBuffer that the CoreML

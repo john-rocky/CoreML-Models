@@ -29,11 +29,11 @@ This demo uses the **MoGe-2 ViT-B + normal** variant (104 M parameters) at a fix
 
 ## Inference Pipeline (Swift)
 
-1. Center-crop the photo to a square, resize to 504 × 504.
+1. Stretch-resize the photo to 504 × 504 (the converted graph bakes `aspect_ratio = 1.0` into its UV grids, so a plain square resize is what the model expects; the original aspect is restored at display time).
 2. Wrap in a BGRA `CVPixelBuffer` (the model's `ImageType` input applies `scale = 1/255` automatically).
 3. Run `MLModel.prediction`. Read `depth`, `normal`, `mask`, `metric_scale` with **stride-aware** access (the ANE returns non-contiguous strides — see Basic Pitch in `docs/coreml_conversion_notes.md`).
 4. Mask out background pixels and multiply depth by `metric_scale` to get meters.
-5. Render: turbo colormap for depth (near = warm), surface-normal RGB for normals (`nx, -ny, nz` → `r, g, b`).
+5. Render: turbo colormap for depth (near = warm), surface-normal RGB for normals (`nx, -ny, nz` → `r, g, b`). The SwiftUI view re-applies the photo's original aspect so the `original` / `depth` / `normal` toggles line up pixel-for-pixel.
 
 ## Conversion Script
 
