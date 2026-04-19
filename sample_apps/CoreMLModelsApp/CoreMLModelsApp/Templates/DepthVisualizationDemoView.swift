@@ -376,6 +376,14 @@ struct DepthVisualizationDemoView: View {
             var confResult: UIImage?
             if let confArr { confResult = buildConfidenceHeatmap(confArr) }
 
+            // Resize square model outputs back to the source image's pixel
+            // dimensions so saves/shares match the original resolution and
+            // aspect — not the 504-square the model predicts at.
+            let targetSize = CGSize(width: cgImage.width, height: cgImage.height)
+            if let d = depthResult { depthResult = ImageUtils.resize(d, to: targetSize) ?? d }
+            if let n = normalResult { normalResult = ImageUtils.resize(n, to: targetSize) ?? n }
+            if let c = confResult { confResult = ImageUtils.resize(c, to: targetSize) ?? c }
+
             await MainActor.run {
                 depthImage = depthResult
                 normalImage = normalResult
