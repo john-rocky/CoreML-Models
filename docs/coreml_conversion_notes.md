@@ -453,3 +453,70 @@ This bites models with reshapes/slices over a singleton "num_objects" or "T" dim
 **Fix:** load the offending model with `.cpuOnly`. The CPU path handles the slice correctly. The "real" fix is to drop the singleton dimension at the wrapper level before tracing, but that's a bigger refactor.
 
 ---
+
+## coremltools 9.0 `_cast` with (1,1,...,1) numpy arrays
+
+coremltools 9.0 `frontend/torch/ops.py::_cast` calls `dtype(x.val)` to fold a torch `aten::Int` / `aten::Bool` into a MIL constant. When traced with torch 2.11, shape-derived scalar values sometimes arrive as `np.ndarray` with shape `(1,)` or `(1,1)` rather than a true 0-d scalar, producing:
+
+```
+TypeError: only 0-dimensional arrays can be converted to Python scalars
+```
+
+**Fix:** monkey-patch `_cast` to call `.item()` on numpy arrays before `dtype(...)`:
+
+```python
+import coremltools.converters.mil.frontend.torch.ops as _ops
+from coremltools.converters.mil import Builder as mb
+
+def _cast(context, node, dtype, dtype_name):
+    x = _ops._get_inputs(context, node, expected=1)[0]
+    # ... unchanged guard on shape ...
+    if x.can_be_folded_to_const() and not isinstance(x.val, dtype):
+        val = x.val.item() if hasattr(x.val, "item") else x.val
+        res = mb.const(val=dtype(val), name=node.name)
+    # ... rest unchanged ...
+
+_ops._cast = _cast
+```
+
+Seen while converting DC-AE (Sana VAE), E-MMDiT, and Llama 3.2 under torch 2.11 + coremltools 9.0.
+
+---
+
+## `torch.Tensor.movedim` unsupported by coremltools 9.0
+
+coremltools 9.0 has no frontend op for `movedim`. Diffusers' DC-AE and Sana attention call `hidden.movedim(1, -1)` / `movedim(-1, 1)` on 4-D tensors. Equivalent permutes trace cleanly:
+
+```python
+_orig = torch.Tensor.movedim
+def movedim(self, src, dst):
+    if self.dim() == 4 and src == 1 and dst == -1:
+        return self.permute(0, 2, 3, 1)
+    if self.dim() == 4 and src == -1 and dst == 1:
+        return self.permute(0, 3, 1, 2)
+    return _orig(self, src, dst)
+torch.Tensor.movedim = movedim
+```
+
+---
+
+## DC-AE (Sana VAE) FP16 linear-attention overflow
+
+The DC-AE `SanaMultiscaleLinearAttention` uses a linear-attention normalization `hidden / (hidden_sum + eps)`. FP16 converges to NaN / saturation, producing grossly smeared output images (parity diff ~2 against an output range of ~±1.3).
+
+**Options:**
+1. Convert the decoder FP32 (~600 MB for f32c32) and accept the size.
+2. Mixed precision with `ct.transform.FP16ComputePrecision(op_selector=...)` to keep only the linear-attention block in FP32. Not yet validated.
+3. Replace the processor with Sana's quadratic-attention branch (`use_linear_attention=False`) at decoder build-time, but that changes output slightly.
+
+FP32 is what Nitro-E ships for now.
+
+Additional DC-AE decoder monkey-patches required for trace: drop `output_size=` from the `repeat_interleave(..., dim=1)` call in `Decoder.forward` (it emits an `aten::Int` on a multi-dim tensor) and statically unpack `hidden_states.size()` in `SanaMultiscaleAttnProcessor2_0.__call__` (its `list(hidden_states.size())` unpack produces dynamic int casts that coremltools cannot fold).
+
+---
+
+## Llama for text-encoding requires transformers == 4.49.x
+
+transformers 5.x rewrote `create_causal_mask` to index into `q_length.shape` / `q_length[0]` — shape assumptions that fail under `torch.jit.trace` (`IndexError: tuple index out of range`). Downgrade to transformers 4.49.0 (the version AMD Nitro-E pins) to convert Llama 3.2 1B cleanly. Keep the wrapper limited to `model.model` (drop the LM head) and return `last_hidden_state` for seq_len=128.
+
+---
