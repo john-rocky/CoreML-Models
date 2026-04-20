@@ -32,7 +32,7 @@ python3.12 conversion_scripts/convert_nitro_e_vae_decoder.py --precision fp32 \
     --out conversion_scripts/NitroE_VAEDecoder_FP32.mlpackage
 # optional: palettize to shrink
 python3.12 conversion_scripts/palettize_nitro_e_text_encoder.py  # 2.3GB -> ~0.6GB
-python3.12 conversion_scripts/palettize_nitro_e_emmdit.py        # 578MB -> ~150MB
+python3.12 conversion_scripts/palettize_nitro_e_emmdit.py        # 578MB -> 295MB
 python3.12 conversion_scripts/palettize_nitro_e_vae_decoder.py   # 608MB -> ~160MB
 ```
 

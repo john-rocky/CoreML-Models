@@ -931,7 +931,7 @@ Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-d
 
 ### Nitro-E
 
-[amd/Nitro-E](https://huggingface.co/amd/Nitro-E) — AMD's 304M-parameter E-MMDiT text-to-image model released October 2025. 4-step distilled variant generates 512×512 images from a prompt in ~3 seconds on iPhone 15+. Uses Llama 3.2 1B as the text encoder, a DC-AE f32c32 VAE decoder, and an ASA-based (Alternating Subregion Attention) diffusion transformer. Full pipeline fits in ~900 MB after INT4 / INT8 palettization.
+[amd/Nitro-E](https://huggingface.co/amd/Nitro-E) — AMD's 304M-parameter E-MMDiT text-to-image model released October 2025. 4-step distilled variant generates 512×512 images from a prompt in ~2–3 seconds on iPhone 15+. Uses Llama 3.2 1B as the text encoder, a DC-AE f32c32 VAE decoder, and an ASA-based (Alternating Subregion Attention) diffusion transformer. Full pipeline fits in ~1.04 GB after INT4 / INT8 palettization (TextEncoder 590 MB + E-MMDiT 295 MB + VAE 159 MB).
 
 <img width="400" src="sample_apps/NitroEDemo/demo.png">
 
@@ -942,7 +942,7 @@ Towards Robust Monocular Depth Estimation: Mixing Datasets for Zero-shot Cross-d
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- | ----------------- |
 | NitroE_TextEncoder.mlpackage | 590 MB (INT4) / 2.3 GB (FP16) | input_ids [1,128], attention_mask [1,128] | last_hidden_state [1,128,2048] | [meta-llama/Llama-3.2-1B](https://huggingface.co/meta-llama/Llama-3.2-1B) | [Llama 3.2](https://www.llama.com/llama3_2/license/) (gated) | 2024 | [NitroEDemo](sample_apps/NitroEDemo) | [convert_nitro_e_text_encoder.py](conversion_scripts/convert_nitro_e_text_encoder.py) |
-| NitroE_EMMDiT.mlpackage | 578 MB (FP16) | latent [1,32,16,16], encoder_hs [1,128,2048], timestep [1] | noise_pred [1,32,16,16] | [amd/Nitro-E](https://huggingface.co/amd/Nitro-E) | [MIT](https://github.com/AMD-AGI/Nitro-E/blob/main/LICENSE) | 2025 | | [convert_nitro_e_emmdit.py](conversion_scripts/convert_nitro_e_emmdit.py) |
+| NitroE_EMMDiT.mlpackage | 295 MB (INT8) / 578 MB (FP16) | latent [1,32,16,16], encoder_hs [1,128,2048], timestep [1] | noise_pred [1,32,16,16] | [amd/Nitro-E](https://huggingface.co/amd/Nitro-E) | [MIT](https://github.com/AMD-AGI/Nitro-E/blob/main/LICENSE) | 2025 | | [convert_nitro_e_emmdit.py](conversion_scripts/convert_nitro_e_emmdit.py) |
 | NitroE_VAEDecoder.mlpackage | 159 MB (INT8) / 608 MB (FP32) | latent [1,32,16,16] | image [1,3,512,512] | [mit-han-lab/dc-ae-f32c32-sana-1.0-diffusers](https://huggingface.co/mit-han-lab/dc-ae-f32c32-sana-1.0-diffusers) | [MIT](https://huggingface.co/mit-han-lab/dc-ae-f32c32-sana-1.0-diffusers) | 2024 | | [convert_nitro_e_vae_decoder.py](conversion_scripts/convert_nitro_e_vae_decoder.py) |
 
 See [`sample_apps/NitroEDemo/README.md`](sample_apps/NitroEDemo/README.md) for the Swift `FlowMatchEulerScheduler` port, tokenizer details, and iOS 18 palettization notes.
