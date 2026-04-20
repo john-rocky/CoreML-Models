@@ -27,6 +27,7 @@
 		F00000010000000000000015 /* FaceCompareDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000015 /* FaceCompareDemoView.swift */; };
 		F00000010000000000000016 /* Face3DDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000016 /* Face3DDemoView.swift */; };
 		F00000010000000000000017 /* TextToImageDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000017 /* TextToImageDemoView.swift */; };
+		F00000010000000000000098 /* NitroETextToImageDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000098 /* NitroETextToImageDemoView.swift */; };
 		F00000010000000000000018 /* ImageToTextDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000018 /* ImageToTextDemoView.swift */; };
 		F00000010000000000000019 /* VideoMattingDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000019 /* VideoMattingDemoView.swift */; };
 		F0000001000000000000001A /* AudioInOutDemoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000002000000000000001A /* AudioInOutDemoView.swift */; };
@@ -77,6 +78,7 @@
 		F00000020000000000000015 /* FaceCompareDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceCompareDemoView.swift; sourceTree = "<group>"; };
 		F00000020000000000000016 /* Face3DDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Face3DDemoView.swift; sourceTree = "<group>"; };
 		F00000020000000000000017 /* TextToImageDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextToImageDemoView.swift; sourceTree = "<group>"; };
+		F00000020000000000000098 /* NitroETextToImageDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NitroETextToImageDemoView.swift; sourceTree = "<group>"; };
 		F00000020000000000000018 /* ImageToTextDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageToTextDemoView.swift; sourceTree = "<group>"; };
 		F00000020000000000000019 /* VideoMattingDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoMattingDemoView.swift; sourceTree = "<group>"; };
 		F0000002000000000000001A /* AudioInOutDemoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioInOutDemoView.swift; sourceTree = "<group>"; };
@@ -190,6 +192,7 @@
 				F00000020000000000000015 /* FaceCompareDemoView.swift */,
 				F00000020000000000000016 /* Face3DDemoView.swift */,
 				F00000020000000000000017 /* TextToImageDemoView.swift */,
+				F00000020000000000000098 /* NitroETextToImageDemoView.swift */,
 				F00000020000000000000018 /* ImageToTextDemoView.swift */,
 				F00000020000000000000019 /* VideoMattingDemoView.swift */,
 				F0000002000000000000001A /* AudioInOutDemoView.swift */,
@@ -310,6 +313,7 @@
 				F00000010000000000000015 /* FaceCompareDemoView.swift in Sources */,
 				F00000010000000000000016 /* Face3DDemoView.swift in Sources */,
 				F00000010000000000000017 /* TextToImageDemoView.swift in Sources */,
+				F00000010000000000000098 /* NitroETextToImageDemoView.swift in Sources */,
 				F00000010000000000000018 /* ImageToTextDemoView.swift in Sources */,
 				F00000010000000000000019 /* VideoMattingDemoView.swift in Sources */,
 				F0000001000000000000001A /* AudioInOutDemoView.swift in Sources */,

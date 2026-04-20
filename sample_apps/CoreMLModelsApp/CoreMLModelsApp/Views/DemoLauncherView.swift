@@ -26,6 +26,8 @@ struct DemoLauncherView: View {
                 Face3DDemoView(model: model)
             case "text_to_image":
                 TextToImageDemoView(model: model)
+            case "text_to_image_nitroe":
+                NitroETextToImageDemoView(model: model)
             case "image_to_text":
                 ImageToTextDemoView(model: model)
             case "video_matting":
