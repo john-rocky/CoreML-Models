@@ -901,6 +901,9 @@ White-box facial image cartoonizaiton
 
 [ByteDance-Seed/Depth-Anything-3](https://github.com/ByteDance-Seed/Depth-Anything-3) (ICLR 2026 Oral) — relative monocular depth from a single image. DA3 Main Series uses a plain DINOv2 ViT backbone plus a DualDPT head with a unified depth-ray representation; this Core ML port exposes only the monocular depth + confidence subgraph (camera / multi-view / sky / 3DGS branches are stripped). First public Core ML conversion of DA3.
 
+<video src="https://github.com/user-attachments/assets/dd914469-909e-4293-8db1-2f21d88b4ad6" width="400"></video>
+<video src="https://github.com/user-attachments/assets/a16ded0c-9a54-4c10-a0f1-a121b38c8c05" width="400"></video>
+
 | Module | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | [DA3 Small 504×504](https://huggingface.co/mlboydaisuke/coreml-zoo/resolve/main/depth_anything_v3/DepthAnythingV3_small_504.mlpackage.zip) | ~44 MB FP16 | Image (RGB 504 × 504) | depth + confidence | [ByteDance-Seed/Depth-Anything-3](https://github.com/ByteDance-Seed/Depth-Anything-3) | [Apache 2.0](https://github.com/ByteDance-Seed/Depth-Anything-3/blob/main/LICENSE) | 2025 | Hub App | [convert_depth_anything_v3.py](conversion_scripts/convert_depth_anything_v3.py) |
@@ -1105,6 +1108,8 @@ Hybrid Transformer Demucs — separates music into 4 stems: drums, bass, vocals,
 ### Florence-2-base
 
 Microsoft Florence-2 — a unified vision-language model supporting image captioning, OCR, and object detection from a single model. Converted as 3 CoreML models (INT8): Vision Encoder (DaViT), Text Encoder (BART), and Decoder with autoregressive generation.
+
+<video src="https://github.com/user-attachments/assets/68c094c1-9bbd-44d5-811b-366ca8ef47df" width="400"></video>
 
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
