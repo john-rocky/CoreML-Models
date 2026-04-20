@@ -3,8 +3,8 @@ import PhotosUI
 import CoreML
 
 /// Image captioning with Photo + Camera tabs.
-/// Matches Florence2Demo: task picker (Caption/Detailed/OCR), real-time camera captioning,
-/// question input for VQA mode, copy button.
+/// Matches Florence2Demo: task picker (Caption / Detailed / More Detail / OCR),
+/// real-time camera captioning, copy button.
 struct ImageToTextDemoView: View {
     let model: ModelEntry
 
@@ -12,8 +12,25 @@ struct ImageToTextDemoView: View {
     enum CaptionTask: String, CaseIterable, Identifiable {
         case caption = "Caption"
         case detailed = "Detailed"
+        case moreDetailed = "More Detail"
         case ocr = "OCR"
         var id: String { rawValue }
+
+        /// Florence-2 prompt tokens. Matches `Florence2Task.inputIDs` in the
+        /// Florence2Demo sample app. Hardcoded (not read from the manifest)
+        /// because the prompts are intrinsic to Florence-2.
+        var inputIDs: [Int] {
+            switch self {
+            case .caption:
+                return [0, 2264, 473, 5, 2274, 6190, 116, 2]
+            case .detailed:
+                return [0, 47066, 21700, 11, 4617, 99, 16, 2343, 11, 5, 2274, 4, 2]
+            case .moreDetailed:
+                return [0, 47066, 21700, 19, 10, 17818, 99, 16, 2343, 11, 5, 2274, 4, 2]
+            case .ocr:
+                return [0, 2264, 16, 5, 2788, 11, 5, 2274, 116, 2]
+            }
+        }
     }
 
     @State private var tab: Tab = .photo
@@ -271,17 +288,7 @@ struct ImageToTextDemoView: View {
             veOutput.featureValue(for: $0)?.multiArrayValue
         }.first
 
-        // Task input IDs
-        let taskIds: [Int]
-        if let tasks = model.demo.config?["tasks"]?.value as? [String: Any],
-           let ids = tasks[task.rawValue.lowercased()] as? [Int] {
-            taskIds = ids
-        } else if let tasks = model.demo.config?["tasks"]?.value as? [String: Any],
-                  let ids = tasks[task.rawValue.lowercased().replacingOccurrences(of: " ", with: "_")] as? [Int] {
-            taskIds = ids
-        } else {
-            taskIds = [0, 2]
-        }
+        let taskIds = task.inputIDs
 
         // Text encode
         var encoderHiddenStates: MLMultiArray?
