@@ -13,3 +13,8 @@ models_draft.json
 # Vendored upstream repos (clone from README link, do not commit)
 conversion_scripts/MoGe/
 conversion_scripts/DepthAnythingV3/
+conversion_scripts/Nitro-E/core/
+conversion_scripts/Nitro-E/reference_dump/
+conversion_scripts/Nitro-E/*.png
+sample_apps/NitroEDemo/NitroEDemo/Llama3Vocab.json
+sample_apps/NitroEDemo/NitroEDemo/Llama3Merges.txt
