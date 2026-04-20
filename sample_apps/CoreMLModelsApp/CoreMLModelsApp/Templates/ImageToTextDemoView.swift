@@ -266,7 +266,9 @@ struct ImageToTextDemoView: View {
     // MARK: - Inference Pipeline
 
     private func runPipeline(image: UIImage, task: CaptionTask) async throws -> String {
-        guard let visionEncoder else { throw NSError(domain: "F2", code: 1) }
+        guard let visionEncoder, let textEncoder, let decoder else {
+            throw NSError(domain: "F2", code: 1)
+        }
 
         let imageSize = model.configInt("image_size") ?? 768
         let maxTokens = model.configInt("max_tokens") ?? 256
@@ -277,85 +279,99 @@ struct ImageToTextDemoView: View {
 
         let start = CFAbsoluteTimeGetCurrent()
 
-        // Vision encode
+        // 1. Vision encode — copy output so the VE buffer is free to be
+        //    reused when later Core ML calls specialize on new shapes.
         await MainActor.run { status = "Encoding image…" }
-        let veInputName = visionEncoder.modelDescription.inputDescriptionsByName.first {
-            $0.value.type == .image
-        }?.key ?? "image"
         let veOutput = try await visionEncoder.prediction(from:
-            MLDictionaryFeatureProvider(dictionary: [veInputName: pb]))
-        let imageFeatures = veOutput.featureNames.compactMap {
-            veOutput.featureValue(for: $0)?.multiArrayValue
-        }.first
-
-        let taskIds = task.inputIDs
-
-        // Text encode
-        var encoderHiddenStates: MLMultiArray?
-        if let textEncoder, let imgFeat = imageFeatures {
-            await MainActor.run { status = "Encoding text…" }
-            let inputIds = try MLMultiArray(shape: [1, NSNumber(value: taskIds.count)], dataType: .int32)
-            for (i, tok) in taskIds.enumerated() { inputIds[i] = NSNumber(value: tok) }
-            var teDict: [String: Any] = ["input_ids": inputIds]
-            for (key, _) in textEncoder.modelDescription.inputDescriptionsByName {
-                if key.contains("image") || key.contains("feature") { teDict[key] = imgFeat }
-            }
-            let teOutput = try await textEncoder.prediction(from: MLDictionaryFeatureProvider(dictionary: teDict))
-            encoderHiddenStates = teOutput.featureNames.compactMap { teOutput.featureValue(for: $0)?.multiArrayValue }.first
-        } else {
-            encoderHiddenStates = imageFeatures
-        }
-
-        // Autoregressive decode
-        guard let decoder, let encHS = encoderHiddenStates else {
-            // Single model — try text output directly
-            if let text = veOutput.featureNames.compactMap({ veOutput.featureValue(for: $0)?.stringValue }).first {
-                await MainActor.run { processingTime = CFAbsoluteTimeGetCurrent() - start }
-                return text
-            }
+            MLDictionaryFeatureProvider(dictionary: ["image": pb]))
+        guard let rawFeatures = veOutput.featureValue(for: "image_features")?.multiArrayValue else {
             throw NSError(domain: "F2", code: 3)
         }
+        let imageFeatures = try copyMultiArray(rawFeatures)
 
+        // 2. Text encode — task-specific prompt tokens drive detailed/OCR output.
+        await MainActor.run { status = "Encoding text…" }
+        let taskIds = task.inputIDs
+        let inputIds = try MLMultiArray(shape: [1, NSNumber(value: taskIds.count)], dataType: .int32)
+        for (i, tok) in taskIds.enumerated() {
+            inputIds[[0, NSNumber(value: i)] as [NSNumber]] = NSNumber(value: tok)
+        }
+        let teOutput = try await textEncoder.prediction(from: MLDictionaryFeatureProvider(dictionary: [
+            "image_features": imageFeatures,
+            "input_ids": inputIds
+        ]))
+        guard let rawHS = teOutput.featureValue(for: "encoder_hidden_states")?.multiArrayValue else {
+            throw NSError(domain: "F2", code: 4)
+        }
+        let encoderHiddenStates = try copyMultiArray(rawHS)
+
+        // 3. Decoder autoregressive loop.
         await MainActor.run { status = "Generating…" }
         let eosTokenId: Int32 = 2
-        var generatedIds: [Int32] = [2]
+        var generatedIds: [Int32] = [eosTokenId]  // BART decoder_start_token_id = 2
 
         for _ in 0..<maxTokens {
             let decInputIds = try MLMultiArray(shape: [1, NSNumber(value: generatedIds.count)], dataType: .int32)
-            for (i, tok) in generatedIds.enumerated() { decInputIds[i] = NSNumber(value: tok) }
-
-            var decDict: [String: Any] = [:]
-            for (key, _) in decoder.modelDescription.inputDescriptionsByName {
-                if key.contains("decoder") && key.contains("input") { decDict[key] = decInputIds }
-                else if key.contains("encoder") || key.contains("hidden") { decDict[key] = encHS }
+            for (i, tok) in generatedIds.enumerated() {
+                decInputIds[[0, NSNumber(value: i)] as [NSNumber]] = NSNumber(value: tok)
             }
-            if decDict.isEmpty { decDict = ["decoder_input_ids": decInputIds, "encoder_hidden_states": encHS] }
+            let decOutput = try await decoder.prediction(from: MLDictionaryFeatureProvider(dictionary: [
+                "decoder_input_ids": decInputIds,
+                "encoder_hidden_states": encoderHiddenStates
+            ]))
+            guard let logits = decOutput.featureValue(for: "logits")?.multiArrayValue else { break }
 
-            let decOutput = try await decoder.prediction(from: MLDictionaryFeatureProvider(dictionary: decDict))
-            guard let logits = decOutput.featureNames.compactMap({ decOutput.featureValue(for: $0)?.multiArrayValue }).first else { break }
-
-            let shape = logits.shape.map { $0.intValue }
-            let vocabSize = shape.last ?? 0
-            let seqLen = shape.count == 3 ? shape[1] : 1
-            let lastOffset = (seqLen - 1) * vocabSize
-
-            var maxVal: Float = -.greatestFiniteMagnitude; var maxIdx: Int32 = 0
-            for v in 0..<vocabSize {
-                let val = ImageUtils.readFloat(logits, at: lastOffset + v)
-                if val > maxVal { maxVal = val; maxIdx = Int32(v) }
-            }
-            if maxIdx == eosTokenId { break }
-            generatedIds.append(maxIdx)
+            let nextToken = argmaxLastToken(logits)
+            if nextToken == eosTokenId { break }
+            generatedIds.append(nextToken)
         }
 
-        let elapsed = CFAbsoluteTimeGetCurrent() - start
-        await MainActor.run { processingTime = elapsed }
+        await MainActor.run { processingTime = CFAbsoluteTimeGetCurrent() - start }
 
         return generatedIds.dropFirst().compactMap { id -> String? in
-            guard let piece = reverseVocab[Int(id)], ![0,1,2].contains(Int(id)) else { return nil }
+            guard let piece = reverseVocab[Int(id)], ![0, 1, 2].contains(Int(id)) else { return nil }
             return piece
         }.joined()
             .replacingOccurrences(of: "\u{0120}", with: " ")
             .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    // MARK: - Helpers
+
+    private func copyMultiArray(_ src: MLMultiArray) throws -> MLMultiArray {
+        let dst = try MLMultiArray(shape: src.shape, dataType: src.dataType)
+        let byteCount: Int
+        switch src.dataType {
+        case .float16: byteCount = src.count * 2
+        case .float32, .int32: byteCount = src.count * 4
+        case .float64: byteCount = src.count * 8
+        default: byteCount = src.count * 4
+        }
+        memcpy(dst.dataPointer, src.dataPointer, byteCount)
+        return dst
+    }
+
+    private func argmaxLastToken(_ logits: MLMultiArray) -> Int32 {
+        let vocabSize = logits.shape.last?.intValue ?? 0
+        let offset = logits.count - vocabSize
+        if logits.dataType == .float16 {
+            let ptr = logits.dataPointer.assumingMemoryBound(to: Float16.self)
+            var maxIdx = 0
+            var maxVal = ptr[offset]
+            for i in 1..<vocabSize {
+                let val = ptr[offset + i]
+                if val > maxVal { maxVal = val; maxIdx = i }
+            }
+            return Int32(maxIdx)
+        } else {
+            let ptr = logits.dataPointer.assumingMemoryBound(to: Float32.self)
+            var maxIdx = 0
+            var maxVal = ptr[offset]
+            for i in 1..<vocabSize {
+                let val = ptr[offset + i]
+                if val > maxVal { maxVal = val; maxIdx = i }
+            }
+            return Int32(maxIdx)
+        }
     }
 }
