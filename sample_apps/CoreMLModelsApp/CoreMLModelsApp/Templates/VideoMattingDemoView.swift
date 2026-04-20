@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import Photos
 import CoreML
 import AVFoundation
 import AVKit
@@ -102,10 +103,28 @@ struct VideoMattingDemoView: View {
             }
 
             if let url = outputVideoURL {
-                VideoPlayerView(url: url)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .padding(.horizontal)
+                VStack(spacing: 8) {
+                    VideoPlayerView(url: url)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                    HStack(spacing: 12) {
+                        Button {
+                            Task { await saveOutputToPhotos(url) }
+                        } label: {
+                            Label("Save", systemImage: "square.and.arrow.down")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+
+                        ShareLink(item: url) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                }
+                .padding(.horizontal)
             } else {
                 VStack(spacing: 12) {
                     Image(systemName: "person.and.background.dotted")
@@ -236,6 +255,25 @@ struct VideoMattingDemoView: View {
                 isProcessing = false
                 status = "Error: \(error.localizedDescription)"
             }
+        }
+    }
+
+    /// Save the matted output video to the user's Photos library. Requests
+    /// add-only authorization — which pairs with the NSPhotoLibraryAdd
+    /// usage description already present in Info.plist.
+    private func saveOutputToPhotos(_ url: URL) async {
+        let auth = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+        guard auth == .authorized || auth == .limited else {
+            await MainActor.run { status = "Photo library access denied" }
+            return
+        }
+        do {
+            try await PHPhotoLibrary.shared().performChanges {
+                PHAssetCreationRequest.creationRequestForAssetFromVideo(atFileURL: url)
+            }
+            await MainActor.run { status = "Saved to Photos" }
+        } catch {
+            await MainActor.run { status = "Save failed: \(error.localizedDescription)" }
         }
     }
 }
