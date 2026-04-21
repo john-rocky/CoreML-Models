@@ -85,6 +85,41 @@ The divergence is inherent to autoregressive generation — a single different l
 
 **Recommendation:** INT8 for generative models (Florence-2, RMBG). **FP16 required for contrastive/embedding models** (SigLIP, CLIP, AdaFace) — INT8 drops cosine similarity from 0.999 to 0.86, making similarity-based scoring unreliable.
 
+### Post-hoc quantization (no re-conversion needed)
+
+`conversion_scripts/quantize_mlpackage.py` compresses any existing
+`.mlpackage` without re-running the original PyTorch → CoreML trace.
+Apple's `coremltools.optimize.coreml.palettize_weights` with k-means
+lookup tables at 8-bit `per_grouped_channel` (group_size=16) is the
+default and is the sweet spot for most models.
+
+```bash
+# MatAnyone 5 packages: 111 MB FP16 → ~28 MB INT8 palettized
+python conversion_scripts/quantize_mlpackage.py -r out/matanyone/
+
+# Single file
+python conversion_scripts/quantize_mlpackage.py MatAnyone_encoder.mlpackage
+
+# Linear INT8 for conv-heavy models (faster build, similar size)
+python conversion_scripts/quantize_mlpackage.py --mode linear ...
+
+# Aggressive 4-bit palettize (risky for attention layers)
+python conversion_scripts/quantize_mlpackage.py --nbits 4 ...
+```
+
+**Why the app-size win matters:** Cutout's first-run download was
+111 + 42 = 153 MB (MatAnyone + RMBG). After palettizing MatAnyone to
+INT8 it drops to ~70 MB total — App Review is less likely to flag the
+download-on-first-use flow and users on cellular can actually get
+through it.
+
+**Verify parity before shipping.** Load both the FP16 and INT8 variants
+in the same test harness, feed 5-10 representative inputs, compute
+`(fp16_out - int8_out).abs().max()`. For conv-heavy encoders/decoders
+the delta is typically <1e-2 on `alpha` output. For attention-heavy
+modules (`read`, `read_first`) the delta can be larger — inspect a few
+alpha mattes visually before committing the replacement to HF.
+
 ---
 
 ## Seq2Seq Model Splitting for CoreML
