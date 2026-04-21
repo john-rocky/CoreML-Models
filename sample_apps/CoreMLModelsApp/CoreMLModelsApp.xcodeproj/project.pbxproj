@@ -53,6 +53,7 @@
 		F00000010000000000000051 /* clip_vocab.json in Resources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000051 /* clip_vocab.json */; };
 		F00000010000000000000054 /* CodeExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000054 /* CodeExportView.swift */; };
 		F00000010000000000000060 /* ByteTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000060 /* ByteTracker.swift */; };
+		F00000010000000000000099 /* StorageManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00000020000000000000099 /* StorageManagementView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -103,6 +104,7 @@
 		F00000020000000000000051 /* clip_vocab.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = clip_vocab.json; sourceTree = "<group>"; };
 		F00000020000000000000054 /* CodeExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeExportView.swift; sourceTree = "<group>"; };
 		F00000020000000000000060 /* ByteTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ByteTracker.swift; sourceTree = "<group>"; };
+		F00000020000000000000099 /* StorageManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManagementView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +172,7 @@
 				F00000020000000000000007 /* RootView.swift */,
 				F00000020000000000000008 /* ModelDetailView.swift */,
 				F00000020000000000000009 /* SettingsView.swift */,
+				F00000020000000000000099 /* StorageManagementView.swift */,
 				F0000002000000000000000A /* DemoLauncherView.swift */,
 				F0000002000000000000001F /* CameraView.swift */,
 				F00000020000000000000060 /* ByteTracker.swift */,
@@ -303,6 +306,7 @@
 				F00000010000000000000007 /* RootView.swift in Sources */,
 				F00000010000000000000008 /* ModelDetailView.swift in Sources */,
 				F00000010000000000000009 /* SettingsView.swift in Sources */,
+				F00000010000000000000099 /* StorageManagementView.swift in Sources */,
 				F0000001000000000000000A /* DemoLauncherView.swift in Sources */,
 				F0000001000000000000000B /* DepthVisualizationDemoView.swift in Sources */,
 				F0000001000000000000000E /* ModelLoader.swift in Sources */,

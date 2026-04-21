@@ -6,14 +6,17 @@ struct SettingsView: View {
     var body: some View {
         List {
             Section("Storage") {
-                let totalBytes = computeStorageUsed()
-                LabeledContent("Models on disk", value: formatBytes(totalBytes))
-                LabeledContent("Installed count", value: "\(catalog.installedIds.count)")
-                Button(role: .destructive) {
-                    deleteAllInstalled()
+                NavigationLink {
+                    StorageManagementView()
                 } label: {
-                    Text("Delete all downloaded models")
+                    HStack {
+                        Label("Manage Storage", systemImage: "internaldrive")
+                        Spacer()
+                        Text(formatBytes(computeStorageUsed()))
+                            .foregroundStyle(.secondary)
+                    }
                 }
+                LabeledContent("Installed count", value: "\(catalog.installedIds.count)")
             }
 
             Section("About") {
@@ -43,11 +46,6 @@ struct SettingsView: View {
             }
         }
         return total
-    }
-
-    private func deleteAllInstalled() {
-        let fm = FileManager.default
-        try? fm.removeItem(at: Paths.modelsDir)
     }
 
     private func appVersion() -> String {
