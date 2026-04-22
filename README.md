@@ -99,6 +99,7 @@ You are free to do or not.
   - [DCGAN](#dcgan)
 
 - [**Image2Image**](#image2image)
+  - [Pixelization](#pixelization)
   - [Anime2Sketch](#anime2sketch)
   - [AnimeGAN2Face_Paint_512_v2](#animegan2face_paint_512_v2)
   - [Photo2Cartoon](#photo2cartoon)
@@ -781,6 +782,14 @@ Low Light Enhancement
 
 
 # Image2Image
+
+### Pixelization
+
+Make Your Own Sprites: Aliasing-Aware and Cell-Controllable Pixelization (SIGGRAPH Asia 2022). Turns any photo into pixel art; the `cell_size` slider (2–8) controls pixel block size at post-processing time — the network runs once per photo.
+
+| Google Drive / HF Link | Size | Input / Output | Original Project | License | Year | Sample Project | Conversion Script |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [Pixelization_512.mlpackage.zip](https://huggingface.co/mlboydaisuke/coreml-zoo/resolve/main/pixelization/Pixelization_512.mlpackage.zip) | 38MB (FP16) | Image (RGB 512×512) → Image (RGB 512×512) | [WuZongWei6/Pixelization](https://github.com/WuZongWei6/Pixelization) | [Non-commercial research](https://github.com/WuZongWei6/Pixelization/blob/main/LICENSE.md) | 2022 | [PixelizationDemo](./sample_apps/PixelizationDemo/) | [convert_pixelization.py](./conversion_scripts/convert_pixelization.py) |
 
 ### [Anime2Sketch](https://drive.google.com/file/d/1-52NnZ1kajZI5Rk0tn3DegpU38la_jYk/view?usp=sharing)
 <img width="400" src="https://user-images.githubusercontent.com/23278992/147990751-9ac35e43-b9a6-4db2-af5c-37978322240d.jpeg"> <img width="400" src="https://user-images.githubusercontent.com/23278992/147990892-d676142c-62c4-433d-9835-337b1293bfc4.jpeg">

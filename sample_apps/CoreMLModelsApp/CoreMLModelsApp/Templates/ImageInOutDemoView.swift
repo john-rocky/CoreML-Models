@@ -18,9 +18,25 @@ struct ImageInOutDemoView: View {
     @State private var processingTime: Double?
     @State private var item: PhotosPickerItem?
     @State private var showOriginal = false
+    // pixel_art: cache the raw (pre cell_size) model output so the preset
+    // picker only re-runs the cheap NEAREST resample + palette mapping.
+    @State private var pixelArtRaw: CGImage?
+    @State private var pixelArtPresetId: String = PixelArtPreset.all[0].id
+    // nil = use the preset's default cell size; non-nil = user dragged the
+    // slider. Reset to nil whenever the preset changes.
+    @State private var pixelArtCellSizeOverride: Double?
+    // User-selected pre-blur target (px). 512 = no blur. Smaller = more
+    // abstracted network input. nil = derive from cellSize.
+    @State private var pixelArtBlurOverride: Int?
     @StateObject private var session = ModelSession<MLModel>()
 
     private var outputType: String { model.configString("output_type") ?? "image" }
+    private var pixelArtPreset: PixelArtPreset {
+        PixelArtPreset.all.first { $0.id == pixelArtPresetId } ?? PixelArtPreset.all[0]
+    }
+    private var pixelArtCellSize: Int {
+        Int(pixelArtCellSizeOverride ?? Double(pixelArtPreset.cellSize))
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -42,7 +58,11 @@ struct ImageInOutDemoView: View {
                     }
                     Image(uiImage: output).resizable().aspectRatio(contentMode: .fit)
                 } else if let img = showOriginal ? inputImage : outputImage ?? inputImage {
-                    Image(uiImage: img).resizable().aspectRatio(contentMode: .fit)
+                    if outputType == "pixel_art" && !showOriginal {
+                        Image(uiImage: img).resizable().interpolation(.none).aspectRatio(contentMode: .fit)
+                    } else {
+                        Image(uiImage: img).resizable().aspectRatio(contentMode: .fit)
+                    }
                 } else {
                     VStack(spacing: 12) {
                         Image(systemName: "photo.on.rectangle.angled").font(.system(size: 60)).foregroundStyle(.secondary)
@@ -85,6 +105,86 @@ struct ImageInOutDemoView: View {
                     if isProcessing { ProgressView().controlSize(.small); Text(status).font(.caption).foregroundStyle(.secondary) }
                 }
 
+                if outputType == "pixel_art" && pixelArtRaw != nil {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(PixelArtPreset.all, id: \.id) { preset in
+                                Button {
+                                    pixelArtPresetId = preset.id
+                                } label: {
+                                    VStack(spacing: 2) {
+                                        Image(systemName: preset.systemImage).font(.body)
+                                        Text(preset.name).font(.caption2)
+                                    }
+                                    .padding(.vertical, 6).padding(.horizontal, 10)
+                                    .background(
+                                        pixelArtPresetId == preset.id
+                                            ? Color.accentColor.opacity(0.25)
+                                            : Color(.systemGray6)
+                                    )
+                                    .cornerRadius(8)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal, 4)
+                    }
+
+                    HStack(spacing: 10) {
+                        Image(systemName: "square.grid.3x3")
+                            .font(.caption).foregroundStyle(.secondary)
+                        Slider(
+                            value: Binding(
+                                get: { Double(pixelArtCellSize) },
+                                set: { pixelArtCellSizeOverride = $0 }
+                            ),
+                            in: 4...10, step: 1
+                        ) { Text("Cell size") }
+                        Text("\(pixelArtCellSize)")
+                            .font(.caption.monospacedDigit())
+                            .frame(width: 22, alignment: .trailing)
+                    }
+
+                    // Pre-blur (photo shrink) picker. Off = full-res network
+                    // input; smaller targets trade fine detail for cleaner,
+                    // more iconic palette cells.
+                    Picker("Abstraction", selection: Binding(
+                        get: { pixelArtBlurOverride ?? 0 },   // 0 == auto (derive from cs)
+                        set: { pixelArtBlurOverride = $0 == 0 ? nil : $0 }
+                    )) {
+                        Text("Auto").tag(0)
+                        Text("Off").tag(512)
+                        Text("256").tag(256)
+                        Text("128").tag(128)
+                        Text("64").tag(64)
+                        Text("32").tag(32)
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: pixelArtBlurOverride) {
+                        if let img = inputImage { Task { await runInference(on: img) } }
+                    }
+
+                    .onChange(of: pixelArtPresetId) {
+                        // New preset → reset override & re-run inference so the
+                        // pre-blur matches the preset's default cellSize.
+                        pixelArtCellSizeOverride = nil
+                        if let img = inputImage {
+                            Task { await runInference(on: img) }
+                        } else if let raw = pixelArtRaw {
+                            outputImage = pixelArtPostProcess(
+                                raw, cellSize: pixelArtCellSize, palette: pixelArtPreset.palette)
+                        }
+                    }
+                    .onChange(of: pixelArtCellSizeOverride) {
+                        // During drag: cheap palette re-snap only. The network
+                        // re-run happens on slider release (onEditingChanged).
+                        if let raw = pixelArtRaw {
+                            outputImage = pixelArtPostProcess(
+                                raw, cellSize: pixelArtCellSize, palette: pixelArtPreset.palette)
+                        }
+                    }
+                }
+
                 HStack(spacing: 12) {
                     PhotosPicker(selection: $item, matching: .images) {
                         Label("Select Photo", systemImage: "photo.badge.plus")
@@ -114,7 +214,11 @@ struct ImageInOutDemoView: View {
             // a photo.
             session.ensure { try await ModelLoader.loadPrimary(for: model) }
         }
-        .onChange(of: item) { _, _ in loadAndRun() }
+        .onChange(of: item) { _, _ in
+            pixelArtRaw = nil
+            pixelArtCellSizeOverride = nil
+            loadAndRun()
+        }
     }
 
     // MARK: - Load & Run
@@ -165,7 +269,19 @@ struct ImageInOutDemoView: View {
 
             let inputDict: [String: Any]
             if let imageInput {
-                guard let pb = ImageUtils.pixelBuffer(from: cgImage, width: inputSize, height: inputSize) else {
+                // pixel_art: pre-downsample the source based on cell size so the
+                // fixed-512 network effectively sees a lower-resolution image
+                // and makes its semantic abstraction at the user's chosen
+                // chunkiness. Mimics upstream test_pro.py's input resize.
+                let sourceForBuffer: CGImage = {
+                    guard outputType == "pixel_art" else { return cgImage }
+                    let target = pixelArtBlurOverride
+                        ?? pixelArtPreBlurTarget(cellSize: pixelArtCellSize, inputSize: inputSize)
+                    return target < inputSize
+                        ? (resizeCGImageBicubic(cgImage, to: target) ?? cgImage)
+                        : cgImage
+                }()
+                guard let pb = ImageUtils.pixelBuffer(from: sourceForBuffer, width: inputSize, height: inputSize) else {
                     await MainActor.run { isProcessing = false; status = "Prep failed" }; return
                 }
                 inputDict = [imageInput.key: pb]
@@ -205,6 +321,13 @@ struct ImageInOutDemoView: View {
                 result = processLABABOutput(output: output, originalImage: cgImage, origW: origW, origH: origH, modelSize: inputSize)
             case "segmap":
                 result = processSegmapOutput(output: output, originalImage: cgImage, origW: origW, origH: origH, modelSize: inputSize)
+            case "pixel_art":
+                let raw = extractRawCGImage(output: output)
+                await MainActor.run { pixelArtRaw = raw }
+                result = raw.flatMap {
+                    pixelArtPostProcess($0, cellSize: pixelArtCellSize,
+                                        palette: pixelArtPreset.palette)
+                }
             default:
                 if let r = processImageOutput(output: output) {
                     result = restoreAspect(r, origW: origW, origH: origH, inputSize: inputSize)
@@ -282,6 +405,72 @@ struct ImageInOutDemoView: View {
             }
         }
         return nil
+    }
+
+    // MARK: - Output: pixel_art (Pixelization)
+
+    private func extractRawCGImage(output: MLFeatureProvider) -> CGImage? {
+        for name in output.featureNames {
+            if let pb = output.featureValue(for: name)?.imageBufferValue {
+                let ci = CIImage(cvPixelBuffer: pb)
+                if let cg = CIContext(options: [.useSoftwareRenderer: false])
+                    .createCGImage(ci, from: ci.extent) { return cg }
+            }
+        }
+        return nil
+    }
+
+    /// Clean pixel-art rendering:
+    ///   1. Mean-sample one color per `cs`×`cs` cell.
+    ///   2. Palette-snap each cell (optional).
+    ///   3. NEAREST upscale by `cs` into the final image.
+    ///
+    /// We deliberately do NOT run a separate edge-detection overlay. Source-
+    /// resolution gradient detection picks up per-cell colour jitter and
+    /// texture noise, sprinkling stray dark lines across flat areas
+    /// ('line picture 'ちょろちょろ出る') — the chunky cells + limited palette
+    /// already give enough silhouette definition on their own.
+    private func pixelArtPostProcess(_ cg: CGImage, cellSize: Int, palette: [UInt32]?) -> UIImage? {
+        let cs = max(1, cellSize)
+        let gridW = cg.width / cs
+        let gridH = cg.height / cs
+        guard gridW > 0 && gridH > 0 else { return nil }
+        let outW = gridW * cs
+        let outH = gridH * cs
+        let srcW = cg.width
+        let srcH = cg.height
+
+        guard let srcData = cg.dataProvider?.data,
+              let srcPtr = CFDataGetBytePtr(srcData) else { return nil }
+        let srcBPR = cg.bytesPerRow
+        let srcBpp = cg.bitsPerPixel / 8
+
+        var grid = [UInt8](repeating: 0, count: gridW * gridH * 3)
+        grid.withUnsafeMutableBufferPointer { gbuf in
+            pixelArtMeanSample(
+                srcPtr: srcPtr, srcW: srcW, srcH: srcH,
+                srcBPR: srcBPR, srcBpp: srcBpp,
+                cs: cs, gridW: gridW, gridH: gridH,
+                gbuf: gbuf.baseAddress!
+            )
+        }
+        if let palette = palette, !palette.isEmpty {
+            applyPalette(&grid, palette: palette)
+        }
+
+        let bytesPerRow = outW * 4
+        var pixels = [UInt8](repeating: 0, count: bytesPerRow * outH)
+        pixels.withUnsafeMutableBufferPointer { dstBuf in
+            grid.withUnsafeBufferPointer { gbuf in
+                pixelArtReplicate(
+                    dst: dstBuf.baseAddress!,
+                    gptr: gbuf.baseAddress!,
+                    gridW: gridW, gridH: gridH,
+                    cs: cs, bytesPerRow: bytesPerRow
+                )
+            }
+        }
+        return ImageUtils.makeRGBA(pixels: pixels, width: outW, height: outH)
     }
 
     // MARK: - Output: mask (RMBG)
@@ -588,5 +777,203 @@ struct ImageInOutDemoView: View {
         let bl = 0.0556434*x - 0.2040259*y + 1.0572252*z
         func gamma(_ c: Float) -> Float { c <= 0.0031308 ? 12.92*c : 1.055*pow(c, 1/2.4) - 0.055 }
         return (max(0, min(1, gamma(rl))), max(0, min(1, gamma(gl))), max(0, min(1, gamma(bl))))
+    }
+}
+
+// MARK: - Pixel art presets
+
+/// A named pixel-art style. `cellSize` controls the grid resolution (larger =
+/// chunkier). `palette` is an optional list of 0xRRGGBB colors to snap every
+/// cell to — nil means "keep the generator's own colors".
+struct PixelArtPreset {
+    let id: String
+    let name: String
+    let systemImage: String
+    let cellSize: Int
+    let palette: [UInt32]?
+
+    // All presets default to the network's native cellSize (4) — the palette
+    // is what differentiates them. Users dial chunkiness via the slider; at
+    // cs=4 the pre-blur is skipped and the network's own pixelization shows
+    // through cleanest, which is what tends to read best across photos.
+    static let all: [PixelArtPreset] = [
+        PixelArtPreset(id: "off",     name: "Off",      systemImage: "circle",                  cellSize: 4, palette: nil),
+        PixelArtPreset(id: "gameboy", name: "Game Boy", systemImage: "gamecontroller",          cellSize: 4, palette: PixelArtPalettes.gameBoy),
+        PixelArtPreset(id: "nes",     name: "NES",      systemImage: "gamecontroller.fill",     cellSize: 4, palette: PixelArtPalettes.nes),
+        PixelArtPreset(id: "pico8",   name: "Pico-8",   systemImage: "square.stack.3d.up.fill", cellSize: 4, palette: PixelArtPalettes.pico8),
+        PixelArtPreset(id: "c64",     name: "C64",      systemImage: "desktopcomputer",         cellSize: 4, palette: PixelArtPalettes.c64),
+    ]
+}
+
+enum PixelArtPalettes {
+    // Game Boy DMG: 4 shades of olive-green.
+    static let gameBoy: [UInt32] = [
+        0x9BBC0F, 0x8BAC0F, 0x306230, 0x0F380F,
+    ]
+
+    // Pico-8 fantasy console: 16 colors.
+    static let pico8: [UInt32] = [
+        0x000000, 0x1D2B53, 0x7E2553, 0x008751,
+        0xAB5236, 0x5F574F, 0xC2C3C7, 0xFFF1E8,
+        0xFF004D, 0xFFA300, 0xFFEC27, 0x00E436,
+        0x29ADFF, 0x83769C, 0xFF77A8, 0xFFCCAA,
+    ]
+
+    // Commodore 64: 16 colors (Pepto's well-known sRGB approximation).
+    static let c64: [UInt32] = [
+        0x000000, 0xFFFFFF, 0x68372B, 0x70A4B2,
+        0x6F3D86, 0x588D43, 0x352879, 0xB8C76F,
+        0x6F4F25, 0x433900, 0x9A6759, 0x444444,
+        0x6C6C6C, 0x9AD284, 0x6C5EB5, 0x959595,
+    ]
+
+    // NES 2C02 PPU (Nintendulator NTSC approximation), 54 usable colors.
+    static let nes: [UInt32] = [
+        0x7C7C7C, 0x0000FC, 0x0000BC, 0x4428BC,
+        0x940084, 0xA80020, 0xA81000, 0x881400,
+        0x503000, 0x007800, 0x006800, 0x005800,
+        0x004058,
+        0xBCBCBC, 0x0078F8, 0x0058F8, 0x6844FC,
+        0xD800CC, 0xE40058, 0xF83800, 0xE45C10,
+        0xAC7C00, 0x00B800, 0x00A800, 0x00A844,
+        0x008888,
+        0xF8F8F8, 0x3CBCFC, 0x6888FC, 0x9878F8,
+        0xF878F8, 0xF85898, 0xF87858, 0xFCA044,
+        0xF8B800, 0xB8F818, 0x58D854, 0x58F898,
+        0x00E8D8, 0x787878,
+        0xFCFCFC, 0xA4E4FC, 0xB8B8F8, 0xD8B8F8,
+        0xF8B8F8, 0xF8A4C0, 0xF0D0B0, 0xFCE0A8,
+        0xF8D878, 0xD8F878, 0xB8F8B8, 0xB8F8D8,
+        0x00FCFC, 0xF8D8F8,
+    ]
+}
+
+/// Replicate each 3-byte grid cell into a `cs`×`cs` block of the output
+/// RGBA buffer. Where `applyEdges` is true and the edge mask at the output
+/// pixel's coordinate is set, write the dark RGB override instead.
+/// Map the user's `cellSize` to the target resolution the photo should be
+/// downsampled to before feeding a fixed-`inputSize` Pixelization network.
+/// The paper's `test_pro.py` resizes the whole network input by cell_size so
+/// the (fully-convolutional) generator makes its abstraction at that scale.
+/// Our CoreML model is fixed-size, so we emulate the effect by shrinking the
+/// source and letting CGContext resize it back up — the network sees a
+/// lower-resolution image and produces cleaner coarse cells.
+///
+/// Matches the upstream `test_pro.py` factor (`inputSize * 4 / cellSize`).
+/// A previous 2× boost to this was too radical — at cs=16 it shrank the
+/// input to 64 px, destroying readability. The useful range is cs=4-8 in
+/// practice; in that window the upstream formula gives 256-512 target,
+/// which blurs texture enough to clean up palette cells without wiping
+/// the subject. cellSize <= 4 keeps native resolution.
+func pixelArtPreBlurTarget(cellSize: Int, inputSize: Int) -> Int {
+    if cellSize <= 4 { return inputSize }
+    return max(96, min(inputSize, inputSize * 4 / cellSize))
+}
+
+/// Redraw `cg` into a square `size`×`size` CGImage using .high interpolation.
+func resizeCGImageBicubic(_ cg: CGImage, to size: Int) -> CGImage? {
+    guard let ctx = CGContext(
+        data: nil, width: size, height: size,
+        bitsPerComponent: 8, bytesPerRow: size * 4,
+        space: CGColorSpaceCreateDeviceRGB(),
+        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+    ) else { return nil }
+    ctx.interpolationQuality = .high
+    ctx.draw(cg, in: CGRect(x: 0, y: 0, width: size, height: size))
+    return ctx.makeImage()
+}
+
+/// Mean-sample a `gridW`×`gridH` buffer of RGB triplets from the source
+/// image by averaging each `cs`×`cs` region.
+func pixelArtMeanSample(
+    srcPtr: UnsafePointer<UInt8>,
+    srcW: Int, srcH: Int,
+    srcBPR: Int, srcBpp: Int,
+    cs: Int, gridW: Int, gridH: Int,
+    gbuf: UnsafeMutablePointer<UInt8>
+) {
+    let div: Int32 = Int32(cs * cs)
+    DispatchQueue.concurrentPerform(iterations: gridH) { gy in
+        for gx in 0..<gridW {
+            var sumR: Int32 = 0, sumG: Int32 = 0, sumB: Int32 = 0
+            for dy in 0..<cs {
+                let sy: Int = min(srcH - 1, gy * cs + dy)
+                let rowBase: Int = sy * srcBPR
+                for dx in 0..<cs {
+                    let sx: Int = min(srcW - 1, gx * cs + dx)
+                    let sOff: Int = rowBase + sx * srcBpp
+                    sumR += Int32(srcPtr[sOff])
+                    sumG += Int32(srcPtr[sOff + 1])
+                    sumB += Int32(srcPtr[sOff + 2])
+                }
+            }
+            let gOff: Int = (gy * gridW + gx) * 3
+            gbuf[gOff]     = UInt8(sumR / div)
+            gbuf[gOff + 1] = UInt8(sumG / div)
+            gbuf[gOff + 2] = UInt8(sumB / div)
+        }
+    }
+}
+
+/// NEAREST replicate each 3-byte grid cell into a `cs`×`cs` RGBA block.
+func pixelArtReplicate(
+    dst: UnsafeMutablePointer<UInt8>,
+    gptr: UnsafePointer<UInt8>,
+    gridW: Int, gridH: Int,
+    cs: Int, bytesPerRow: Int
+) {
+    DispatchQueue.concurrentPerform(iterations: gridH) { gy in
+        for gx in 0..<gridW {
+            let gOff: Int = (gy * gridW + gx) * 3
+            let r: UInt8 = gptr[gOff]
+            let g: UInt8 = gptr[gOff + 1]
+            let b: UInt8 = gptr[gOff + 2]
+            for by in 0..<cs {
+                let oy: Int = gy * cs + by
+                var off: Int = oy * bytesPerRow + gx * cs * 4
+                for _ in 0..<cs {
+                    dst[off]     = r
+                    dst[off + 1] = g
+                    dst[off + 2] = b
+                    dst[off + 3] = 255
+                    off += 4
+                }
+            }
+        }
+    }
+}
+
+/// Snap every RGB triplet in `buf` to the nearest palette color (Euclidean in
+/// RGB). `buf` is tightly-packed 3 bytes per pixel (RGB, no alpha). Runs
+/// concurrently — for 512×512 / 54-color NES it's ~50 ms on A-series CPUs.
+func applyPalette(_ buf: inout [UInt8], palette: [UInt32]) {
+    let n = palette.count
+    let pr: [Int16] = palette.map { Int16(($0 >> 16) & 0xFF) }
+    let pg: [Int16] = palette.map { Int16(($0 >> 8) & 0xFF) }
+    let pb: [Int16] = palette.map { Int16($0 & 0xFF) }
+    let count = buf.count / 3
+    buf.withUnsafeMutableBufferPointer { buf in
+        let ptr = buf.baseAddress!
+        pr.withUnsafeBufferPointer { prBuf in
+            pg.withUnsafeBufferPointer { pgBuf in
+                pb.withUnsafeBufferPointer { pbBuf in
+                    let prp = prBuf.baseAddress!, pgp = pgBuf.baseAddress!, pbp = pbBuf.baseAddress!
+                    DispatchQueue.concurrentPerform(iterations: count) { i in
+                        let off = i * 3
+                        let r = Int16(ptr[off]), g = Int16(ptr[off + 1]), b = Int16(ptr[off + 2])
+                        var bestIdx = 0
+                        var bestDist: Int32 = .max
+                        for j in 0..<n {
+                            let dr = Int32(r - prp[j]), dg = Int32(g - pgp[j]), db = Int32(b - pbp[j])
+                            let d = dr*dr + dg*dg + db*db
+                            if d < bestDist { bestDist = d; bestIdx = j }
+                        }
+                        ptr[off]     = UInt8(prp[bestIdx])
+                        ptr[off + 1] = UInt8(pgp[bestIdx])
+                        ptr[off + 2] = UInt8(pbp[bestIdx])
+                    }
+                }
+            }
+        }
     }
 }
