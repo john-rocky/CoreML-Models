@@ -1121,7 +1121,7 @@ Microsoft Florence-2 — a unified vision-language model supporting image captio
 
 # Language Model
 
-**[john-rocky/CoreML-LLM](https://github.com/john-rocky/CoreML-LLM)** — Companion repository for running LLMs on the **Apple Neural Engine**. Unlike MLX Swift (GPU-only), CoreML-LLM targets ANE for ~10x lower power draw, making always-on on-device LLMs practical on iPhone. Current release **v1.3.0** — Qwen3-VL added, Gemma 4 E2B prefill doubled to N=1024, 3-chunk decode on opt-in. All models below load via the same `CoreMLLLM.load(...)` Swift API and are available in-app through the [Models Zoo](https://apps.apple.com/jp/app/models-zoo/id6762083207) hub.
+**[john-rocky/CoreML-LLM](https://github.com/john-rocky/CoreML-LLM)** — Companion repository for running LLMs on the **Apple Neural Engine**. Unlike MLX Swift (GPU-only), CoreML-LLM targets ANE for ~10x lower power draw, making always-on on-device LLMs practical on iPhone. Current release **v1.4.0** — Gemma 4 E2B 3-chunk decode (31.6 → 34.2 tok/s, +8.2%), chunk pipelining default ON, still-image vision encoder on ANE. All models below load via the same `CoreMLLLM.load(...)` Swift API and are available in-app through the [Models Zoo](https://apps.apple.com/jp/app/models-zoo/id6762083207) hub.
 
 | Model | Size | Modalities | iPhone 17 Pro decode | HuggingFace |
 |---|---:|---|---:|---|

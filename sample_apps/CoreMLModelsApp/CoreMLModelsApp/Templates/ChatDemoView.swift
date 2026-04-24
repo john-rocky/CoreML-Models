@@ -211,7 +211,7 @@ struct ChatDemoView: View {
                 llm = loaded
                 hasVision = loaded.supportsVision
                 hasAudio = loaded.supportsAudio
-                // CoreMLLLM 1.3 still ships a video encoder only for Gemma 4 E2B
+                // CoreMLLLM 1.4 still ships a video encoder only for Gemma 4 E2B
                 // (Qwen3-VL 2B is image-only). No public supportsVideo flag yet,
                 // so gate on the single currently-capable manifest id.
                 hasVideo = loaded.supportsVision && model.id == "gemma4_e2b"
