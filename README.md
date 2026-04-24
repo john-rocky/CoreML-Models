@@ -158,7 +158,11 @@ You are free to do or not.
   - [Florence-2-base](#florence-2-base)
 
 - [**Language Model**](#language-model)
-  - [Gemma 4 E2B (CoreML-LLM)](#gemma-4-e2b-coreml-llm)
+  - [Gemma 4 E2B (text + image + audio + video)](#gemma-4-e2b-coreml-llm)
+  - [Gemma 4 E4B (text)](#gemma-4-e4b)
+  - [Qwen3.5 2B (text)](#qwen35-2b)
+  - [Qwen3.5 0.8B (text)](#qwen35-08b)
+  - [Qwen3-VL 2B (text + image)](#qwen3-vl-2b)
 
 - [**Zero-Shot Image Classification**](#zero-shot-image-classification)
   - [SigLIP ViT-B/16](#siglip-vit-b16)
@@ -1117,15 +1121,55 @@ Microsoft Florence-2 — a unified vision-language model supporting image captio
 
 # Language Model
 
+**[john-rocky/CoreML-LLM](https://github.com/john-rocky/CoreML-LLM)** — Companion repository for running LLMs on the **Apple Neural Engine**. Unlike MLX Swift (GPU-only), CoreML-LLM targets ANE for ~10x lower power draw, making always-on on-device LLMs practical on iPhone. Current release **v1.3.0** — Qwen3-VL added, Gemma 4 E2B prefill doubled to N=1024, 3-chunk decode on opt-in. All models below load via the same `CoreMLLLM.load(...)` Swift API and are available in-app through the [Models Zoo](https://apps.apple.com/jp/app/models-zoo/id6762083207) hub.
+
+| Model | Size | Modalities | iPhone 17 Pro decode | HuggingFace |
+|---|---:|---|---:|---|
+| Gemma 4 E2B | 3.1 GB | Text + image + audio + video | 31–34 tok/s | [mlboydaisuke/gemma-4-E2B-coreml](https://huggingface.co/mlboydaisuke/gemma-4-E2B-coreml) |
+| Gemma 4 E4B | 5.5 GB | Text | ~14 tok/s | [mlboydaisuke/gemma-4-E4B-coreml](https://huggingface.co/mlboydaisuke/gemma-4-E4B-coreml) |
+| Qwen3.5 2B | 2.4 GB | Text | ~17 tok/s (~200 MB RSS) | [mlboydaisuke/qwen3.5-2B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-2B-CoreML) |
+| Qwen3.5 0.8B | 754 MB | Text | ~20 tok/s | [mlboydaisuke/qwen3.5-0.8B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-0.8B-CoreML) |
+| Qwen3-VL 2B | 4.7 GB | Text + image | ~7.5 tok/s | [mlboydaisuke/qwen3-vl-2b-coreml](https://huggingface.co/mlboydaisuke/qwen3-vl-2b-coreml) |
+
 ### Gemma 4 E2B (CoreML-LLM)
 
-**[john-rocky/CoreML-LLM](https://github.com/john-rocky/CoreML-LLM)** — Companion repository for running LLMs on the **Apple Neural Engine**. Unlike MLX Swift (GPU-only), CoreML-LLM targets ANE for ~10x lower power draw, making always-on on-device LLMs practical on iPhone.
-
-Google Gemma 4 E2B (2B params) running on iPhone 15 Pro at ~11 tok/s decode and ~175 tok/s effective prefill throughput (seq=64 batched prefill → 188 ms TTFT for a 33-token prompt). INT4 palettized, 2048 context length, Sliding Window Attention (28/35 layers are O(W)), Per-Layer Embedding computed inside the ANE graph.
+Google Gemma 4 E2B (2.3B effective parameters with Per-Layer Embeddings) running fully on ANE. **Multimodal**: text, image (native 384x384 encoder, 196 tokens/image), audio (12-layer Conformer encoder), and video (64 tokens/frame). 2048 context length, Sliding Window Attention (28/35 layers are O(W)), PLE computed inside the graph. The default 4-chunk decode ships at 31.6 tok/s on iPhone 17 Pro; `LLM_3CHUNK=1` bumps it to 34.2 tok/s by collapsing chunk 2+3.
 
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Swift Package |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| [mlboydaisuke/gemma-4-E2B-coreml](https://huggingface.co/mlboydaisuke/gemma-4-E2B-coreml) | 2.7 GB (INT4, 4 decode + 4 prefill chunks) | Text prompt (up to 2048 tokens) | Generated text (streaming) | [google/gemma-3n-E2B-it](https://huggingface.co/google/gemma-3n-E2B-it) | [Gemma ToU](https://ai.google.dev/gemma/terms) | 2025 | [CoreMLLLMChat](https://github.com/john-rocky/CoreML-LLM/tree/main/Examples/CoreMLLLMChat) | [CoreML-LLM](https://github.com/john-rocky/CoreML-LLM) |
+| [mlboydaisuke/gemma-4-E2B-coreml](https://huggingface.co/mlboydaisuke/gemma-4-E2B-coreml) | 3.1 GB (INT4, 4 chunks + vision + audio + video encoders) | Text + image + audio + video (≤2048 tokens) | Generated text (streaming) | [google/gemma-3n-E2B-it](https://huggingface.co/google/gemma-3n-E2B-it) | [Gemma ToU](https://ai.google.dev/gemma/terms) | 2025 | [CoreMLLLMChat](https://github.com/john-rocky/CoreML-LLM/tree/main/Examples/CoreMLLLMChat) | [CoreML-LLM](https://github.com/john-rocky/CoreML-LLM) |
+
+### Gemma 4 E4B
+
+Larger text-only Gemma 4 variant — 42-layer decoder, ~4B effective parameters, 100% ANE-resident. Use when you want maximum text quality and have the storage budget. No vision / audio / video encoders.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Swift Package |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [mlboydaisuke/gemma-4-E4B-coreml](https://huggingface.co/mlboydaisuke/gemma-4-E4B-coreml) | 5.5 GB (INT4, 4 chunks) | Text prompt (≤2048 tokens) | Generated text (streaming) | [google/gemma-3n-E4B-it](https://huggingface.co/google/gemma-3n-E4B-it) | [Gemma ToU](https://ai.google.dev/gemma/terms) | 2025 | [CoreMLLLMChat](https://github.com/john-rocky/CoreML-LLM/tree/main/Examples/CoreMLLLMChat) | [CoreML-LLM](https://github.com/john-rocky/CoreML-LLM) |
+
+### Qwen3.5 2B
+
+Alibaba Qwen3.5 2B — hybrid Gated-DeltaNet SSM + attention. Shipped as 4 INT8 body chunks (6 layers each) + tail + mmap fp16 embed sidecar so a 2B-param model fits in ~200 MB phys_footprint. The 4-chunk split is required to stay ANE-resident — a 2-chunk variant at 2 GB fp16/chunk exceeds the single-mlprogram budget and falls to GPU.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Swift Package |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [mlboydaisuke/qwen3.5-2B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-2B-CoreML) | 2.4 GB (INT8, 4 chunks + embed) | Text prompt | Generated text (streaming) | [Qwen/Qwen3.5-2B](https://huggingface.co/Qwen/Qwen3.5-2B) | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | 2025 | [CoreMLLLMChat](https://github.com/john-rocky/CoreML-LLM/tree/main/Examples/CoreMLLLMChat) | [CoreML-LLM](https://github.com/john-rocky/CoreML-LLM) |
+
+### Qwen3.5 0.8B
+
+Compact hybrid SSM+attention model, INT8 palettized — same semantic precision as fp16 (top-3 = 100% parity vs fp32 oracle), half the bundle size. Smallest and fastest option in the lineup at 754 MB / ~20 tok/s decode.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Swift Package |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [mlboydaisuke/qwen3.5-0.8B-CoreML](https://huggingface.co/mlboydaisuke/qwen3.5-0.8B-CoreML) | 754 MB (INT8 palettized) | Text prompt | Generated text (streaming) | [Qwen/Qwen3.5-0.8B](https://huggingface.co/Qwen/Qwen3.5-0.8B) | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | 2025 | [CoreMLLLMChat](https://github.com/john-rocky/CoreML-LLM/tree/main/Examples/CoreMLLLMChat) | [CoreML-LLM](https://github.com/john-rocky/CoreML-LLM) |
+
+### Qwen3-VL 2B
+
+Qwen3-VL multimodal — text + image input with DeepStack injection at L0/1/2 and interleaved mRoPE for the 196 image tokens. 28-layer GQA text backbone shipped as 6 INT8 body chunks + chunk_head + raw fp16 embed sidecar that Swift mmaps. Vision tower re-uses Qwen3-VL's native ViT.
+
+| Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Swift Package |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| [mlboydaisuke/qwen3-vl-2b-coreml](https://huggingface.co/mlboydaisuke/qwen3-vl-2b-coreml) | 4.7 GB (INT8, 6 body chunks + head + embed) | Text + image | Generated text (streaming) | [Qwen/Qwen3-VL-2B-Instruct](https://huggingface.co/Qwen/Qwen3-VL-2B-Instruct) | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | 2025 | [CoreMLLLMChat](https://github.com/john-rocky/CoreML-LLM/tree/main/Examples/CoreMLLLMChat) | [CoreML-LLM](https://github.com/john-rocky/CoreML-LLM) |
 
 See [CoreML-LLM](https://github.com/john-rocky/CoreML-LLM) for the full conversion pipeline, ANE optimization techniques (cat-trick RMSNorm, Conv2d Linear, pre-computed RoPE, stateless KV with explicit I/O), and the Swift sample app.
 

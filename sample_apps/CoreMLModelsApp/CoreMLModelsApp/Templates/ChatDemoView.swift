@@ -4,7 +4,10 @@ import PhotosUI
 import AVFoundation
 
 /// LLM chat demo template with streaming generation.
-/// Used by: Gemma 4 E2B (multimodal), Qwen2.5-0.5B (text-only).
+/// Used by every CoreML-LLM model in the manifest:
+///   - Gemma 4 E2B (text + image + audio + video)
+///   - Gemma 4 E4B, Qwen3.5 2B, Qwen3.5 0.8B, Qwen2.5 0.5B (text)
+///   - Qwen3-VL 2B (text + image)
 ///
 /// Uses CoreML-LLM package for ANE-optimized on-device inference.
 /// Supports multimodal input (text + image + audio + video) when the loaded
@@ -208,9 +211,9 @@ struct ChatDemoView: View {
                 llm = loaded
                 hasVision = loaded.supportsVision
                 hasAudio = loaded.supportsAudio
-                // CoreMLLLM 0.8 ships a video encoder only for Gemma 4 E2B.
-                // There is no public supportsVideo flag yet, so gate on the
-                // manifest id of the single currently-capable model.
+                // CoreMLLLM 1.3 still ships a video encoder only for Gemma 4 E2B
+                // (Qwen3-VL 2B is image-only). No public supportsVideo flag yet,
+                // so gate on the single currently-capable manifest id.
                 hasVideo = loaded.supportsVision && model.id == "gemma4_e2b"
                 audioRecorder.maxDuration = loaded.maxAudioDuration
                 isLoading = false
