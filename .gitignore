@@ -16,5 +16,7 @@ conversion_scripts/DepthAnythingV3/
 conversion_scripts/Nitro-E/core/
 conversion_scripts/Nitro-E/reference_dump/
 conversion_scripts/Nitro-E/*.png
+conversion_scripts/Pixelization/
+conversion_scripts/pixelization_sample_*.png
 sample_apps/NitroEDemo/NitroEDemo/Llama3Vocab.json
 sample_apps/NitroEDemo/NitroEDemo/Llama3Merges.txt
