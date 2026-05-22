@@ -555,3 +555,73 @@ Additional DC-AE decoder monkey-patches required for trace: drop `output_size=` 
 transformers 5.x rewrote `create_causal_mask` to index into `q_length.shape` / `q_length[0]` — shape assumptions that fail under `torch.jit.trace` (`IndexError: tuple index out of range`). Downgrade to transformers 4.49.0 (the version AMD Nitro-E pins) to convert Llama 3.2 1B cleanly. Keep the wrapper limited to `model.model` (drop the LM head) and return `last_hidden_state` for seq_len=128.
 
 ---
+
+## Weight modulation with huge style codes — bake the code into Conv2d weights
+
+**Pixelization (SIGGRAPH Asia 2022) `ModulationConvBlock` overflows FP16 even though intermediate activations stay < 50.**
+
+Symptom: the FP16 model outputs a nearly-constant image (every pixel lands at tanh(~3) ≈ 0.999, producing a flat 254.875 after `(y+1)*127.5`). FP32 is fine.
+
+Cause: the upstream inference path is
+```python
+code = torch.tensor(MLP_code).reshape(1, 256, 1, 1)   # constants up to 2.3e5
+cellcode = G_A.MLP(code)                              # abs max ~8.4e8 (!!)
+# Inside ModulationConvBlock.forward:
+_weight = weight.view(1, k, k, in_c, out_c) * code.view(1,1,1,in_c,1)   # OVERFLOWS FP16
+_weight_norm = torch.sqrt(_weight.pow(2).sum([1,2,3]) + eps)
+_weight = _weight / _weight_norm.view(1,1,1,1,out_c)
+```
+`cellcode` magnitudes easily clear FP16's 65504 ceiling, so `_weight * code` saturates to Inf and the subsequent division leaves NaNs.
+
+Fix: **cellcode is a constant** (the upstream authors already extracted its pre-MLP input as a 256-float magic table and `best_cell_size` is fixed at 4 — the `cell_size` slider only affects post-processing). Since `(W·c)/‖W·c‖` is fully determined at conversion time, precompute that effective weight in FP32, store it on a plain `nn.Conv2d`, and drop the modulation op entirely:
+
+```python
+class BakedModConv(nn.Module):
+    def __init__(self, orig, code_chunk):
+        super().__init__()
+        with torch.no_grad():
+            w = orig.weight * orig.wscale                    # (out, in, k, k)
+            _w = w.view(1, k, k, in_c, out_c) * code_chunk.view(1,1,1,in_c,1)
+            norm = torch.sqrt((_w**2).sum([1,2,3]) + orig.eps)
+            _w = _w / norm.view(1,1,1,1,out_c)
+            w_final = _w.permute(1,2,3,0,4).reshape(k,k,in_c,out_c).permute(3,2,0,1).contiguous()
+        self.register_buffer("weight", w_final)
+        self.bias = nn.Parameter(orig.bias.detach().clone())
+    def forward(self, x):
+        x = F.conv2d(x, self.weight, bias=None, padding=self.ksize//2)
+        return F.leaky_relu(x + self.bias.view(1,-1,1,1), 0.2) * math.sqrt(2)
+```
+
+Bonus: also caught a bug in the upstream decoder — `mod_conv_3..8` are defined but never called; `mod_conv_2` is reused 7 times. Preserve that when baking (8 BakedModConv instances, weights from `mod_conv_1` for the first, `mod_conv_2` for the rest).
+
+---
+
+## Upstream "LayerNorm" that flattens the whole tensor — use `nn.GroupNorm(1, C)`
+
+Pixelization ships a custom `LayerNorm`:
+```python
+def forward(self, x):
+    mean = x.view(-1).mean().view(-1, 1, 1, 1)      # global over C*H*W
+    std  = x.view(-1).std().view(-1, 1, 1, 1)
+    x = (x - mean) / (std + eps)
+    return x * gamma.view(1, C, 1, 1) + beta.view(1, C, 1, 1)
+```
+
+Semantically equivalent to `nn.GroupNorm(num_groups=1, num_channels=C)` with per-channel affine. But the manual `view(-1).std()` path converts to a primitive reduce chain that coremltools lowers badly in FP16: on a (1, 128, 256, 256) tensor (~8M elements) the resulting FP16 std comes out ~4× too large, so the output magnitudes collapse by 4× and the downstream tanh branch saturates.
+
+Fix: swap the layers after loading weights, before tracing:
+```python
+def swap_ln(module):
+    for name, ch in list(module.named_children()):
+        if isinstance(ch, UpstreamLN):
+            gn = nn.GroupNorm(1, ch.num_features, eps=ch.eps)
+            gn.weight.data.copy_(ch.gamma.data)
+            gn.bias.data.copy_(ch.beta.data)
+            setattr(module, name, gn)
+        else:
+            swap_ln(ch)
+```
+
+Apple's `group_norm` op handles the reduction in FP32 even under `compute_precision=FLOAT16`, so post-swap FP16 parity against PyTorch is ~10/255 max / 0.2/255 mean — imperceptible.
+
+---
