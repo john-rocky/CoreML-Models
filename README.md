@@ -2,6 +2,10 @@
 
 <img width="1280" src="https://user-images.githubusercontent.com/23278992/147420041-fdeb1fbb-7e93-41c6-84d6-80d7c1c45200.jpeg">
 
+> **Maintained by [Daisuke Majima](https://john-rocky.github.io/)** — on-device AI for iOS & Android, ex-Ultralytics.
+> Need one of these models running in your app, or a custom model converted and optimized?
+> 📧 rockyshikoku@gmail.com · 🌐 [john-rocky.github.io](https://john-rocky.github.io/)
+
 # How to use
 
 Take a look this model zoo, and if you found the CoreML model you want,
@@ -1344,15 +1348,17 @@ On YOLOv5 convertion, [dbsystel/yolov5-coreml-tools](https://github.com/dbsystel
 
 And all of original projects
 
-# Auther
+# Author
 
-Daisuke Majima
-Freelance engineer. iOS/MachineLearning/AR
-I can work on mobile ML projects and AR project.
-Feel free to contact: rockyshikoku@gmail.com
+**Daisuke Majima** — I build on-device AI for iOS and Android: model conversion (PyTorch / ONNX → Core ML / LiteRT), latency and memory optimization, real-time camera and video pipelines, on-device VLM / LLM, and training or fine-tuning models for a specific device target. Previously mobile at Ultralytics (YOLO).
 
-[GitHub](https://github.com/john-rocky)
-[Twitter](https://twitter.com/JackdeS11)
-[Medium](https://rockyshikoku.medium.com/)
+I also maintain [LiteRT-Models](https://github.com/john-rocky/LiteRT-Models) (Android / TFLite) and [VLMKit](https://github.com/john-rocky/VLMKit) (on-device VLM on Apple Silicon).
+
+**Available for contract work — small, well-scoped pieces are welcome as well as longer engagements.**
+
+📧 rockyshikoku@gmail.com — I reply within a day
+🌐 [john-rocky.github.io](https://john-rocky.github.io/) — shipped apps, past work, details
+
+[GitHub](https://github.com/john-rocky) · [Twitter](https://twitter.com/JackdeS11) · [Medium](https://rockyshikoku.medium.com/)
 
 
