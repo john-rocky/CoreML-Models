@@ -2,9 +2,7 @@
 
 <img width="1280" src="https://user-images.githubusercontent.com/23278992/147420041-fdeb1fbb-7e93-41c6-84d6-80d7c1c45200.jpeg">
 
-> **Maintained by [Daisuke Majima](https://john-rocky.github.io/)** — on-device AI for iOS & Android, ex-Ultralytics.
-> Need one of these models running in your app, or a custom model converted and optimized?
-> 📧 rockyshikoku@gmail.com · 🌐 [john-rocky.github.io](https://john-rocky.github.io/)
+*Maintained by [Daisuke Majima](https://john-rocky.github.io/) — on-device AI for iOS & Android.*
 
 # How to use
 
@@ -1354,10 +1352,10 @@ And all of original projects
 
 I also maintain [LiteRT-Models](https://github.com/john-rocky/LiteRT-Models) (Android / TFLite) and [VLMKit](https://github.com/john-rocky/VLMKit) (on-device VLM on Apple Silicon).
 
-**Freelance through Pebble Inc. (Osaka) — currently taking projects.** Small, well-scoped pieces are welcome as well as longer engagements.
+I work freelance through Pebble Inc. (Osaka) and take on on-device AI projects. Feel free to get in touch.
 
-📧 rockyshikoku@gmail.com — I reply within a day
-🌐 [john-rocky.github.io](https://john-rocky.github.io/) — shipped apps, past work, details
+📧 rockyshikoku@gmail.com
+🌐 [john-rocky.github.io](https://john-rocky.github.io/)
 
 [GitHub](https://github.com/john-rocky) · [Twitter](https://twitter.com/JackdeS11) · [Medium](https://rockyshikoku.medium.com/)
 
