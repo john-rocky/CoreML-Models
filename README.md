@@ -1354,7 +1354,7 @@ And all of original projects
 
 I also maintain [LiteRT-Models](https://github.com/john-rocky/LiteRT-Models) (Android / TFLite) and [VLMKit](https://github.com/john-rocky/VLMKit) (on-device VLM on Apple Silicon).
 
-**Available for contract work — small, well-scoped pieces are welcome as well as longer engagements.**
+**Freelance through Pebble Inc. (Osaka) — currently taking projects.** Small, well-scoped pieces are welcome as well as longer engagements.
 
 📧 rockyshikoku@gmail.com — I reply within a day
 🌐 [john-rocky.github.io](https://john-rocky.github.io/) — shipped apps, past work, details
