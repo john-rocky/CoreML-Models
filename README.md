@@ -4,6 +4,12 @@
 
 *Maintained by [Daisuke Majima](https://john-rocky.github.io/) — on-device AI for iOS & Android.*
 
+## Looking for Core AI on iOS 27 or macOS 27?
+
+For a `.aimodel` bundle or a custom local model in a new Swift app, the [Core AI start page](https://john-rocky.github.io/core-ai/) connects the [model zoo](https://github.com/john-rocky/coreai-model-zoo), [CoreAIKit](https://github.com/john-rocky/coreai-kit#quickstart), and downloadable demo apps. It includes the tested environment for each starting point. Coding agents can read the [task index](https://john-rocky.github.io/core-ai/llms.txt).
+
+This repository provides Core ML models and sample apps. Use the catalog below for existing Core ML integrations, earlier OS targets, or models available here; `.mlpackage` and `.aimodel` are different formats.
+
 # How to use
 
 Take a look this model zoo, and if you found the CoreML model you want,
