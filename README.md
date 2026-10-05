@@ -19,6 +19,10 @@ You are free to do or not.
 
 **If you like this repository, please give me a star so I can do my best.**
 
+# Projects using these models
+
+- [xLights](https://github.com/xLightsSequencer/xLights) — an open-source light show sequencer. On macOS, xLights 2026.18 downloads this repository's [HTDemucs](#htdemucs) Core ML model on first use and splits a song's audio into four stems: drums, bass, other, and vocals ([source](https://github.com/xLightsSequencer/xLights/blob/2026.18/src-core/media/StemSeparator.h#L3-L11)).
+
 # Section Link
 
 - [**Image Classifier**](#image-classifier)
