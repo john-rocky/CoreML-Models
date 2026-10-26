@@ -164,11 +164,25 @@ final class ModelCatalog: ObservableObject {
         }
         for url in entries where url.hasDirectoryPath {
             let meta = url.appendingPathComponent(".meta.json")
-            if fm.fileExists(atPath: meta.path) {
-                ids.insert(url.lastPathComponent)
+            guard fm.fileExists(atPath: meta.path) else { continue }
+            // A model whose package was cut short (app killed while unpacking) shows
+            // as not downloaded, so Download fetches the missing part instead of
+            // Try It failing in Core ML.
+            if let model = manifest?.models.first(where: { $0.id == url.lastPathComponent }),
+               !Self.packagesComplete(model, in: url) {
+                continue
             }
+            ids.insert(url.lastPathComponent)
         }
         return ids
+    }
+
+    private static func packagesComplete(_ model: ModelEntry, in dir: URL) -> Bool {
+        model.files.allSatisfy { file in
+            guard file.archive == "zip", !(file.optional ?? false) else { return true }
+            let package = dir.appendingPathComponent((file.name as NSString).deletingPathExtension)
+            return package.pathExtension != "mlpackage" || PackageCheck.isComplete(package)
+        }
     }
 
     private func fetchManifest() async throws -> Manifest {

@@ -129,8 +129,8 @@ final class ModelFileDownloader: NSObject, ObservableObject {
 
         let tmpFile = try await startDownload(remote: remote, spec: spec)
 
-        // Verify SHA-256
-        let digest = try Self.sha256(of: tmpFile)
+        // Verify SHA-256 (off the main thread: a 1.3 GB file takes seconds)
+        let digest = try await Task.detached { try Self.sha256(of: tmpFile) }.value
         guard digest.lowercased() == spec.sha256.lowercased() else {
             try? FileManager.default.removeItem(at: tmpFile)
             throw DownloaderError.sha256Mismatch(expected: spec.sha256, got: digest)
@@ -139,8 +139,9 @@ final class ModelFileDownloader: NSObject, ObservableObject {
         // Unpack if archive
         if spec.archive == "zip" {
             state.byFile[spec.name] = .unpacking
-            try Self.unzip(archive: tmpFile, to: Paths.modelDir(id: modelId))
-            try? FileManager.default.removeItem(at: tmpFile)
+            let modelDir = Paths.modelDir(id: modelId)
+            defer { try? FileManager.default.removeItem(at: tmpFile) }
+            try await Task.detached { try Self.unzip(archive: tmpFile, into: modelDir) }.value
         } else {
             try? FileManager.default.removeItem(at: finalURL)
             try FileManager.default.moveItem(at: tmpFile, to: finalURL)
@@ -155,7 +156,14 @@ final class ModelFileDownloader: NSObject, ObservableObject {
         if spec.archive == "zip" {
             let base = (spec.name as NSString).deletingPathExtension
             let candidate = Paths.modelDir(id: modelId).appendingPathComponent(base)
-            return fm.fileExists(atPath: candidate.path)
+            guard fm.fileExists(atPath: candidate.path) else { return false }
+            // A package cut short by an earlier unpack (app killed mid-way) has its
+            // Manifest.json but not every item it lists: drop it and fetch it again.
+            if candidate.pathExtension == "mlpackage", !PackageCheck.isComplete(candidate) {
+                try? fm.removeItem(at: candidate)
+                return false
+            }
+            return true
         }
         guard fm.fileExists(atPath: finalURL.path) else { return false }
         let digest = try Self.sha256(of: finalURL)
@@ -204,7 +212,7 @@ final class ModelFileDownloader: NSObject, ObservableObject {
 
     // MARK: - Helpers
 
-    static func sha256(of url: URL) throws -> String {
+    nonisolated static func sha256(of url: URL) throws -> String {
         let handle = try FileHandle(forReadingFrom: url)
         defer { try? handle.close() }
         var hasher = SHA256()
@@ -217,8 +225,25 @@ final class ModelFileDownloader: NSObject, ObservableObject {
         return hasher.finalize().map { String(format: "%02x", $0) }.joined()
     }
 
-    static func unzip(archive: URL, to dest: URL) throws {
-        try ZipUnpacker.unpack(archive: archive, to: dest)
+    /// Unpacks into a staging folder and moves each top-level item into the
+    /// model folder only once every `.mlpackage` in it is complete, so a kill
+    /// mid-unpack never leaves a half-written package where the loader looks.
+    nonisolated static func unzip(archive: URL, into modelDir: URL) throws {
+        let fm = FileManager.default
+        let staging = modelDir.appendingPathComponent(".unpacking", isDirectory: true)
+        try? fm.removeItem(at: staging)
+        try fm.createDirectory(at: staging, withIntermediateDirectories: true)
+        defer { try? fm.removeItem(at: staging) }
+
+        try ZipUnpacker.unpack(archive: archive, to: staging)
+        for item in try fm.contentsOfDirectory(at: staging, includingPropertiesForKeys: nil) {
+            if item.pathExtension == "mlpackage", !PackageCheck.isComplete(item) {
+                throw DownloaderError.incompletePackage(item.lastPathComponent)
+            }
+            let dest = modelDir.appendingPathComponent(item.lastPathComponent)
+            try? fm.removeItem(at: dest)
+            try fm.moveItem(at: item, to: dest)
+        }
     }
 
     static func writeMeta(modelId: String, files: [FileSpec]) {
@@ -339,6 +364,7 @@ enum DownloaderError: LocalizedError {
     case sha256Mismatch(expected: String, got: String)
     case cancelled
     case interrupted
+    case incompletePackage(String)
 
     var errorDescription: String? {
         switch self {
@@ -348,6 +374,30 @@ enum DownloaderError: LocalizedError {
             return "Checksum mismatch. Expected \(e.prefix(12))…, got \(g.prefix(12))…"
         case .cancelled: return "Download cancelled"
         case .interrupted: return "Download interrupted — will resume automatically"
+        case .incompletePackage(let name): return "\(name) is incomplete — tap Download to fetch it again"
         }
+    }
+}
+
+/// Checks that an `.mlpackage` holds every item its Manifest.json lists.
+/// Core ML refuses a package that misses one ("Item does not exist for
+/// identifier"), which is what an unpack cut short used to leave behind.
+enum PackageCheck {
+    static func isComplete(_ package: URL) -> Bool {
+        let fm = FileManager.default
+        guard let data = try? Data(contentsOf: package.appendingPathComponent("Manifest.json")),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let items = json["itemInfoEntries"] as? [String: [String: Any]],
+              !items.isEmpty else { return false }
+        for item in items.values {
+            guard let path = item["path"] as? String else { return false }
+            let url = package.appendingPathComponent("Data").appendingPathComponent(path)
+            var isDir: ObjCBool = false
+            guard fm.fileExists(atPath: url.path, isDirectory: &isDir) else { return false }
+            if isDir.boolValue, ((try? fm.contentsOfDirectory(atPath: url.path)) ?? []).isEmpty {
+                return false
+            }
+        }
+        return true
     }
 }

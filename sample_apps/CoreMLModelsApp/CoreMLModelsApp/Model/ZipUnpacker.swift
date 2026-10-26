@@ -3,11 +3,13 @@ import Compression
 
 /// Minimal ZIP extractor for .mlpackage.zip archives.
 ///
-/// Parses the ZIP central directory ourselves and uses Apple's Compression
-/// framework (`compression_decode_buffer` with `COMPRESSION_ZLIB`, i.e. raw
-/// deflate) for each deflate-compressed entry. Stored (method 0) entries are
-/// copied through unchanged. Deflate (method 8) is the only other format
-/// produced by standard zip tools on macOS.
+/// Parses the ZIP central directory ourselves and streams each entry from
+/// disk through Apple's Compression framework (`.zlib`, i.e. raw deflate) in
+/// 1 MB chunks, so memory stays flat however large the archive is (the
+/// Stable Audio DiT weights alone are 1.3 GB; reading the whole archive into
+/// memory got the app killed on iPhone). Stored (method 0) entries are copied
+/// through unchanged. Deflate (method 8) is the only other format produced by
+/// standard zip tools on macOS. ZIP64 archives are not supported.
 enum ZipUnpacker {
     enum UnzipError: LocalizedError {
         case invalidArchive(String)
@@ -23,16 +25,18 @@ enum ZipUnpacker {
         }
     }
 
+    private static let chunkSize = 1 << 20
+
     static func unpack(archive: URL, to destination: URL) throws {
-        let raw: Data
+        let handle: FileHandle
         do {
-            raw = try Data(contentsOf: archive, options: [.mappedIfSafe])
+            handle = try FileHandle(forReadingFrom: archive)
         } catch {
             throw UnzipError.io(error.localizedDescription)
         }
-        let bytes = [UInt8](raw)
+        defer { try? handle.close() }
 
-        let entries = try parseCentralDirectory(bytes: bytes)
+        let entries = try parseCentralDirectory(handle: handle)
         let fm = FileManager.default
         for entry in entries {
             // Skip macOS metadata injected by Finder/zip
@@ -44,17 +48,7 @@ enum ZipUnpacker {
             }
             try fm.createDirectory(at: outURL.deletingLastPathComponent(),
                                    withIntermediateDirectories: true)
-            let compressed = try readLocalFile(bytes: bytes, entry: entry)
-            let decompressed: Data
-            switch entry.method {
-            case 0:
-                decompressed = Data(compressed)
-            case 8:
-                decompressed = try inflate(compressed, uncompressedSize: Int(entry.uncompressedSize))
-            default:
-                throw UnzipError.unsupported("compression method \(entry.method)")
-            }
-            try decompressed.write(to: outURL)
+            try extract(entry, from: handle, to: outURL)
         }
     }
 
@@ -69,15 +63,18 @@ enum ZipUnpacker {
         let isDirectory: Bool
     }
 
-    private static func parseCentralDirectory(bytes: [UInt8]) throws -> [Entry] {
-        guard bytes.count >= 22 else { throw UnzipError.invalidArchive("too small") }
-        let maxComment = 65535
-        let start = max(0, bytes.count - 22 - maxComment)
+    private static func parseCentralDirectory(handle: FileHandle) throws -> [Entry] {
+        let fileSize = try handle.seekToEnd()
+        guard fileSize >= 22 else { throw UnzipError.invalidArchive("too small") }
+        // The end-of-central-directory record sits in the last 22 + comment bytes.
+        let maxComment: UInt64 = 65535
+        let tailLength = min(fileSize, 22 + maxComment)
+        let tail = try read(handle, at: fileSize - tailLength, count: Int(tailLength))
         var eocdOffset: Int? = nil
-        var i = bytes.count - 22
-        while i >= start {
-            if bytes[i] == 0x50 && bytes[i + 1] == 0x4b
-                && bytes[i + 2] == 0x05 && bytes[i + 3] == 0x06 {
+        var i = tail.count - 22
+        while i >= 0 {
+            if tail[i] == 0x50 && tail[i + 1] == 0x4b
+                && tail[i + 2] == 0x05 && tail[i + 3] == 0x06 {
                 eocdOffset = i
                 break
             }
@@ -87,16 +84,24 @@ enum ZipUnpacker {
             throw UnzipError.invalidArchive("no EOCD")
         }
 
-        let totalEntries = readU16(bytes, at: eocd + 10)
-        let cdOffset = readU32(bytes, at: eocd + 16)
+        let totalEntries = readU16(tail, at: eocd + 10)
+        let cdSize = readU32(tail, at: eocd + 12)
+        let cdOffset = readU32(tail, at: eocd + 16)
+        if totalEntries == 0xFFFF || cdSize == 0xFFFF_FFFF || cdOffset == 0xFFFF_FFFF {
+            throw UnzipError.unsupported("ZIP64")
+        }
+        guard UInt64(cdOffset) + UInt64(cdSize) <= fileSize else {
+            throw UnzipError.invalidArchive("central directory out of range")
+        }
+        let bytes = try read(handle, at: UInt64(cdOffset), count: Int(cdSize))
 
         var entries: [Entry] = []
-        var p = Int(cdOffset)
+        var p = 0
         for _ in 0..<totalEntries {
             guard p + 46 <= bytes.count,
                   bytes[p] == 0x50 && bytes[p + 1] == 0x4b
                     && bytes[p + 2] == 0x01 && bytes[p + 3] == 0x02 else {
-                throw UnzipError.invalidArchive("bad CDH signature at \(p)")
+                throw UnzipError.invalidArchive("bad CDH signature at \(Int(cdOffset) + p)")
             }
             let method = readU16(bytes, at: p + 10)
             let compressed = readU32(bytes, at: p + 20)
@@ -105,7 +110,13 @@ enum ZipUnpacker {
             let extraLen = Int(readU16(bytes, at: p + 30))
             let commentLen = Int(readU16(bytes, at: p + 32))
             let localOffset = readU32(bytes, at: p + 42)
+            if compressed == 0xFFFF_FFFF || uncompressed == 0xFFFF_FFFF || localOffset == 0xFFFF_FFFF {
+                throw UnzipError.unsupported("ZIP64")
+            }
             let nameStart = p + 46
+            guard nameStart + nameLen <= bytes.count else {
+                throw UnzipError.invalidArchive("CDH name overflow")
+            }
             let nameBytes = Array(bytes[nameStart..<nameStart + nameLen])
             let name = String(decoding: nameBytes, as: UTF8.self)
             let isDir = name.hasSuffix("/")
@@ -120,44 +131,66 @@ enum ZipUnpacker {
         return entries
     }
 
-    private static func readLocalFile(bytes: [UInt8], entry: Entry) throws -> [UInt8] {
-        let lh = Int(entry.localHeaderOffset)
-        guard lh + 30 <= bytes.count,
-              bytes[lh] == 0x50 && bytes[lh + 1] == 0x4b
-                && bytes[lh + 2] == 0x03 && bytes[lh + 3] == 0x04 else {
+    // MARK: - Streaming extract
+
+    /// Copies (method 0) or inflates (method 8) one entry to `outURL`, 1 MB of
+    /// input at a time, and checks the written size against the directory.
+    private static func extract(_ entry: Entry, from handle: FileHandle, to outURL: URL) throws {
+        guard entry.method == 0 || entry.method == 8 else {
+            throw UnzipError.unsupported("compression method \(entry.method)")
+        }
+        // The local header's name/extra lengths can differ from the central directory's.
+        let lh = UInt64(entry.localHeaderOffset)
+        let header = try read(handle, at: lh, count: 30)
+        guard header.count == 30,
+              header[0] == 0x50 && header[1] == 0x4b
+                && header[2] == 0x03 && header[3] == 0x04 else {
             throw UnzipError.invalidArchive("bad LFH at \(lh)")
         }
-        let nameLen = Int(readU16(bytes, at: lh + 26))
-        let extraLen = Int(readU16(bytes, at: lh + 28))
-        let dataStart = lh + 30 + nameLen + extraLen
-        let dataEnd = dataStart + Int(entry.compressedSize)
-        guard dataEnd <= bytes.count else {
-            throw UnzipError.invalidArchive("LFH overflow")
+        let nameLen = UInt64(readU16(header, at: 26))
+        let extraLen = UInt64(readU16(header, at: 28))
+        try handle.seek(toOffset: lh + 30 + nameLen + extraLen)
+
+        guard FileManager.default.createFile(atPath: outURL.path, contents: nil) else {
+            throw UnzipError.io("cannot create \(entry.name)")
         }
-        return Array(bytes[dataStart..<dataEnd])
-    }
+        let out = try FileHandle(forWritingTo: outURL)
+        defer { try? out.close() }
 
-    // MARK: - Deflate
-
-    private static func inflate(_ input: [UInt8], uncompressedSize: Int) throws -> Data {
-        let outCapacity = max(uncompressedSize, 1)
-        var output = Data(count: outCapacity)
-        let written = output.withUnsafeMutableBytes { (outBuf: UnsafeMutableRawBufferPointer) -> Int in
-            input.withUnsafeBufferPointer { (inBuf: UnsafeBufferPointer<UInt8>) -> Int in
-                guard let srcPtr = inBuf.baseAddress,
-                      let dstPtr = outBuf.bindMemory(to: UInt8.self).baseAddress else {
-                    return 0
-                }
-                return compression_decode_buffer(dstPtr, outCapacity,
-                                                 srcPtr, input.count,
-                                                 nil,
-                                                 COMPRESSION_ZLIB)
+        var written: UInt64 = 0
+        var filter: OutputFilter?
+        if entry.method == 8 {
+            filter = try OutputFilter(.decompress, using: .zlib) { chunk in
+                guard let chunk else { return }
+                try out.write(contentsOf: chunk)
+                written += UInt64(chunk.count)
             }
         }
-        if written == 0 {
-            throw UnzipError.io("decompression failed")
+        var remaining = UInt64(entry.compressedSize)
+        while remaining > 0 {
+            try autoreleasepool {
+                let chunk = try handle.read(upToCount: Int(min(remaining, UInt64(chunkSize)))) ?? Data()
+                guard !chunk.isEmpty else {
+                    throw UnzipError.invalidArchive("\(entry.name) is truncated")
+                }
+                remaining -= UInt64(chunk.count)
+                if let filter {
+                    try filter.write(chunk)
+                } else {
+                    try out.write(contentsOf: chunk)
+                    written += UInt64(chunk.count)
+                }
+            }
         }
-        return output.prefix(written)
+        try filter?.finalize()
+        guard written == UInt64(entry.uncompressedSize) else {
+            throw UnzipError.io("\(entry.name): wrote \(written) of \(entry.uncompressedSize) bytes")
+        }
+    }
+
+    private static func read(_ handle: FileHandle, at offset: UInt64, count: Int) throws -> [UInt8] {
+        try handle.seek(toOffset: offset)
+        return [UInt8](try handle.read(upToCount: count) ?? Data())
     }
 
     // MARK: - Little-endian byte reads
