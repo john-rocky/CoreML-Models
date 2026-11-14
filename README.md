@@ -1349,6 +1349,14 @@ model_fp16 = quantization_utils.quantize_weights(model_fp32, nbits=16)
 
 
 
+# License
+
+The code and documentation in this repository are licensed under the [Apache License 2.0](LICENSE), with the exceptions listed in [NOTICE](NOTICE).
+
+NOTICE lists the files that come from other projects or contain code adapted from them, each with its project and license. It also lists the few files that the Apache License does not cover.
+
+The converted models are not covered by this license. Each model keeps the license of its original project, which most tables above show in their License column.
+
 # Thanks
 Cover image was taken from Ghibli free images. 
 

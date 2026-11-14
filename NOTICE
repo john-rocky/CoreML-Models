@@ -1,0 +1,432 @@
+CoreML-Models
+https://github.com/john-rocky/CoreML-Models
+Copyright 2020-2026 Daisuke Majima
+
+This repository is licensed under the Apache License, Version 2.0 (see
+LICENSE), with the exceptions listed in this file.
+
+- Files copied from other projects, and code adapted from other
+  projects, are listed below with the original project and its license.
+  That material keeps its original license.
+- Two files are under the MIT License instead (see "Under the MIT
+  License").
+- The files under "Not covered by the Apache License" are not licensed
+  under the Apache License.
+- The converted Core ML models (GitHub Releases, Hugging Face, Google
+  Drive) are not covered by this license. Each model keeps the license
+  of its original project.
+
+If you reuse a file listed below, keep its entry (project, license,
+copyright line) with your copy.
+
+Where an original license asks for its text to be included, the text is
+at the end of this file, in LICENSE (Apache License 2.0), or next to the
+files it covers. The GNU AGPL v3.0 is linked from its entry.
+
+
+Files copied from other projects
+================================
+
+apple/ml-stable-diffusion
+https://github.com/apple/ml-stable-diffusion
+MIT License, Copyright (c) 2024 Apple Inc.
+  sample_apps/HyperSDDemo/HyperSDDemo/:
+    BPETokenizer.swift, BPETokenizer+Reading.swift, CGImage+vImage.swift,
+    ControlNet.swift, Decoder.swift, DPMSolverMultistepScheduler.swift,
+    Encoder.swift, ManagedMLModel.swift, MultilingualTextEncoder.swift,
+    NumPyRandomSource.swift, NvRandomSource.swift, RandomSource.swift,
+    ResourceManaging.swift, SafetyChecker.swift, SampleTimer.swift,
+    Scheduler.swift, StableDiffusionPipeline+Resources.swift,
+    StableDiffusionPipeline.Configuration.swift,
+    StableDiffusionPipeline.swift, StableDiffusionXL+Resources.swift,
+    StableDiffusionXLPipeline.swift, TextEncoder.swift, TextEncoderXL.swift,
+    TorchRandomSource.swift, Unet.swift
+  StableDiffusionPipeline.swift, StableDiffusionXLPipeline.swift and
+  StableDiffusionPipeline+Resources.swift have small changes for this
+  app. Apple's license text (LICENSE.md) and Apple's acknowledgements of
+  the code these files build on (ACKNOWLEDGEMENTS) are in the same
+  folder.
+
+hexgrad/misaki
+https://github.com/hexgrad/misaki
+Apache License 2.0
+  sample_apps/KokoroDemo/KokoroDemo/us_gold.json
+  sample_apps/KokoroDemo/KokoroDemo/us_silver.json
+  (the US English pronunciation dictionaries in misaki/data, unchanged)
+
+hexgrad/Kokoro-82M
+https://huggingface.co/hexgrad/Kokoro-82M
+Apache License 2.0
+  sample_apps/KokoroDemo/KokoroDemo/voice_*.bin (10 files)
+  (the voice tensors in voices/*.pt, stored as raw float32)
+  sample_apps/KokoroDemo/KokoroDemo/kokoro_vocab.json
+  (the "vocab" table in config.json)
+
+openai/CLIP
+https://github.com/openai/CLIP
+MIT License, Copyright (c) 2021 OpenAI
+  sample_apps/CoreMLModelsApp/CoreMLModelsApp/clip_vocab.json
+  sample_apps/YOLOEDemo/YOLOEDemo/clip_vocab.json
+  sample_apps/YOLOWorldDemo/YOLOWorldDemo/clip_vocab.json
+  sample_apps/HyperSDDemo/HyperSDDemo/vocab.json
+  sample_apps/HyperSDDemo/HyperSDDemo/merges.txt
+  (the byte-pair vocabulary and merges of the CLIP tokenizer)
+
+microsoft/Florence-2-base
+https://huggingface.co/microsoft/Florence-2-base
+MIT License, Copyright (c) Microsoft Corporation.
+  sample_apps/Florence2Demo/Florence2Demo/florence2_vocab.json
+  (the tokenizer vocabulary, keyed by token id)
+
+google/siglip-base-patch16-224
+https://huggingface.co/google/siglip-base-patch16-224
+Apache License 2.0
+  sample_apps/SigLIPDemo/SigLIPDemo/siglip_vocab.json
+  (the tokenizer vocabulary, keyed by token id)
+
+google-t5/t5-base
+https://huggingface.co/google-t5/t5-base
+Apache License 2.0
+  sample_apps/StableAudioDemo/StableAudioDemo/t5_vocab.json
+  (the tokenizer vocabulary, keyed by token id)
+
+ChaoningZhang/MobileSAM
+https://github.com/ChaoningZhang/MobileSAM
+Apache License 2.0
+  sample_apps/YOLOEDemo/YOLOEDemo/mobile_sam_prompt_encoder_weights.json
+  (the prompt encoder weights in weights/mobile_sam.pt, as JSON)
+
+
+Code adapted from other projects
+================================
+
+These files contain code taken or translated from the projects named.
+The adapted parts keep the original license.
+
+apple/ml-stable-diffusion
+https://github.com/apple/ml-stable-diffusion
+MIT License, Copyright (c) 2024 Apple Inc.
+  sample_apps/HyperSDDemo/HyperSDDemo/TCDScheduler.swift
+  (the beta schedule is adapted from Scheduler.swift)
+
+huggingface/diffusers
+https://github.com/huggingface/diffusers
+Apache License 2.0
+  sample_apps/HyperSDDemo/HyperSDDemo/TCDScheduler.swift
+  sample_apps/CoreMLModelsApp/CoreMLModelsApp/Templates/TextToImageDemoView.swift
+  (Swift versions of the TCD scheduler)
+  sample_apps/NitroEDemo/NitroEDemo/FlowMatchEulerScheduler.swift
+  sample_apps/CoreMLModelsApp/CoreMLModelsApp/Templates/NitroETextToImageDemoView.swift
+  (Swift versions of the flow-match Euler scheduler)
+  conversion_scripts/convert_nitro_e_vae_decoder.py
+  (from the Sana attention processor and the DC-AE decoder; file
+  headers: Copyright 2025 The HuggingFace Team; Copyright 2025 MIT,
+  Tsinghua University, NVIDIA CORPORATION and The HuggingFace Team)
+
+hexgrad/misaki
+https://github.com/hexgrad/misaki
+Apache License 2.0
+  sample_apps/KokoroDemo/KokoroDemo/EnglishG2P.swift
+  (the letter-name pronunciations, A to Z, come from us_gold.json; the
+  dictionary lookup follows misaki/en.py)
+  sample_apps/KokoroDemo/KokoroDemo/JapaneseG2P.swift
+  (the kana-to-IPA table is copied from misaki/cutlet.py, and the
+  conversion rules are ported to Swift. misaki adapted cutlet.py from
+  polm/cutlet, https://github.com/polm/cutlet, MIT License,
+  Copyright (c) 2020 Paul O'Leary McCann)
+
+hexgrad/kokoro
+https://github.com/hexgrad/kokoro
+Apache License 2.0
+  conversion_scripts/convert_kokoro.py
+  conversion_scripts/test_kokoro_coreml.py
+  (the forward pass of KModel)
+
+spotify/basic-pitch
+https://github.com/spotify/basic-pitch
+Apache License 2.0, Copyright 2022 Spotify AB
+  sample_apps/BasicPitchDemo/BasicPitchDemo/NoteCreation.swift
+  (a Swift port of basic_pitch/note_creation.py; the notice from
+  basic-pitch's NOTICE file is at the end of this file)
+
+natanielruiz/deep-head-pose
+https://github.com/natanielruiz/deep-head-pose
+Apache License 2.0, Copyright 2017 Nataniel Ruiz
+  sample_apps/Face3DDemo/Face3DDemo/ContentView.swift
+  sample_apps/CoreMLModelsApp/CoreMLModelsApp/Templates/Face3DDemoView.swift
+  (draw_axis)
+
+cleardusk/3DDFA_V2
+https://github.com/cleardusk/3DDFA_V2
+MIT License, Copyright (c) 2017 Max deGroot, Ellis Brown; Copyright (c)
+2019 Zisian Wong, Shifeng Zhang; Copyright (c) 2020 Jianzhu Guo, in
+Center for Biometrics and Security Research (CBSR)
+  sample_apps/Face3DDemo/Face3DDemo/FaceReconstructor.swift
+  sample_apps/CoreMLModelsApp/CoreMLModelsApp/Templates/Face3DDemoView.swift
+  (the face crop box, parse_roi_box_from_bbox)
+
+Turbo colormap, polynomial approximation in GLSL
+https://gist.github.com/mikhailov-work/0d177465a8151eb6ede1768d51d476c7
+Apache License 2.0, Copyright 2019 Google LLC.
+  sample_apps/MoGe2Demo/MoGe2Demo/Visualization.swift
+  (the colormap coefficients)
+
+deepinsight/insightface
+https://github.com/deepinsight/insightface
+MIT License (as its README states)
+  sample_apps/AdaFaceDemo/AdaFaceDemo/FaceRecognizer.swift
+  (the five-point face alignment template)
+
+facebookresearch/demucs
+https://github.com/facebookresearch/demucs
+MIT License, Copyright (c) Meta Platforms, Inc. and affiliates.
+  sample_apps/DemucsDemo/DemucsDemo/ContentView.swift
+  (the STFT padding and the overlap-add weights)
+
+openai/CLIP
+https://github.com/openai/CLIP
+MIT License, Copyright (c) 2021 OpenAI
+  sample_apps/CoreMLModelsApp/CoreMLModelsApp/Templates/CLIPTokenizer.swift
+  sample_apps/YOLOEDemo/YOLOEDemo/CLIPTokenizer.swift
+  sample_apps/YOLOWorldDemo/YOLOWorldDemo/CLIPTokenizer.swift
+  (the byte-to-unicode table)
+  sample_apps/YOLOWorldDemo/convert_models.py
+  (the text encoder and the vocabulary export)
+
+openai/gpt-2
+https://github.com/openai/gpt-2
+Modified MIT License, Software Copyright (c) 2019 OpenAI
+  sample_apps/NitroEDemo/NitroEDemo/LlamaTokenizer.swift
+  sample_apps/CoreMLModelsApp/CoreMLModelsApp/Templates/NitroETextToImageDemoView.swift
+  (the byte-to-unicode table)
+
+apple/coremltools
+https://github.com/apple/coremltools
+BSD 3-Clause License, Copyright (c) 2020-2023, Apple Inc.
+  conversion_scripts/convert_nitro_e_emmdit.py
+  conversion_scripts/convert_nitro_e_text_encoder.py
+  conversion_scripts/convert_nitro_e_vae_decoder.py
+  (the _cast function inside _patch_coremltools_cast)
+
+ByteDance-Seed/Depth-Anything-3
+https://github.com/ByteDance-Seed/Depth-Anything-3
+Apache License 2.0, Copyright 2025 The Depth Anything 3 Team
+  conversion_scripts/convert_depth_anything_v3.py
+  (the UV grid and the intermediate-layer pass; file headers: Copyright
+  (c) 2025 ByteDance Ltd. and/or its affiliates; Copyright (c) Meta
+  Platforms, Inc. and affiliates.)
+
+microsoft/MoGe
+https://github.com/microsoft/MoGe
+MIT License, Copyright (c) Microsoft Corporation.
+  conversion_scripts/convert_moge2.py
+  (the forward pass of MoGeModel)
+
+microsoft/Florence-2-base, modeling_florence2.py
+https://huggingface.co/microsoft/Florence-2-base
+Apache License 2.0, Copyright 2024 Microsoft and the HuggingFace Inc. team
+  conversion_scripts/convert_florence2.py
+  (the image encoding steps. The repository's LICENSE is MIT; the header
+  of modeling_florence2.py says Apache License 2.0.)
+
+myshell-ai/OpenVoice and jaywalnut310/vits
+https://github.com/myshell-ai/OpenVoice
+https://github.com/jaywalnut310/vits
+MIT License, Copyright 2024 MyShell.ai; Copyright (c) 2021 Jaehyeon Kim
+  conversion_scripts/convert_openvoice.py
+  (the voice conversion pass)
+
+mk-minchul/CVLface
+https://github.com/mk-minchul/CVLface
+MIT License, Copyright (c) 2022 Minchul Kim
+  conversion_scripts/convert_adaface.py
+  (the iResNet-18 backbone)
+
+nelson1425/EfficientAD
+https://github.com/nelson1425/EfficientAD
+Apache License 2.0
+  conversion_scripts/convert_efficientad.py
+  (the anomaly map computation)
+
+piddnad/DDColor
+https://github.com/piddnad/DDColor
+Apache License 2.0
+  conversion_scripts/convert_ddcolor.py
+  (the encoder pass and the refine step; its ConvNeXt code carries the
+  header: Copyright (c) Meta Platforms, Inc. and affiliates.)
+
+CompVis/taming-transformers
+https://github.com/CompVis/taming-transformers
+MIT License, Copyright (c) 2020 Patrick Esser and Robin Rombach and
+Björn Ommer
+  conversion_scripts/convert_sinsr.py
+  (three lines of the vector quantizer)
+
+
+Under the MIT License
+=====================
+
+sample_apps/YOLO26Demo/YOLO26Demo/Tracker.swift
+sample_apps/CoreMLModelsApp/CoreMLModelsApp/Views/ByteTracker.swift
+  A Swift tracker that follows ByteTrack
+  (https://github.com/ifzhang/ByteTrack, MIT License, Copyright (c) 2021
+  Yifu Zhang). README.md lists Tracker.swift as MIT; ByteTracker.swift
+  is the same tracker. Both files are under the MIT License, Copyright
+  (c) 2026 Daisuke Majima.
+
+
+Not covered by the Apache License
+=================================
+
+conversion_scripts/convert_matanyone.py
+sample_apps/MatAnyoneDemo/MatAnyoneDemo/MatAnyoneEngine.swift
+sample_apps/CoreMLModelsApp/CoreMLModelsApp/Templates/VideoMattingDemoView.swift
+  These files contain code adapted from pq-yang/MatAnyone
+  (https://github.com/pq-yang/MatAnyone), so they are not licensed under
+  the Apache License. The adapted code keeps the S-Lab License 1.0, which
+  permits redistribution and use for non-commercial purposes only. Its
+  text is at the end of this file.
+
+sample_apps/YOLOEDemo/convert_models.py
+  This file contains code adapted from ultralytics/ultralytics
+  (https://github.com/ultralytics/ultralytics), so it is not licensed
+  under the Apache License. The adapted code keeps the GNU Affero General
+  Public License v3.0 (https://www.gnu.org/licenses/agpl-3.0.html). The
+  file also contains code adapted from openai/CLIP (MIT License,
+  Copyright (c) 2021 OpenAI).
+
+sample_apps/SinSRDemo/sinsr_demo.png
+  Both halves show an illustration from another source (left: the
+  input, right: the model's output).
+
+
+NOTICE file of spotify/basic-pitch (the part that applies)
+==========================================================
+
+Basic Pitch
+Copyright 2022 Spotify AB
+
+This product includes software developed at
+Spotify AB (http://www.spotify.com/).
+
+
+MIT License
+===========
+
+Applies to the material above marked MIT License, under these copyright
+notices:
+  Copyright (c) 2024 Apple Inc.
+  Copyright (c) 2021 OpenAI
+  Copyright (c) Microsoft Corporation.
+  Copyright (c) 2020 Paul O'Leary McCann
+  Copyright (c) 2017 Max deGroot, Ellis Brown
+  Copyright (c) 2019 Zisian Wong, Shifeng Zhang
+  Copyright (c) 2020 Jianzhu Guo, in Center for Biometrics and Security
+  Research (CBSR)
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+  Copyright (c) 2021 Yifu Zhang
+  Copyright (c) 2026 Daisuke Majima
+  Copyright 2024 MyShell.ai
+  Copyright (c) 2021 Jaehyeon Kim
+  Copyright (c) 2022 Minchul Kim
+  Copyright (c) 2020 Patrick Esser and Robin Rombach and Björn Ommer
+  deepinsight/insightface (no copyright line given)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+Modified MIT License (openai/gpt-2)
+===================================
+
+Software Copyright (c) 2019 OpenAI
+
+We don’t claim ownership of the content you create with GPT-2, so it is yours to do with as you please.
+We only ask that you use GPT-2 responsibly and clearly indicate your content was created using GPT-2.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+The above copyright notice and this permission notice need not be included
+with content created by the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+BSD 3-Clause License (apple/coremltools)
+========================================
+
+Copyright © 2020-2023, Apple Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1.  Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2.  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+3.  Neither the name of the copyright holder(s) nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+S-Lab License 1.0 (pq-yang/MatAnyone)
+=====================================
+
+Copyright 2023 S-Lab
+
+Redistribution and use for non-commercial purpose in source and
+binary forms, with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+In the event that redistribution and/or use for commercial purpose in
+source or binary forms, with or without modification is required,
+please contact the contributor(s) of the work.
