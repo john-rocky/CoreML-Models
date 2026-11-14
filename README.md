@@ -1236,7 +1236,7 @@ EfficientAD (PDN-Small) — lightweight unsupervised anomaly detection for indus
 
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| [EfficientAD_Bottle.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/efficientad-v1/EfficientAD_Bottle.mlpackage.zip) | 15 MB (FP16) | 256x256 RGB image | anomaly_map [1,1,256,256] + anomaly_score [0-1] | [nelson1425/EfficientAD](https://github.com/nelson1425/EfficientAD) | [MIT](https://opensource.org/licenses/MIT) | 2023 | [EfficientADDemo](sample_apps/EfficientADDemo) | [convert_efficientad.py](conversion_scripts/convert_efficientad.py) |
+| [EfficientAD_Bottle.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/efficientad-v1/EfficientAD_Bottle.mlpackage.zip) | 15 MB (FP16) | 256x256 RGB image | anomaly_map [1,1,256,256] + anomaly_score [0-1] | [nelson1425/EfficientAD](https://github.com/nelson1425/EfficientAD) | [Apache-2.0](https://github.com/nelson1425/EfficientAD/blob/main/LICENSE) (code); weights: [MIT](https://huggingface.co/MSherbinii/efficientad-bottle) | 2023 | [EfficientADDemo](sample_apps/EfficientADDemo) | [convert_efficientad.py](conversion_scripts/convert_efficientad.py) |
 
 # Music Transcription
 

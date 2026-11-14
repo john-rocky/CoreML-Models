@@ -140,7 +140,10 @@ def main():
         "EfficientAD anomaly detection (bottle category). "
         "256x256 RGB -> anomaly heatmap [1,1,256,256] + score [0-1]."
     )
-    mlmodel.license = "MIT"
+    mlmodel.license = (
+        "Apache-2.0 (EfficientAD code, nelson1425/EfficientAD). Weights: MIT. "
+        "See https://huggingface.co/MSherbinii/efficientad-bottle"
+    )
 
     out_path = "EfficientAD_Bottle.mlpackage"
     mlmodel.save(out_path)
