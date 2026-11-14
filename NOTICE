@@ -21,7 +21,7 @@ copyright line) with your copy.
 
 Where an original license asks for its text to be included, the text is
 at the end of this file, in LICENSE (Apache License 2.0), or next to the
-files it covers. The GNU AGPL v3.0 is linked from its entry.
+files it covers.
 
 
 Files copied from other projects
@@ -290,14 +290,10 @@ sample_apps/CoreMLModelsApp/CoreMLModelsApp/Templates/VideoMattingDemoView.swift
 sample_apps/YOLOEDemo/convert_models.py
   This file contains code adapted from ultralytics/ultralytics
   (https://github.com/ultralytics/ultralytics), so it is not licensed
-  under the Apache License. The adapted code keeps the GNU Affero General
-  Public License v3.0 (https://www.gnu.org/licenses/agpl-3.0.html). The
-  file also contains code adapted from openai/CLIP (MIT License,
-  Copyright (c) 2021 OpenAI).
-
-sample_apps/SinSRDemo/sinsr_demo.png
-  Both halves show an illustration from another source (left: the
-  input, right: the model's output).
+  under the Apache License. The file as a whole is under the GNU Affero
+  General Public License v3.0. Its text is in LICENSE-AGPL-3.0.txt in the
+  same folder. The file also contains code adapted from openai/CLIP (MIT
+  License, Copyright (c) 2021 OpenAI).
 
 
 NOTICE file of spotify/basic-pitch (the part that applies)

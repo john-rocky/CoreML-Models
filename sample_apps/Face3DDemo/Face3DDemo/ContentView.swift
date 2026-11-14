@@ -661,7 +661,7 @@ func aspectFitSize(imageSize: CGSize, in containerSize: CGSize) -> CGSize {
     return CGSize(width: imageSize.width * scale, height: imageSize.height * scale)
 }
 
-// Standard draw_axis from 3DDFA_V2 reference implementation.
+// draw_axis, ported from natanielruiz/deep-head-pose (code/utils.py).
 // Returns (dx, dy) offsets for X, Y, Z axes in image coordinates.
 func poseAxesFromEuler(yaw: CGFloat, pitch: CGFloat, roll: CGFloat, length: CGFloat) -> (x: CGPoint, y: CGPoint, z: CGPoint) {
     let yr = yaw * .pi / 180

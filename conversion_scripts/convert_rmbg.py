@@ -77,7 +77,7 @@ def main():
         "RMBG-1.4 background removal. "
         "1024x1024 RGB → alpha mask [1, 1, 1024, 1024]. INT8."
     )
-    ml.license = "Apache-2.0"
+    ml.license = "Bria RMBG-1.4 License (non-commercial). See https://huggingface.co/briaai/RMBG-1.4"
 
     ml.save("RMBG_1_4.mlpackage")
     print("Saved RMBG_1_4.mlpackage")

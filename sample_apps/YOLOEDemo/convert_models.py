@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Contains code adapted from ultralytics/ultralytics (adapted May 2026).
+# This file as a whole is under the GNU Affero General Public License v3.0.
+# See LICENSE-AGPL-3.0.txt in this folder.
 """Convert YOLOE to Core ML as an *open-vocabulary region-embedding* detector.
 
 Unlike the usual YOLOE/YOLO-World export that bakes a fixed text prompt into the

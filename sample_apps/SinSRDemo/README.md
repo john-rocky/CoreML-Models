@@ -2,10 +2,6 @@
 
 Sample iOS app for [SinSR](https://github.com/wyf0912/SinSR) — single-step diffusion-based super-resolution (CVPR 2024). 4× upscaling in one denoiser pass via a Swin Transformer UNet on a VQ-VAE latent space (~113M params).
 
-<img width="512" src="sinsr_demo.png">
-
-*Left: bicubic 4× upscale, Right: SinSR single-step diffusion SR (128×128 → 512×512)*
-
 ## Models
 
 | Model | Size | Input | Output |

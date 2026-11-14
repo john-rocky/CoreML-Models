@@ -504,7 +504,7 @@ private func aspectFillOffset(imageSize: CGSize, in containerSize: CGSize) -> CG
                    y: (containerSize.height - filled.height) / 2)
 }
 
-/// Standard draw_axis from the 3DDFA_V2 reference implementation.
+/// draw_axis, ported from natanielruiz/deep-head-pose (code/utils.py).
 /// Returns (dx, dy) offsets for X, Y, Z axes in image coordinates.
 private func poseAxesFromEuler(yaw: CGFloat, pitch: CGFloat, roll: CGFloat, length: CGFloat)
     -> (x: CGPoint, y: CGPoint, z: CGPoint) {

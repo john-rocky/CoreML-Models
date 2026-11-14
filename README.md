@@ -406,7 +406,7 @@ RMBG1.4 - The IS-Net enhanced with our unique training scheme and proprietary da
 
 | Download Link | Size | Output |Original Project | License | year  | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- |------------- | ------------- | ------------- |------------- |------------- |
-| [RMBG_1_4.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/rmbg-v1/RMBG_1_4.mlpackage.zip) | 42 MB (INT8) | Alpha mask 1024x1024 |[briaai/RMBG-1.4](https://huggingface.co/briaai/RMBG-1.4) | [Creative Commons](https://huggingface.co/briaai/RMBG-1.4) |2024| [RMBGDemo](sample_apps/RMBGDemo) | [convert_rmbg.py](conversion_scripts/convert_rmbg.py) |
+| [RMBG_1_4.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/rmbg-v1/RMBG_1_4.mlpackage.zip) | 42 MB (INT8) | Alpha mask 1024x1024 |[briaai/RMBG-1.4](https://huggingface.co/briaai/RMBG-1.4) | [Bria RMBG-1.4 License (non-commercial)](https://huggingface.co/briaai/RMBG-1.4) |2024| [RMBGDemo](sample_apps/RMBGDemo) | [convert_rmbg.py](conversion_scripts/convert_rmbg.py) |
 
 ### face-Parsing
 
@@ -696,15 +696,11 @@ Pytorch implementation of "Unsupervised Degradation Representation Learning for 
 
 [wyf0912/SinSR](https://github.com/wyf0912/SinSR) — single-step diffusion-based super-resolution (CVPR 2024, ~113M params). Distilled from ResShift for one-step 4x upscaling. Uses a Swin Transformer UNet with VQ-VAE latent space.
 
-<img width="512" src="sample_apps/SinSRDemo/sinsr_demo.png">
-
-*Left: bicubic 4x upscale, Right: SinSR single-step diffusion SR (128x128 → 512x512)*
-
 3 CoreML models: VQ-VAE encoder, Swin-UNet denoiser (single step), and VQ-VAE decoder with vector quantization.
 
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ---- | ----- | ------ | ---------------- | ------- | ---- | -------------- | ----------------- |
-| [SinSR_Encoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/sinsr-v1/SinSR_Encoder.mlpackage.zip) | 39 MB | image [1,3,1024,1024] | latent [1,3,256,256] | [wyf0912/SinSR](https://github.com/wyf0912/SinSR) | [S-Lab](https://github.com/wyf0912/SinSR/blob/main/LICENSE) | 2024 | [SinSRDemo](sample_apps/SinSRDemo) | [convert_sinsr.py](conversion_scripts/convert_sinsr.py) |
+| [SinSR_Encoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/sinsr-v1/SinSR_Encoder.mlpackage.zip) | 39 MB | image [1,3,1024,1024] | latent [1,3,256,256] | [wyf0912/SinSR](https://github.com/wyf0912/SinSR) | [CC BY-NC-SA 4.0](https://github.com/wyf0912/SinSR/blob/main/LICENSE) | 2024 | [SinSRDemo](sample_apps/SinSRDemo) | [convert_sinsr.py](conversion_scripts/convert_sinsr.py) |
 | [SinSR_Denoiser.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/sinsr-v1/SinSR_Denoiser.mlpackage.zip) | 420 MB | input [1,6,256,256] | predicted_latent [1,3,256,256] | | | | | |
 | [SinSR_Decoder.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/sinsr-v1/SinSR_Decoder.mlpackage.zip) | 58 MB | latent [1,3,256,256] | image [1,3,1024,1024] | | | | | |
 
@@ -1088,7 +1084,7 @@ AdaFace — Quality-adaptive face recognition. Outputs 512-dim embedding for fac
 
 | Download Link | Size | Input | Output | Original Project | License | Year | Sample Project | Conversion Script |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
-| [AdaFace_IR18.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/adaface-v1/AdaFace_IR18.mlpackage.zip) | 48 MB | Image (112×112 face) | 512-dim L2-normalized embedding | [mk-minchul/AdaFace](https://github.com/mk-minchul/AdaFace) | [MIT](https://github.com/mk-minchul/AdaFace/blob/master/LICENSE) | 2022 | [AdaFaceDemo](sample_apps/AdaFaceDemo) | [convert_adaface.py](conversion_scripts/convert_adaface.py) |
+| [AdaFace_IR18.mlpackage.zip](https://github.com/john-rocky/CoreML-Models/releases/download/adaface-v1/AdaFace_IR18.mlpackage.zip) | 48 MB | Image (112×112 face) | 512-dim L2-normalized embedding | [mk-minchul/AdaFace](https://github.com/mk-minchul/AdaFace) | [MIT](https://github.com/mk-minchul/AdaFace/blob/master/LICENSE) (code); weights: [follow the WebFace4M dataset license](https://huggingface.co/minchul/cvlface_adaface_ir18_webface4m) | 2022 | [AdaFaceDemo](sample_apps/AdaFaceDemo) | [convert_adaface.py](conversion_scripts/convert_adaface.py) |
 
 # 3D Face Pose Estimation
 

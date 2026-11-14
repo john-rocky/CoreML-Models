@@ -10,7 +10,9 @@ Output:
 Model: AdaFace (CVPR 2022) via CVLface
   - Input: 112x112 RGB face image
   - Output: 512-dim L2-normalized face embedding
-  - License: MIT
+  - License: MIT for the AdaFace and CVLface code. The weights' model card
+    (https://huggingface.co/minchul/cvlface_adaface_ir18_webface4m) asks
+    users to follow the license of the training dataset (WebFace4M).
   - Repo: https://github.com/mk-minchul/AdaFace
 """
 
@@ -159,7 +161,7 @@ def main():
 
     mlmodel.author = "CoreML-Models"
     mlmodel.short_description = "AdaFace IR-18: Face recognition embedding (512-dim). Input: 112x112 face image."
-    mlmodel.license = "MIT"
+    mlmodel.license = "MIT (AdaFace and CVLface code). Weights: follow the license of the training dataset (WebFace4M). See https://huggingface.co/minchul/cvlface_adaface_ir18_webface4m"
 
     output_path = os.path.join(script_dir, "..", "creative_apps", "AdaFaceDemo", "AdaFaceDemo", "AdaFace_IR18.mlpackage")
     os.makedirs(os.path.dirname(output_path), exist_ok=True)

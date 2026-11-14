@@ -111,3 +111,7 @@ This regenerates `yoloe_detector.mlpackage`, `reprta.mlpackage`, and
 2. Tap the search button or press return
 3. Switch Camera / Photo / Video with the bottom tabs
 4. Adjust the confidence slider; in Photo mode masks re-render instantly
+
+## License
+
+LICENSE-AGPL-3.0.txt in this folder applies to convert_models.py, which contains code adapted from ultralytics/ultralytics. For the other files, see NOTICE at the repository root.
