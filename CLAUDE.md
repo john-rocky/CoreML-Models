@@ -36,7 +36,7 @@ python conversion_scripts/convert_<model>.py --help
 open sample_apps/<Name>Demo/<Name>Demo.xcodeproj
 ```
 
-Per CLAUDE global rules: **do not run iOS builds locally — building/testing happens on the user's device.** Do not commit `.mlpackage` files, `xcuserdata/`, or other build artifacts.
+**Do not run iOS builds locally — building and testing happen on a physical device.** Do not commit `.mlpackage` files, `xcuserdata/`, or other build artifacts.
 
 ## Architecture Patterns You Will See Repeatedly
 
@@ -76,6 +76,5 @@ Florence-2 uses ImageNet, **SigLIP uses (0.5, 0.5)**, **RMBG uses (0.5, 1.0)**, 
 
 - **Code comments and UI strings are English only.** (Scripts and READMEs frequently reference Japanese / Chinese upstream repos, but our code stays in English.)
 - **Do not commit `.mlpackage` files, build artifacts, `xcuserdata/`, or anything else that bloats the repo.** Models are distributed via GitHub Releases / Google Drive links from the README.
-- **Do not include `claude` in commit messages or as committer.** Do not add Claude co-author trailers.
-- **Build testing is done on the user's physical device** — do not attempt to run `xcodebuild` or simulator builds as part of a task.
+- **Build testing is done on a physical device** — do not attempt to run `xcodebuild` or simulator builds as part of a task.
 - When adding a new conversion lesson, append it to `docs/coreml_conversion_notes.md` rather than scattering it across per-app READMEs.
