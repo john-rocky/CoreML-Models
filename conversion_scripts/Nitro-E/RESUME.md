@@ -11,7 +11,7 @@ Blocked on: `meta-llama/Llama-3.2-1B` HF gated access (request submitted 2026-04
 ## Next steps once Llama access is granted
 
 ```bash
-cd /Users/majimadaisuke/Downloads/CoreML-Models/conversion_scripts/Nitro-E
+cd conversion_scripts/Nitro-E
 
 # 1. End-to-end reference on CPU (FP32 is safest; MPS+bf16 known-flaky for DiT)
 python3 run_pytorch_reference.py --device cpu --out reference_out.png
